@@ -142,6 +142,10 @@ código roda na web, no CLI e nos testes.
 - **Editor de fonte**: o `.asm` carregado abre num editor com numeração de linhas, onde dá
   para escrever e editar o programa; Ctrl+Enter (ou o botão) monta e carrega na hora, e um
   botão baixa o `.asm` de volta.
+- **Aba referência**: a máquina em resumo (barramentos, registradores, ciclo, boot), o mapa
+  de memória, os modos de endereçamento, o de-para completo instrução → opcode em hexa com
+  ciclos e flags (gerado a partir da tabela congelada) e cada exemplo do projeto com o
+  fonte e a explicação do que faz.
 
 ### CLI (ferramenta de CI e terminal)
 

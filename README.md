@@ -25,7 +25,9 @@ velocidade ajustável e Boot do disco), registradores em hex/binário, hex dump 
 com regiões coloridas e célula do último acesso acesa, monitor de barramentos com
 histórico, terminal de saída ($E800) e listing do programa com o PC apontando a linha
 corrente (clique numa linha para marcar breakpoint). O painel "fonte" deixa escrever e
-editar o próprio programa, com montagem na hora (Ctrl+Enter) e download do `.asm`. Carrega
+editar o próprio programa, com montagem na hora (Ctrl+Enter) e download do `.asm`. A aba
+"referência" traz o de-para completo de opcodes em hexa (gerado da tabela congelada), o
+mapa de memória, os modos de endereçamento e a explicação de cada exemplo. Carrega
 `.asm` (montado no próprio navegador), `.bin` e `.disk`; o exemplo `hello-disk` grava o
 loader no setor 0 e o programa "Ola, AK-8!" no setor 1, bootando pelo disco.
 
