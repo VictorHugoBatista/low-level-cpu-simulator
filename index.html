@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AK-8 — simulador de CPU em baixo nível</title>
+    <script>
+      // A chave do tema também é definida em src/web/app.tsx (THEME_KEY).
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem("ak8-theme") === "light" ? "light" : "dark";
+      } catch {
+        /* sem localStorage: fica no tema padrão (escuro) */
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
