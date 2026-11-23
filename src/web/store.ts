@@ -2,6 +2,7 @@ import { createSignal, onCleanup } from "solid-js";
 import { Machine } from "../runtime/machine.js";
 import type { BusTransaction } from "../bus/bus.js";
 import { AsmError, assemble } from "../asm/assembler.js";
+import { DiskImage, SECTOR_SIZE } from "../storage/diskImage.js";
 import type { ListingLine } from "../asm/emitter.js";
 
 export interface LoadedProgram {
@@ -68,7 +69,8 @@ export function createStore() {
   const [breakpoints, setBreakpoints] = createSignal<ReadonlySet<number>>(new Set());
   const [memVersion, setMemVersion] = createSignal(0);
   const [lastAccess, setLastAccess] = createSignal<number | null>(null);
-  const [asmError, setAsmError] = createSignal<string | null>(null);
+  const [terminalText, setTerminal] = createSignal(machine.terminal.text);
+  const [notice, setNotice] = createSignal<string | null>(null);
 
   let raf = 0;
 
@@ -84,6 +86,7 @@ export function createStore() {
     setLastAccess(last === undefined ? null : last.address);
     setCycles(machine.cycleCount);
     setHalted(machine.isHalted);
+    setTerminal(machine.terminal.text);
     setMemVersion((v) => v + 1);
   };
 
@@ -144,28 +147,65 @@ export function createStore() {
   };
 
   const report = (message: string | null): void => {
-    setAsmError(message);
+    setNotice(message);
   };
 
   const loadAsm = (source: string, name: string): void => {
     try {
       const r = assemble(source, name);
-      setAsmError(null);
+      setNotice(null);
+      machine.terminal.clear();
       machine.loadProgram(r.bytes, r.origin);
       machine.reset();
       setProgram({ name, kind: "asm", origin: r.origin, bytes: r.bytes, entries: r.entries });
     } catch (e) {
-      setAsmError(e instanceof AsmError ? e.message : String(e));
+      setNotice(e instanceof AsmError ? e.message : String(e));
       return;
     }
     sync();
   };
 
   const loadBin = (bytes: Uint8Array, name: string, origin = 0x0200): void => {
-    setAsmError(null);
-    machine.loadProgram(Array.from(bytes), origin);
+    setNotice(null);
+    machine.terminal.clear();
+    machine.loadProgram(bytes, origin);
     machine.reset();
     setProgram({ name, kind: "bin", origin, bytes: Array.from(bytes), entries: [] });
+    sync();
+  };
+
+  const loadDisk = (bytes: Uint8Array, name: string): void => {
+    const img = DiskImage.fromBytes(bytes);
+    machine.insertDisk(img);
+    report(`disco carregado: ${name} (${img.sectorCount} setores)`);
+  };
+
+  /** Monta um .asm e grava os bytes como setor de um disco novo (para os exemplos). */
+  const loadDiskFromAsm = (source: string, name: string, lba: number): void => {
+    try {
+      const r = assemble(source, name);
+      if (r.bytes.length > SECTOR_SIZE) {
+        setNotice(`${name}: programa com ${r.bytes.length} bytes não cabe em um setor`);
+        return;
+      }
+      const img = new DiskImage(256);
+      img.writeSector(lba, Uint8Array.from(r.bytes));
+      machine.insertDisk(img);
+      setNotice(null);
+    } catch (e) {
+      setNotice(e instanceof AsmError ? e.message : String(e));
+    }
+  };
+
+  /** O papel da BIOS: setor 0 → RAM, vetor apontando para lá, reset. */
+  const bootFromDisk = (): void => {
+    setRunning(false);
+    if (machine.diskController.disk.readSector(0).every((b) => b === 0x00)) {
+      report("o setor 0 do disco está vazio — carregue um loader antes de bootar");
+      return;
+    }
+    machine.terminal.clear();
+    machine.bootFromDisk();
     sync();
   };
 
@@ -191,7 +231,8 @@ export function createStore() {
     breakpoints,
     memVersion,
     lastAccess,
-    asmError,
+    terminalText,
+    notice,
     toggleRun,
     stepClock,
     stepInstruction,
@@ -199,6 +240,9 @@ export function createStore() {
     report,
     loadAsm,
     loadBin,
+    loadDisk,
+    loadDiskFromAsm,
+    bootFromDisk,
     toggleBreakpoint,
   };
 }

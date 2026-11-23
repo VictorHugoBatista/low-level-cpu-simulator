@@ -1,7 +1,14 @@
 import { For } from "solid-js";
 import type { Store } from "../store.js";
 
-export function Controls(props: { store: Store; examples: [string, string][] }) {
+export interface ExampleDef {
+  name: string;
+  asm: string;
+  /** Se definido, monta o .asm e grava como setor de um disco novo antes de carregar. */
+  disk?: { source: string; name: string; lba: number };
+}
+
+export function Controls(props: { store: Store; examples: ExampleDef[] }) {
   const s = props.store;
   let fileInput: HTMLInputElement | undefined;
 
@@ -15,9 +22,9 @@ export function Controls(props: { store: Store; examples: [string, string][] }) 
     } else if (name.endsWith(".bin")) {
       s.loadBin(new Uint8Array(await file.arrayBuffer()), file.name);
     } else if (name.endsWith(".disk")) {
-      s.report("a memória secundária (disco) chega no marco M4");
+      s.loadDisk(new Uint8Array(await file.arrayBuffer()), file.name);
     } else {
-      s.report("formato não suportado: use .asm ou .bin");
+      s.report("formato não suportado: use .asm, .bin ou .disk");
     }
     input.value = "";
   };
@@ -28,14 +35,24 @@ export function Controls(props: { store: Store; examples: [string, string][] }) 
       <div class="row">
         <input
           type="file"
-          accept=".asm,.bin"
+          accept=".asm,.bin,.disk"
           ref={fileInput}
           onChange={onFile}
-          title="carregar .asm ou .bin"
+          title="carregar .asm, .bin ou .disk"
         />
         <For each={props.examples}>
-          {([name, source]) => (
-            <button onClick={() => s.loadAsm(source, `${name}.asm`)}>exemplo: {name}</button>
+          {(ex) => (
+            <button
+              onClick={() => {
+                if (ex.disk !== undefined) {
+                  s.loadDiskFromAsm(ex.disk.source, ex.disk.name, ex.disk.lba);
+                }
+                s.loadAsm(ex.asm, `${ex.name}.asm`);
+                if (ex.disk !== undefined) s.bootFromDisk();
+              }}
+            >
+              exemplo: {ex.name}
+            </button>
           )}
         </For>
       </div>
@@ -57,9 +74,11 @@ export function Controls(props: { store: Store; examples: [string, string][] }) 
           <option value="1000">1 kHz</option>
           <option value="0">Máximo</option>
         </select>
+        <button onClick={() => s.bootFromDisk()}>Boot do disco</button>
       </div>
       <div class="hint">
-        Passo avança exatamente um clock. Breakpoints: clique nas linhas do programa.
+        Passo avança exatamente um clock. Breakpoints: clique nas linhas do programa. O Boot
+        copia o setor 0 do disco para $0200 e dispara.
       </div>
     </section>
   );

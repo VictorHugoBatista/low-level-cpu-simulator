@@ -25,10 +25,10 @@ export class Ram implements BusDevice {
     this.busWrite(address, data);
   }
 
-  /** Carrega bytes crus em um endereço (programa montado, imagem de setor...). */
-  load(origin: Word, bytes: readonly number[]): void {
-    bytes.forEach((b, i) => {
-      this.busWrite(asWord(origin + i), b);
-    });
+  /** Carrega bytes crus em um endereço (programa montado, setor de disco...). */
+  load(origin: Word, bytes: ArrayLike<number>): void {
+    for (let i = 0; i < bytes.length; i++) {
+      this.busWrite(asWord(origin + i), bytes[i]);
+    }
   }
 }

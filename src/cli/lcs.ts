@@ -4,8 +4,8 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { AsmError, assemble } from "../asm/assembler.js";
 import { Machine } from "../runtime/machine.js";
+import { DiskImage } from "../storage/diskImage.js";
 import { hex2, hex4 } from "../core/bytes.js";
-import type { Registers } from "../cpu/registers.js";
 
 interface ParsedArgs {
   positional: string[];
@@ -42,7 +42,10 @@ const hasFlag = (flags: ParsedArgs["flags"], name: string): boolean => flags.has
 function usage(): never {
   console.error(`uso:
   lcs assemble <arquivo.asm> [-o saida.bin] [--lst saida.lst]
-  lcs run <arquivo.bin> [--origin 0x0200] [--trace] [--step] [--max 1000000]`);
+  lcs mkdisk <saida.disk> <payload.bin> [--lba 1] [--setores 256]
+  lcs run [arquivo.bin] [--disk x.disk] [--origin 0x0200] [--trace] [--step] [--max 1000000]
+
+Com --disk e sem arquivo.bin, a máquina boota do setor 0 do disco.`);
   process.exit(1);
 }
 
@@ -89,10 +92,29 @@ function cmdAssemble(argv: string[]): void {
   );
 }
 
+function cmdMkdisk(argv: string[]): void {
+  const { positional, flags } = parseArgs(argv, ["lba", "setores"]);
+  const out = positional[0];
+  const payload = positional[1];
+  if (out === undefined || payload === undefined) usage();
+
+  const lba = Number(flagValue(flags, "lba", "1"));
+  const sectors = Number(flagValue(flags, "setores", "256"));
+  const img = new DiskImage(sectors);
+  const bytes = readFileSync(payload);
+  if (bytes.length > 256) {
+    console.error(`aviso: ${payload} tem ${bytes.length} bytes (mais que um setor)`);
+  }
+  img.writeSector(lba, bytes);
+  writeFileSync(out, Buffer.from(img.toBytes()));
+  console.log(`disco ${out}: ${sectors} setores, payload de ${bytes.length} bytes no setor ${lba}`);
+}
+
 async function cmdRun(argv: string[]): Promise<void> {
-  const { positional, flags } = parseArgs(argv, ["origin", "max"]);
-  const file = positional[0];
-  if (file === undefined) usage();
+  const { positional, flags } = parseArgs(argv, ["origin", "max", "disk"]);
+  const binPath = positional[0];
+  const diskPath = flagValue(flags, "disk", "") || undefined;
+  if (binPath === undefined && diskPath === undefined) usage();
 
   const origin = Number(flagValue(flags, "origin", "0x0200"));
   const max = Number(flagValue(flags, "max", "1000000"));
@@ -100,8 +122,15 @@ async function cmdRun(argv: string[]): Promise<void> {
   const step = hasFlag(flags, "step");
 
   const m = new Machine();
-  m.loadProgram(Array.from(readFileSync(file)), origin);
-  m.reset();
+  if (diskPath !== undefined) {
+    m.insertDisk(DiskImage.fromBytes(readFileSync(diskPath)));
+  }
+  if (binPath !== undefined) {
+    m.loadProgram(Array.from(readFileSync(binPath)), origin);
+    m.reset();
+  } else {
+    m.bootFromDisk(origin);
+  }
 
   const rl = step ? createInterface({ input: process.stdin }) : null;
   let printed = 0;
@@ -123,6 +152,17 @@ async function cmdRun(argv: string[]): Promise<void> {
   rl?.close();
 
   printState(m);
+
+  const text = m.terminal.text;
+  if (text.length > 0) {
+    console.log(`--- terminal ($E800) ---\n${text}------------------------`);
+  }
+
+  if (diskPath !== undefined && m.diskController.disk.dirty) {
+    writeFileSync(diskPath, Buffer.from(m.diskController.disk.toBytes()));
+    console.log(`disco alterado durante a execução, gravado de volta em ${diskPath}`);
+  }
+
   console.log(
     m.isHalted
       ? `parou em HLT após ${executed} ciclos`
@@ -133,5 +173,6 @@ async function cmdRun(argv: string[]): Promise<void> {
 const argv = process.argv.slice(2);
 const cmd = argv.shift();
 if (cmd === "assemble") cmdAssemble(argv);
+else if (cmd === "mkdisk") cmdMkdisk(argv);
 else if (cmd === "run") cmdRun(argv).catch((e) => { console.error(e); process.exit(1); });
 else usage();

@@ -8,10 +8,9 @@ busca e execução e, por fim, assembly. O simulador reproduz esse percurso em s
 peça que o Akita desenha no quadro vira um componente separado aqui, e o objetivo didático é
 poder enxergar cada byte trafegando por cada barramento a cada ciclo de clock.
 
-> **Status**: M1, M2 e M3 concluídos — núcleo, assembler com CLI e dashboard no navegador
-> (Vite + SolidJS), com workflow de deploy para o GitHub Pages em
-> `.github/workflows/deploy.yml`. O deploy efetivo acontece quando o repositório for
-> publicado no GitHub com Pages na origem "GitHub Actions". Próximo: M4, disco e E/S.
+> **Status**: M1 a M4 concluídos — núcleo, assembler com CLI, dashboard no navegador e
+> memória secundária com boot: loader no setor 0 carrega o programa do setor 1, que
+> imprime no terminal ($E800). Próximo: M5, a ISA completa.
 
 ## A máquina-alvo: AK-8
 
@@ -212,6 +211,9 @@ um monólito disfarçado de simulador.
 ✅ M3 implementado (dashboard completo; o apontamento final da URL depende de publicar o
 repositório no GitHub com Pages na origem "GitHub Actions" — o workflow já está no projeto).
 | M4 Disco e E/S | imagem .disk, controlador, terminal, vetor de reset | hello-disk.asm boota do disco e imprime no terminal do dashboard |
+
+✅ M4 implementado (terminal em $E800, controlador em $F000, `bootFromDisk` no núcleo;
+prova: loader do setor 0 + hello do setor 1 → "Ola, AK-8!" no terminal, 111 ciclos).
 | M5 ISA completa | X/Y, stack, JSR/RTS, modos indexados, flags C/N/V | programa com função recursiva e loops roda certo |
 | M6 Trace e docs | histórico de micro-ops no dashboard e no CLI; ISA, mapa de memória, formato do disco, guia do assembler | exemplos comentados rodam sem consultar o código |
 
