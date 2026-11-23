@@ -293,6 +293,17 @@ h1 {
   min-height: 0;
 }
 
+/* Com exercício ativo, o painel dele vira uma linha própria no topo da grade —
+   as proporções dos painéis continuam as mesmas daí para baixo. */
+.machine-cols:has(> .ex-banner) {
+  grid-template-rows: auto minmax(0, 2fr) minmax(0, 3fr);
+}
+
+.machine-cols > .ex-banner {
+  max-height: 40vh; /* o resultado da verificação rola dentro do painel, sem empurrar a máquina */
+  overflow: auto;
+}
+
 /* Os painéis preenchem a área toda; o conteúdo rola dentro de cada um,
    com o cabeçalho (título + dropdown) sempre visível. */
 .machine-cols .col > .panel {
@@ -804,6 +815,44 @@ button.run .glyph {
   margin: 0;
   overflow: auto;
   font-size: 12px;
+}
+
+/* Exercício ativo na aba máquina */
+
+.ex-banner h2 {
+  margin: 0 0 4px;
+}
+
+.ex-statement summary {
+  cursor: pointer;
+  color: var(--accent);
+}
+
+.ex-statement p {
+  margin: 6px 0 0;
+  line-height: 1.55;
+}
+
+.ex-case-row {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ex-case {
+  width: 26px;
+  padding: 2px 0;
+  text-align: center;
+}
+
+.ex-case.active {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+
+.ex-case-label,
+.ex-case-name {
+  color: var(--dim);
 }
 
 @media (max-width: 900px) {

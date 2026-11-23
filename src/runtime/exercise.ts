@@ -96,3 +96,12 @@ export function runExerciseCases(
 ): CaseResult[] {
   return cases.map((c) => runExerciseCase(program, c, maxCycles));
 }
+
+/** Prepara a máquina VISÍVEL do dashboard para desenvolver um caso à mão: grava os
+ * valores de entrada do caso na RAM e reseta — o mesmo preparo que runExerciseCase
+ * faz numa máquina fresca, mas na máquina cujos painéis a pessoa está olhando.
+ * loadProgram/reset não limpam a RAM, então remontar o programa preserva as entradas. */
+export function applyCasePresets(machine: Machine, preset: readonly MemExpect[]): void {
+  for (const p of preset) machine.ram.write(p.addr, p.value);
+  machine.reset();
+}

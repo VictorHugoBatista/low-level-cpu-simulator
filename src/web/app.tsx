@@ -8,6 +8,8 @@ import { IndicatorPanel } from "./components/indicatorPanel.js";
 import type { IndicatorKind } from "./components/indicatorPanel.js";
 import { ReferencePage } from "./components/reference.js";
 import { ExercisesPage } from "./components/exercises.js";
+import { ExercisePanel } from "./components/exercisePanel.js";
+import { restoreLast, saveDraftActive } from "./exerciseState.js";
 import somaAsm from "../../examples/soma.asm?raw";
 import desvioAsm from "../../examples/desvio.asm?raw";
 import bootAsm from "../../examples/boot.asm?raw";
@@ -88,6 +90,9 @@ function applyTheme(theme: Theme) {
 
 export function App() {
   const store = createStore({ source: somaAsm, name: "soma.asm" });
+  // A página carregada com um exercício: o último nível aberto volta com o rascunho no
+  // editor e as entradas do caso gravadas na RAM — a pessoa continua de onde parou.
+  restoreLast(store);
   const [tab, setTab] = createSignal<"maquina" | "exercicios" | "referencia">("maquina");
   const [slots, setSlots] = createSignal<IndicatorKind[]>([...INITIAL_SLOTS]);
 
@@ -182,9 +187,10 @@ export function App() {
           when={layout() === "lateral"}
           fallback={
             <div class="machine-cols">
+              <ExercisePanel store={store} onOpenExercises={() => setTab("exercicios")} />
               <div class="hero">
                 <Controls store={store} examples={EXAMPLES} />
-                <Editor store={store} />
+                <Editor store={store} onBlur={() => saveDraftActive(store)} />
               </div>
               <div class="grid">
                 <div class="col">
@@ -217,8 +223,9 @@ export function App() {
         >
           <div class="layout-side">
             <div class="hero">
+              <ExercisePanel store={store} onOpenExercises={() => setTab("exercicios")} />
               <Controls store={store} examples={EXAMPLES} />
-              <Editor store={store} />
+              <Editor store={store} onBlur={() => saveDraftActive(store)} />
             </div>
             <div class="col">
               <For each={slots()}>

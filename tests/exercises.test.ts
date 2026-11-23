@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { assemble, AsmError } from "../src/asm/assembler.js";
 import {
+  applyCasePresets,
   runExerciseCase,
   runExerciseCases,
 } from "../src/runtime/exercise.js";
+import { Machine } from "../src/runtime/machine.js";
 import { EXERCISES } from "../src/web/exerciseCatalog.js";
 import type { ExerciseDef } from "../src/web/exerciseCatalog.js";
 
@@ -84,6 +86,33 @@ describe("verificador de exercícios — mecanismo", () => {
       { name: "b", preset: [], expect: [{ addr: 0x0300, value: 5 }] },
     ]);
     expect(results.map((r) => r.passed)).toEqual([true, true]);
+  });
+});
+
+describe("applyCasePresets — o caso desenvolvido na máquina visível do dashboard", () => {
+  it("grava as entradas na RAM e reseta: o caso roda à mão e o resultado sai igual", () => {
+    const m = new Machine();
+    const r = assemble("lda $0300\nadd $0301\nsta $0302\nhlt", "dev.asm");
+    m.loadProgram(r.bytes, r.origin);
+    applyCasePresets(m, [
+      { addr: 0x0300, value: 10 },
+      { addr: 0x0301, value: 32 },
+    ]);
+    m.run();
+    expect(m.isHalted).toBe(true);
+    expect(m.ram.read(0x0302)).toBe(42);
+  });
+
+  it("remontar o programa depois do preset preserva as entradas: a RAM não é zerada", () => {
+    const m = new Machine();
+    applyCasePresets(m, [
+      { addr: 0x0300, value: 200 },
+      { addr: 0x0301, value: 55 },
+    ]);
+    const r = assemble("lda $0300\nadd $0301\nsta $0302\nhlt", "dev.asm");
+    m.loadProgram(r.bytes, r.origin);
+    m.run();
+    expect(m.ram.read(0x0302)).toBe(255);
   });
 });
 

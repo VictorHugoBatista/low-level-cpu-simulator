@@ -3,6 +3,8 @@ import { Machine } from "../runtime/machine.js";
 import type { BusTransaction } from "../bus/bus.js";
 import { AsmError, assemble } from "../asm/assembler.js";
 import { DiskImage, SECTOR_SIZE } from "../storage/diskImage.js";
+import { applyCasePresets } from "../runtime/exercise.js";
+import type { MemExpect } from "../runtime/exercise.js";
 import type { ListingLine } from "../asm/emitter.js";
 
 export interface LoadedProgram {
@@ -170,6 +172,14 @@ export function createStore(initial?: { source: string; name: string }) {
     sync();
   };
 
+  /** Grava os valores de entrada de um caso de exercício na RAM e reseta — as entradas
+   * ficam na máquina visível para o caso ser desenvolvido e rodado à mão. */
+  const applyPresets = (preset: readonly MemExpect[]): void => {
+    setRunning(false);
+    applyCasePresets(machine, preset);
+    sync();
+  };
+
   const loadBin = (bytes: Uint8Array, name: string, origin = 0x0200): void => {
     setNotice(null);
     setSource(""); // binário cru não tem fonte para editar
@@ -257,6 +267,7 @@ export function createStore(initial?: { source: string; name: string }) {
     reset,
     report,
     loadAsm,
+    applyPresets,
     loadBin,
     loadDisk,
     loadDiskFromAsm,
