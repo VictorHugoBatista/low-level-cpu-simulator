@@ -65,6 +65,9 @@ const REF_EXAMPLES = [
 
 type Theme = "dark" | "light";
 
+/** Duplicada no script inline do index.html, que roda antes do build e não consegue importar daqui. */
+const THEME_KEY = "ak8-theme";
+
 function initialTheme(): Theme {
   return document.documentElement.dataset.theme === "light" ? "light" : "dark";
 }
@@ -72,7 +75,7 @@ function initialTheme(): Theme {
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
   try {
-    localStorage.setItem("ak8-theme", theme);
+    localStorage.setItem(THEME_KEY, theme);
   } catch {
     /* localStorage indisponível: tema só vale para a sessão */
   }
@@ -118,7 +121,6 @@ export function App() {
           {store.cycles()} ciclos
         </div>
         <select
-          class="theme"
           title="tema"
           value={theme()}
           onChange={(e) => setAndStoreTheme(e.currentTarget.value as Theme)}
