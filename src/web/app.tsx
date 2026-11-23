@@ -63,9 +63,29 @@ const REF_EXAMPLES = [
   },
 ];
 
+type Theme = "dark" | "light";
+
+function initialTheme(): Theme {
+  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
+}
+
+function applyTheme(theme: Theme) {
+  document.documentElement.dataset.theme = theme;
+  try {
+    localStorage.setItem("ak8-theme", theme);
+  } catch {
+    /* localStorage indisponível: tema só vale para a sessão */
+  }
+}
+
 export function App() {
   const store = createStore({ source: somaAsm, name: "soma.asm" });
   const [tab, setTab] = createSignal<"maquina" | "referencia">("maquina");
+  const [theme, setTheme] = createSignal<Theme>(initialTheme());
+  const setAndStoreTheme = (t: Theme) => {
+    applyTheme(t);
+    setTheme(t);
+  };
 
   return (
     <main>
@@ -97,6 +117,15 @@ export function App() {
           {" · "}
           {store.cycles()} ciclos
         </div>
+        <select
+          class="theme"
+          title="tema"
+          value={theme()}
+          onChange={(e) => setAndStoreTheme(e.currentTarget.value as Theme)}
+        >
+          <option value="dark">escuro</option>
+          <option value="light">claro</option>
+        </select>
       </header>
 
       <Show when={store.notice() !== null}>
