@@ -2,7 +2,7 @@ import { For, createMemo } from "solid-js";
 import type { Store } from "../store.js";
 
 /** Editor do fonte em assembly: o que está aqui é o que o botão "Montar e carregar" usa. */
-export function Editor(props: { store: Store }) {
+export function Editor(props: { store: Store; onBlur?: () => void }) {
   const s = props.store;
   let ta: HTMLTextAreaElement | undefined;
   let gutter: HTMLDivElement | undefined;
@@ -68,6 +68,7 @@ export function Editor(props: { store: Store }) {
           value={s.source()}
           placeholder={"; escreva seu programa em assembly AK-8 aqui\n; Ctrl+Enter monta e carrega"}
           onInput={(e) => s.setSource(e.currentTarget.value)}
+          onBlur={() => props.onBlur?.()}
           onKeyDown={onKeyDown}
           onScroll={syncScroll}
         />

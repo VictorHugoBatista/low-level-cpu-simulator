@@ -667,3 +667,148 @@ button.run .glyph {
 .listing .src {
   color: var(--text);
 }
+
+/* ===== Exercícios de fixação ===== */
+
+.ex {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.ex-levels ol {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ex-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ex-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--sunken);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.ex-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+
+.ex-count {
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+.ex-lvl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+}
+
+.ex-lvl.done {
+  border-color: var(--r-term);
+}
+
+.ex-lvl.current {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+
+.ex-lvl.locked {
+  opacity: 0.5;
+}
+
+.ex-badge {
+  width: 18px;
+  text-align: center;
+  flex: none;
+}
+
+.ex-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ex-main h3 {
+  margin: 10px 0 4px;
+  color: var(--accent);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ex-main p {
+  margin: 0 0 6px;
+  line-height: 1.55;
+}
+
+.ex-celebrate {
+  color: var(--hot-text);
+  font-weight: bold;
+}
+
+.ex-cases {
+  margin-top: 8px;
+}
+
+.ex-cases .mark {
+  width: 20px;
+  font-weight: bold;
+}
+
+.ex-cases tr.pass .mark {
+  color: var(--r-term);
+}
+
+.ex-cases tr.fail .mark {
+  color: var(--err-text);
+}
+
+.ex-cases tr.fail td {
+  background: var(--err-bg);
+}
+
+.ex-cases .cname {
+  white-space: nowrap;
+}
+
+.ex-fails {
+  margin: 0;
+  padding-left: 16px;
+  color: var(--err-text);
+}
+
+.ex-solution {
+  background: var(--sunken);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 8px;
+  margin: 0;
+  overflow: auto;
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .ex {
+    grid-template-columns: 1fr;
+  }
+}
+
