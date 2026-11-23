@@ -47,6 +47,7 @@ export function IndicatorPanel(props: {
         <select
           class="panel-picker"
           title="escolher o painel deste espaço"
+          aria-label="trocar o painel deste espaço"
           value={props.kind}
           onChange={(e) =>
             props.onPick(props.index, e.currentTarget.value as IndicatorKind)
