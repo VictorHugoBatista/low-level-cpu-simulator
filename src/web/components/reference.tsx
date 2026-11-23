@@ -91,6 +91,12 @@ const MACHINE_NOTES = [
   "Reset lê o vetor em $FFFC/FD; o boot pelo disco copia o setor 0 para $0200 e desvia — o setor 0 é o loader, como um MBR.",
 ];
 
+const AKITA_VIDEO = "https://www.youtube.com/watch?v=8G80nuEyDN4";
+const AKITA_PLAYLIST =
+  "https://www.youtube.com/playlist?list=PLdsnXVqbHDUcQIuiH9b-i9A85H3A2ZW5W";
+const AKITA_TRANSCRIPT =
+  "https://akitaonrails.com/2020/06/04/akitando-80-o-guia-hardcore-de-introducao-a-computacao";
+
 function OpcodeCell(props: { instr: RefInstr; mode: AddressingMode }) {
   const spec = props.instr.modes.find((m) => m.mode === props.mode);
   if (spec === undefined) return <td class="nomode" />;
@@ -112,6 +118,30 @@ export function ReferencePage(props: {
 }) {
   return (
     <div class="ref">
+      <section class="panel credit">
+        <h2>base didática</h2>
+        <p>
+          Esta aplicação é um simulador construído a partir da aula{" "}
+          <strong>"O Guia +Hardcore de Introdução à COMPUTAÇÃO"</strong>, do Fabio Akita (
+          <a href={AKITA_VIDEO} target="_blank" rel="noreferrer">
+            [Akitando] #80 — assista aqui
+          </a>
+          ), parte da playlist{" "}
+          <a href={AKITA_PLAYLIST} target="_blank" rel="noreferrer">
+            "Como Computadores Funcionam?"
+          </a>{" "}
+          — a série que constrói a computação de baixo para cima: transistor, porta lógica,
+          flip-flop, registrador, ULA, barramentos, memória, ciclo de busca e execução e, por fim,
+          assembly. A arquitetura da AK-8 segue o mesmo percurso da aula: barramentos que registram
+          cada byte, micro-operações uma por clock, boot por vetor de reset e disco em setores
+          carregado por um loader. A{" "}
+          <a href={AKITA_TRANSCRIPT} target="_blank" rel="noreferrer">
+            transcrição da aula no site do Akita
+          </a>{" "}
+          acompanha o vídeo e vale como material de estudo.
+        </p>
+      </section>
+
       <section class="panel">
         <h2>a máquina em uma página</h2>
         <ul class="reflist">
