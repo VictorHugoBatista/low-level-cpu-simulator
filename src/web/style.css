@@ -244,10 +244,10 @@ h1 {
   gap: 12px;
 }
 
-/* Layout lateral: controles e fonte em 50% à esquerda, todos os painéis numa coluna à direita. */
+/* Layout lateral: controles e fonte em ~40% à esquerda, painéis em ~60% à direita. */
 .layout-side {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
   gap: 12px;
   align-items: start;
 }
