@@ -1,34 +1,16 @@
-import { For, Show, createEffect, createSignal } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
 import { createStore } from "./store.js";
 import type { Store } from "./store.js";
 import { Controls } from "./components/controls.js";
 import type { ExampleDef } from "./components/controls.js";
 import { Editor } from "./components/editor.js";
-import { RegistersPanel } from "./components/registers.js";
-import { MemoryView } from "./components/memoryView.js";
-import { BusMonitor } from "./components/busMonitor.js";
-import { ProgramView } from "./components/programView.js";
+import { IndicatorPanel } from "./components/indicatorPanel.js";
+import type { IndicatorKind } from "./components/indicatorPanel.js";
 import { ReferencePage } from "./components/reference.js";
 import somaAsm from "../../examples/soma.asm?raw";
 import desvioAsm from "../../examples/desvio.asm?raw";
 import bootAsm from "../../examples/boot.asm?raw";
 import helloAsm from "../../examples/hello.asm?raw";
-
-function TerminalPanel(props: { store: Store }) {
-  let el: HTMLPreElement | undefined;
-  createEffect(() => {
-    props.store.terminalText();
-    if (el !== undefined) el.scrollTop = el.scrollHeight;
-  });
-  return (
-    <section class="panel">
-      <h2>terminal ($E800)</h2>
-      <pre class="term" ref={el}>
-        {props.store.terminalText()}
-      </pre>
-    </section>
-  );
-}
 
 const EXAMPLES: ExampleDef[] = [
   { name: "soma", asm: somaAsm },
@@ -63,6 +45,15 @@ const REF_EXAMPLES = [
   },
 ];
 
+/** Painéis indicadores por espaço: os dois primeiros ficam na coluna esquerda, o resto na direita. */
+const INITIAL_SLOTS: IndicatorKind[] = [
+  "registradores",
+  "memoria",
+  "programa",
+  "barramento",
+  "terminal",
+];
+
 type Theme = "dark" | "light";
 
 /** Duplicada no script inline do index.html, que roda antes do build e não consegue importar daqui. */
@@ -84,6 +75,20 @@ function applyTheme(theme: Theme) {
 export function App() {
   const store = createStore({ source: somaAsm, name: "soma.asm" });
   const [tab, setTab] = createSignal<"maquina" | "referencia">("maquina");
+  const [slots, setSlots] = createSignal<IndicatorKind[]>([...INITIAL_SLOTS]);
+
+  /** Escolher um painel para um espaço troca com o espaço onde ele estava. */
+  const pickSlot = (index: number, kind: IndicatorKind): void => {
+    setSlots((prev) => {
+      const from = prev.indexOf(kind);
+      if (from === index || from === -1) return prev;
+      const next = prev.slice();
+      next[from] = next[index];
+      next[index] = kind;
+      return next;
+    });
+  };
+
   const [theme, setTheme] = createSignal<Theme>(initialTheme());
   const setAndStoreTheme = (t: Theme) => {
     applyTheme(t);
@@ -135,17 +140,34 @@ export function App() {
       </Show>
 
       <Show when={tab() === "maquina"}>
+        <div class="hero">
+          <Controls store={store} examples={EXAMPLES} />
+          <Editor store={store} />
+        </div>
         <div class="grid">
           <div class="col">
-            <Controls store={store} examples={EXAMPLES} />
-            <Editor store={store} />
-            <RegistersPanel regs={store.regs} />
-            <ProgramView store={store} />
+            <For each={slots().slice(0, 2)}>
+              {(kind, i) => (
+                <IndicatorPanel
+                  kind={kind}
+                  index={i()}
+                  store={store}
+                  onPick={pickSlot}
+                />
+              )}
+            </For>
           </div>
           <div class="col">
-            <BusMonitor store={store} />
-            <TerminalPanel store={store} />
-            <MemoryView store={store} />
+            <For each={slots().slice(2)}>
+              {(kind, i) => (
+                <IndicatorPanel
+                  kind={kind}
+                  index={i() + 2}
+                  store={store}
+                  onPick={pickSlot}
+                />
+              )}
+            </For>
           </div>
         </div>
       </Show>

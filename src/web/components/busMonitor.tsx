@@ -12,8 +12,7 @@ export function BusMonitor(props: { store: Store }) {
   const history = createMemo<BusTransaction[]>(() => s.transactions().slice().reverse());
 
   return (
-    <section class="panel">
-      <h2>barramentos</h2>
+    <>
       <div class="busnow">
         {last() === null ? (
           <span class="hint">sem transferências ainda</span>
@@ -40,6 +39,6 @@ export function BusMonitor(props: { store: Store }) {
           )}
         </For>
       </div>
-    </section>
+    </>
   );
 }

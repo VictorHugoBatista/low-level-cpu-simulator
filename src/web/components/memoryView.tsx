@@ -47,8 +47,7 @@ export function MemoryView(props: { store: Store }) {
   };
 
   return (
-    <section class="panel">
-      <h2>memória</h2>
+    <>
       <div class="row">
         <input
           class="jump"
@@ -90,6 +89,6 @@ export function MemoryView(props: { store: Store }) {
           </For>
         </tbody>
       </table>
-    </section>
+    </>
   );
 }

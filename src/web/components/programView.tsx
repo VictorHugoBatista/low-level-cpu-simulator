@@ -20,8 +20,7 @@ export function ProgramView(props: { store: Store }) {
   });
 
   return (
-    <section class="panel">
-      <h2>programa</h2>
+    <>
       {s.program() === null ? (
         <div class="hint">carregue um .asm (com listing) ou .bin</div>
       ) : (
@@ -46,6 +45,6 @@ export function ProgramView(props: { store: Store }) {
           </For>
         </div>
       )}
-    </section>
+    </>
   );
 }
