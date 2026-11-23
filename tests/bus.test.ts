@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { SystemBus } from "../src/bus/bus";
-import { Ram } from "../src/memory/ram";
-import { MemoryMap } from "../src/memory/memoryMap";
+import { SystemBus } from "../src/bus/bus.js";
+import { Ram } from "../src/memory/ram.js";
+import { MemoryMap } from "../src/memory/memoryMap.js";
 
 describe("barramento e memória", () => {
   it("escrever e ler pela RAM devolve o mesmo byte", () => {

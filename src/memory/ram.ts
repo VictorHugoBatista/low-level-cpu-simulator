@@ -1,5 +1,5 @@
-import { Byte, Word, asByte, asWord } from "../core/bytes";
-import type { BusDevice } from "../bus/bus";
+import { Byte, Word, asByte, asWord } from "../core/bytes.js";
+import type { BusDevice } from "../bus/bus.js";
 
 /** Memória primária: RAM de acesso em 1 ciclo. */
 export class Ram implements BusDevice {

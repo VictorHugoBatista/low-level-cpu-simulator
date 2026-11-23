@@ -1,15 +1,21 @@
 {
   "name": "low-level-cpu-simulator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Simulador didático de um computador von Neumann de 8 bits (AK-8)",
+  "bin": {
+    "lcs": "dist/cli/lcs.js"
+  },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "npm run build && node dist/cli/lcs.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@types/node": "^22.10.0",
     "typescript": "^5.6.3",
     "vitest": "^3.2.4"
   }

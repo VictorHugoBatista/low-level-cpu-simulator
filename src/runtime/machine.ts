@@ -1,11 +1,11 @@
-import { Byte, Word, hiByte, loByte } from "../core/bytes";
-import { Clock } from "../core/clock";
-import { RESET_VECTOR } from "../core/constants";
-import { SystemBus } from "../bus/bus";
-import type { BusTransaction } from "../bus/bus";
-import { MemoryMap } from "../memory/memoryMap";
-import { Ram } from "../memory/ram";
-import { Cpu } from "../cpu/cpu";
+import { Byte, Word, hiByte, loByte } from "../core/bytes.js";
+import { Clock } from "../core/clock.js";
+import { RESET_VECTOR } from "../core/constants.js";
+import { SystemBus } from "../bus/bus.js";
+import type { BusTransaction } from "../bus/bus.js";
+import { MemoryMap } from "../memory/memoryMap.js";
+import { Ram } from "../memory/ram.js";
+import { Cpu } from "../cpu/cpu.js";
 
 /**
  * A máquina inteira ligada: barramento, memória e CPU. É o ponto de entrada do simulador —

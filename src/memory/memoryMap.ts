@@ -1,5 +1,5 @@
-import { Byte, Word, hex4 } from "../core/bytes";
-import type { BusDevice } from "../bus/bus";
+import { Byte, Word, hex4 } from "../core/bytes.js";
+import type { BusDevice } from "../bus/bus.js";
 
 /**
  * Roteia endereços para dispositivos. Região mapeada por cima de outra (ex.: o controlador

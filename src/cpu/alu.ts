@@ -1,4 +1,4 @@
-import { Byte, asByte } from "../core/bytes";
+import { Byte, asByte } from "../core/bytes.js";
 
 export interface AluResult {
   value: Byte;

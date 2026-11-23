@@ -1,4 +1,4 @@
-import { Byte, Word } from "../core/bytes";
+import { Byte, Word } from "../core/bytes.js";
 
 export const FLAG_C = 0x01;
 export const FLAG_Z = 0x02;

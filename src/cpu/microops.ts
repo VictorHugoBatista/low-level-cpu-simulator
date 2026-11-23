@@ -1,7 +1,7 @@
-import { Byte, asWord, toSigned } from "../core/bytes";
-import type { SystemBus } from "../bus/bus";
-import type { Registers } from "./registers";
-import { aluAdd, aluSub } from "./alu";
+import { Byte, asWord, toSigned } from "../core/bytes.js";
+import type { SystemBus } from "../bus/bus.js";
+import type { Registers } from "./registers.js";
+import { aluAdd, aluSub } from "./alu.js";
 
 /**
  * Uma micro-operação: o que acontece em UM ciclo de clock. Toda micro-operação que move

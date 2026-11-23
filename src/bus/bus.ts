@@ -1,4 +1,4 @@
-import { Byte, Word, asByte } from "../core/bytes";
+import { Byte, Word, asByte } from "../core/bytes.js";
 
 /** Um dispositivo que se pendura no barramento: RAM, terminal, controlador de disco... */
 export interface BusDevice {

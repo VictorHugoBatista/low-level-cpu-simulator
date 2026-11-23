@@ -8,7 +8,7 @@ import {
   aluShr,
   aluSub,
   aluXor,
-} from "../src/cpu/alu";
+} from "../src/cpu/alu.js";
 
 describe("ULA", () => {
   it("ADD soma e aponta carry", () => {

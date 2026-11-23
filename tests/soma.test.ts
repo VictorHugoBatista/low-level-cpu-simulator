@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Machine } from "../src/runtime/machine";
+import { Machine } from "../src/runtime/machine.js";
 
 // LDA #$02; ADD #$03; STA $0300; HLT — montado à mão segundo docs/ISA.md
 const SOMA = [0x10, 0x02, 0x70, 0x03, 0x22, 0x00, 0x03, 0xff];

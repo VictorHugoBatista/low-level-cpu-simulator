@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Machine } from "../src/runtime/machine";
+import { Machine } from "../src/runtime/machine.js";
 
 describe("CPU M1", () => {
   it("LDA absoluto carrega da memória e atualiza Z e N", () => {

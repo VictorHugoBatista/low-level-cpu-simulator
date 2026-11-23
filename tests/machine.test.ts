@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Machine } from "../src/runtime/machine";
+import { Machine } from "../src/runtime/machine.js";
 
 describe("máquina", () => {
   it("liga pela lógica do vetor de reset, não 'rodando o arquivo'", () => {

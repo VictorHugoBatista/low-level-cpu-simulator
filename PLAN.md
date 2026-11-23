@@ -8,9 +8,9 @@ busca e execução e, por fim, assembly. O simulador reproduz esse percurso em s
 peça que o Akita desenha no quadro vira um componente separado aqui, e o objetivo didático é
 poder enxergar cada byte trafegando por cada barramento a cada ciclo de clock.
 
-> **Status**: passo 1 concluído — ISA congelada em `docs/ISA.md` e M1 implementado
-> (barramentos, RAM, CPU com as 8 instruções do marco), com a prova da soma passando em
-> `tests/soma.test.ts`. Próximo: M2, o assembler.
+> **Status**: passos 1 e 2 concluídos — ISA congelada, núcleo M1 e assembler M2 com o CLI
+> (`lcs assemble` / `lcs run`); a prova da soma monta exatamente os bytes que o M1 executa.
+> Próximo: M3, o dashboard no navegador.
 
 ## A máquina-alvo: AK-8
 
@@ -205,7 +205,7 @@ um monólito disfarçado de simulador.
 | Marco | Entrega | Como sei que está pronto |
 |---|---|---|
 | M1 Núcleo | barramentos, RAM, CPU com 8 instruções, clock com step/run/dump | soma 2+3 em binário cru, resultado conferido no dump |
-| M2 Assembler | pipeline completo, labels, diretivas, listing | fib.asm monta, os bytes batem com a tabela e roda |
+| M2 Assembler | pipeline completo, labels, diretivas, listing, CLI | soma.asm e desvio.asm montam, os bytes batem com a tabela e rodam (fib espera o ADD absoluto do M5) |
 | M3 Dashboard no navegador | controles Run/Pause/Reset e Passo de clock, painel de registradores, vista da memória, monitor de barramentos, carga de .asm/.bin, deploy no GitHub Pages | a soma 2+3 roda direto e clock a clock na URL do Pages, com o byte acendendo na memória a cada ciclo |
 | M4 Disco e E/S | imagem .disk, controlador, terminal, vetor de reset | hello-disk.asm boota do disco e imprime no terminal do dashboard |
 | M5 ISA completa | X/Y, stack, JSR/RTS, modos indexados, flags C/N/V | programa com função recursiva e loops roda certo |

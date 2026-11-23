@@ -1,10 +1,10 @@
-import { asWord } from "../core/bytes";
-import { RESET_VECTOR } from "../core/constants";
-import type { SystemBus } from "../bus/bus";
-import { Registers } from "./registers";
-import { FETCH_OPCODE } from "./microops";
-import type { MicroOp, MicroOpContext } from "./microops";
-import { microprogramFor } from "./decoder";
+import { asWord } from "../core/bytes.js";
+import { RESET_VECTOR } from "../core/constants.js";
+import type { SystemBus } from "../bus/bus.js";
+import { Registers } from "./registers.js";
+import { FETCH_OPCODE } from "./microops.js";
+import type { MicroOp, MicroOpContext } from "./microops.js";
+import { microprogramFor } from "./decoder.js";
 
 /**
  * A CPU da AK-8. Cada chamada a tick() executa exatamente UMA micro-operação — um ciclo de
