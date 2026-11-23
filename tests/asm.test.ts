@@ -48,6 +48,22 @@ describe("assembler — codificação", () => {
     expect(assemble("lda #-1").bytes).toEqual([0x10, 0xff]);
   });
 
+  it("#<rótulo e #>rótulo devolvem byte baixo e alto", () => {
+    const src = 'msg: .ascii "AB"\n lda #<msg\n lda #>msg\n';
+    const r = assemble(src);
+    // msg em $0200 (2 bytes da string), lda em $0202 e $0204
+    expect(r.bytes).toEqual([0x41, 0x42, 0x10, 0x00, 0x10, 0x02]);
+  });
+
+  it("codificação das instruções novas do M5", () => {
+    expect(assemble("nop").bytes).toEqual([0x00]);
+    expect(assemble("pha").bytes).toEqual([0x05]);
+    expect(assemble("sta ($20),y").bytes).toEqual([0x24, 0x20]);
+    expect(assemble("inc $10").bytes).toEqual([0xd1, 0x10]);
+    expect(assemble("jsr $0300").bytes).toEqual([0xf1, 0x00, 0x03]);
+    expect(assemble("ldx #$10").bytes).toEqual([0x30, 0x10]);
+  });
+
   it("listing traz endereço, bytes e fonte", () => {
     const r = assemble(".org $0200\n lda #$02\n hlt\n");
     expect(r.listing).toContain("0200  10 02");

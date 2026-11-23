@@ -57,10 +57,17 @@ export function pass2(p1: Pass1Result, file: string, problems: AsmProblem[]): Pa
       switch (plan.mode) {
         case "impl":
           break;
-        case "imm":
+        case "imm": {
+          const arg = stmt.arg;
+          if (arg !== undefined && arg.kind === "imm" && arg.part !== undefined) {
+            if (target === null || target < 0 || target > 0xffff) bad("endereço fora de 16 bits");
+            else out.push(arg.part === "lo" ? loByte(target) : hiByte(target));
+            break;
+          }
           if (target === null || target < -128 || target > 255) bad("não cabe em um byte");
           else out.push(asByte(target));
           break;
+        }
         case "zp":
         case "indY":
           if (target === null || target < 0 || target > 0xff) {

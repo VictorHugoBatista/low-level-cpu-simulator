@@ -75,10 +75,11 @@ describe("CPU M1", () => {
     expect(() => m.run()).toThrow(/opcode inválido 0x69 em 0x0200/);
   });
 
-  it("opcode congelado na ISA mas ainda não implementado também é erro claro", () => {
+  it("opcode que era congelado-não-implementado agora executa (STX zp, M5)", () => {
     const m = new Machine();
-    m.loadProgram([0x41]); // STX zp
+    m.loadProgram([0x30, 0x12, 0x41, 0x40, 0xff]); // LDX #$12; STX $40; HLT
     m.reset();
-    expect(() => m.run()).toThrow(/STX zp.*ainda não implementada/);
+    m.run();
+    expect(m.ram.read(0x40)).toBe(0x12);
   });
 });

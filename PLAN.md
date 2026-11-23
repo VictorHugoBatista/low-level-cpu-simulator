@@ -8,11 +8,10 @@ busca e execução e, por fim, assembly. O simulador reproduz esse percurso em s
 peça que o Akita desenha no quadro vira um componente separado aqui, e o objetivo didático é
 poder enxergar cada byte trafegando por cada barramento a cada ciclo de clock.
 
-> **Status**: M1 a M4 concluídos e publicados em
-> <https://victorhugobatista.github.io/low-level-cpu-simulator/> — núcleo, assembler com
-> CLI, dashboard no navegador (Vite + SolidJS) e memória secundária com boot: loader no
-> setor 0 carrega o programa do setor 1, que imprime no terminal ($E800). Próximo: M5, a
-> ISA completa.
+> **Status**: M1 a M5 concluídos — a ISA congelada está 100% executável no núcleo, com o
+> site publicado em <https://victorhugobatista.github.io/low-level-cpu-simulator/> e o
+> fluxo de trabalho por branches + PRs (AGENTS.md, com proteção da `main`). Restam o M6
+> (trace rico de micro-operações e documentação de fechamento).
 
 ## A máquina-alvo: AK-8
 
@@ -224,6 +223,9 @@ um monólito disfarçado de simulador.
 ✅ M4 implementado (terminal em $E800, controlador em $F000, `bootFromDisk` no núcleo;
 prova: loader do setor 0 + hello do setor 1 → "Ola, AK-8!" no terminal, 111 ciclos).
 | M5 ISA completa | X/Y, stack, JSR/RTS, modos indexados, flags C/N/V | programa com função recursiva e loops roda certo |
+
+✅ M5 implementado: tabela congelada 100% executável no núcleo; hello vira loop com
+ponteiro na página zero (`#<`/`#>` no assembler) e fib.asm roda (fib(9) = 34).
 | M6 Trace e docs | histórico de micro-ops no dashboard e no CLI; ISA, mapa de memória, formato do disco, guia do assembler | exemplos comentados rodam sem consultar o código |
 
 Tamanhos aproximados em linhas de código: M1 ~800, M2 ~700, M3 ~900, M4 ~400, M5 ~400, M6

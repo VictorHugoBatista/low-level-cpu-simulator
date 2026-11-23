@@ -17,29 +17,23 @@ const BOOT_ASM = `.org $0200
 `;
 
 const HELLO_ASM = `.org $0300
-  lda #'O'
+  .equ ptr, $30
+  lda #<msg
+  sta ptr
+  lda #>msg
+  sta $31
+  ldy #$00
+loop:
+  lda (ptr),y
+  jz fim
   sta $e800
-  lda #'l'
-  sta $e800
-  lda #'a'
-  sta $e800
-  lda #','
-  sta $e800
-  lda #' '
-  sta $e800
-  lda #'A'
-  sta $e800
-  lda #'K'
-  sta $e800
-  lda #'-'
-  sta $e800
-  lda #'8'
-  sta $e800
-  lda #'!'
-  sta $e800
-  lda #'\\n'
-  sta $e800
+  inc ptr
+  jmp loop
+fim:
   hlt
+msg:
+  .ascii "Ola, AK-8!\\n"
+  .db 0
 `;
 
 describe("terminal ($E800)", () => {
@@ -146,11 +140,12 @@ describe("M4 — prova: boot pelo disco e saída no terminal", () => {
     expect(m.isHalted).toBe(true);
   });
 
-  it("boot com setor 0 vazio executa bytes nulos e dá erro claro", () => {
+  it("boot com setor 0 vazio marcha pelos zeros e morre em endereço sem dispositivo", () => {
     const m = new Machine();
     m.insertDisk(new DiskImage(4));
     m.bootFromDisk();
-    // $00 é NOP na ISA — congelado, ainda não implementado no núcleo
-    expect(() => m.run()).toThrow(/ainda não implementada/);
+    // $00 é NOP (implementado no M5): a execução atravessa a RAM zerada
+    // até o primeiro endereço sem dispositivo — e o erro é claro
+    expect(() => m.run()).toThrow(/nenhum dispositivo responde em 0xE000/);
   });
 });

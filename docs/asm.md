@@ -18,6 +18,7 @@ case-sensitive. Números: decimal (`123`), hex (`$2000`), binário (`%1010`) e c
 | Forma | Modo escolhido |
 |---|---|
 | `#$nn` | imediato |
+| `#<rótulo` / `#>rótulo` | imediato com byte baixo / alto do endereço (bootstrap de ponteiro na página zero) |
 | valor ≤ `$FF` (literal ou constante) | zero page, quando a instrução tem esse modo |
 | `$hhhh` ou rótulo | absoluto |
 | `$hhhh,X` | indexado |
