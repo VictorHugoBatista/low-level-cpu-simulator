@@ -23,7 +23,9 @@ Nome de branch: `<tipo>/<assunto>` em kebab-case — `feat/microops-stx`, `fix/l
 `docs/agents-md`. Uma branch, um assunto; não empilhe marcos inteiros numa branch só.
 
 A `main` precisa estar sempre deployável: o workflow de deploy publica o site no Pages a
-cada push nela, depois de rodar testes e typecheck.
+cada push nela, depois de rodar testes e typecheck. **A regra é aplicada por proteção de
+branch**: a `main` exige o check `checks` do CI (neste PR mesmo) e rejeita push direto —
+inclusive do dono do projeto.
 
 ## Setup e comandos
 
@@ -44,7 +46,7 @@ Antes de commitar: `npm test` e `npm run typecheck` passando. Os dois, sempre.
    `src/runtime` e `src/asm` **não importam** `node:*`, DOM nem Solid. APIs de plataforma
    só em `src/cli` e `src/web`.
 2. **Componentes só falam com barramentos.** A ULA não conhece a RAM; o controlador de
-   disco não conhece a CPU; o `runtime/` (Machine) é o único que fiação tudo junto.
+   disco não conhece a CPU; o `runtime/` (Machine) é quem fia tudo junto.
 3. **Tabela de opcodes tem fonte única**: `src/cpu/opcodes.ts` espelha `docs/ISA.md`.
    Assembler e CPU derivam dela; a página de referência gera os hexas de `opcodeFor` —
    nunca escreva hexa de opcode em outro lugar.
