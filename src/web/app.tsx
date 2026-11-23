@@ -3,6 +3,7 @@ import { createStore } from "./store.js";
 import type { Store } from "./store.js";
 import { Controls } from "./components/controls.js";
 import type { ExampleDef } from "./components/controls.js";
+import { Editor } from "./components/editor.js";
 import { RegistersPanel } from "./components/registers.js";
 import { MemoryView } from "./components/memoryView.js";
 import { BusMonitor } from "./components/busMonitor.js";
@@ -39,7 +40,7 @@ const EXAMPLES: ExampleDef[] = [
 ];
 
 export function App() {
-  const store = createStore();
+  const store = createStore({ source: somaAsm, name: "soma.asm" });
 
   return (
     <main>
@@ -66,6 +67,7 @@ export function App() {
       <div class="grid">
         <div class="col">
           <Controls store={store} examples={EXAMPLES} />
+          <Editor store={store} />
           <RegistersPanel regs={store.regs} />
           <ProgramView store={store} />
         </div>

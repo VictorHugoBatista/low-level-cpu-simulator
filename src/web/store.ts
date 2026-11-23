@@ -56,7 +56,7 @@ const HISTORY_VISIBLE = 512;
  * A ponte entre o núcleo e a UI: envolve a Machine em signals do Solid. O núcleo continua
  * isomórfico — nada aqui vaza para dentro dele.
  */
-export function createStore() {
+export function createStore(initial?: { source: string; name: string }) {
   const machine = new Machine();
   const [regs, setRegs] = createSignal<RegSnapshot>(snapshot(machine));
   const [transactions, setTransactions] = createSignal<BusTransaction[]>([]);
@@ -71,6 +71,8 @@ export function createStore() {
   const [lastAccess, setLastAccess] = createSignal<number | null>(null);
   const [terminalText, setTerminal] = createSignal(machine.terminal.text);
   const [notice, setNotice] = createSignal<string | null>(null);
+  /** O fonte em edição no painel "fonte" — o que o botão montar usa. */
+  const [source, setSource] = createSignal(initial?.source ?? "");
 
   let raf = 0;
 
@@ -150,9 +152,10 @@ export function createStore() {
     setNotice(message);
   };
 
-  const loadAsm = (source: string, name: string): void => {
+  const loadAsm = (newSource: string, name: string): void => {
+    setSource(newSource); // o editor passa a mostrar o que foi carregado
     try {
-      const r = assemble(source, name);
+      const r = assemble(newSource, name);
       setNotice(null);
       machine.terminal.clear();
       machine.loadProgram(r.bytes, r.origin);
@@ -167,6 +170,7 @@ export function createStore() {
 
   const loadBin = (bytes: Uint8Array, name: string, origin = 0x0200): void => {
     setNotice(null);
+    setSource(""); // binário cru não tem fonte para editar
     machine.terminal.clear();
     machine.loadProgram(bytes, origin);
     machine.reset();
@@ -209,6 +213,13 @@ export function createStore() {
     sync();
   };
 
+  /** Monta e carrega o que está no editor de fonte. */
+  const assembleCurrent = (): void => {
+    const p = program();
+    const name = p !== null && p.kind === "asm" ? p.name : "editor.asm";
+    loadAsm(source(), name);
+  };
+
   const toggleBreakpoint = (addr: number): void => {
     setBreakpoints((prev) => {
       const next = new Set(prev);
@@ -233,6 +244,9 @@ export function createStore() {
     lastAccess,
     terminalText,
     notice,
+    source,
+    setSource,
+    assembleCurrent,
     toggleRun,
     stepClock,
     stepInstruction,

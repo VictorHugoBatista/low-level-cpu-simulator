@@ -24,9 +24,10 @@ Painéis: controles (Reset, Passo de 1 clock, Passo de 1 instrução, Run/Pause 
 velocidade ajustável e Boot do disco), registradores em hex/binário, hex dump da memória
 com regiões coloridas e célula do último acesso acesa, monitor de barramentos com
 histórico, terminal de saída ($E800) e listing do programa com o PC apontando a linha
-corrente (clique numa linha para marcar breakpoint). Carrega `.asm` (montado no próprio
-navegador), `.bin` e `.disk`; o exemplo `hello-disk` grava o loader no setor 0 e o programa
-"Ola, AK-8!" no setor 1, bootando pelo disco.
+corrente (clique numa linha para marcar breakpoint). O painel "fonte" deixa escrever e
+editar o próprio programa, com montagem na hora (Ctrl+Enter) e download do `.asm`. Carrega
+`.asm` (montado no próprio navegador), `.bin` e `.disk`; o exemplo `hello-disk` grava o
+loader no setor 0 e o programa "Ola, AK-8!" no setor 1, bootando pelo disco.
 
 ### GitHub Pages
 

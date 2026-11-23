@@ -139,6 +139,9 @@ código roda na web, no CLI e nos testes.
   corrente; clicar numa linha cria ou remove breakpoint.
 - **Carga de programas**: upload de `.asm` (montado no próprio navegador pelo mesmo
   assembler), `.bin` e `.disk`.
+- **Editor de fonte**: o `.asm` carregado abre num editor com numeração de linhas, onde dá
+  para escrever e editar o programa; Ctrl+Enter (ou o botão) monta e carrega na hora, e um
+  botão baixa o `.asm` de volta.
 
 ### CLI (ferramenta de CI e terminal)
 

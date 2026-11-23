@@ -301,6 +301,46 @@ button.run {
   color: #86e39c;
 }
 
+.editor {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #0d0f14;
+  overflow: hidden;
+}
+
+.editor .gutter {
+  padding: 8px 6px;
+  text-align: right;
+  color: var(--dim);
+  background: #161a22;
+  user-select: none;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.45;
+  min-width: 28px;
+}
+
+.editor .srcedit {
+  flex: 1;
+  border: none;
+  resize: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.45;
+  padding: 8px;
+  outline: none;
+  min-height: 160px;
+  white-space: pre;
+  overflow: auto;
+}
+
+.editor .srcedit::placeholder {
+  color: var(--dim);
+}
+
 .listing .src {
   color: var(--text);
 }
