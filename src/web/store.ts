@@ -69,6 +69,8 @@ export function createStore(initial?: { source: string; name: string }) {
   const [breakpoints, setBreakpoints] = createSignal<ReadonlySet<number>>(new Set());
   const [memVersion, setMemVersion] = createSignal(0);
   const [lastAccess, setLastAccess] = createSignal<number | null>(null);
+  /** Endereço inicial do dump de memória: no store para sobreviver a trocas de painel. */
+  const [memStart, setMemStart] = createSignal(0x0200);
   const [terminalText, setTerminal] = createSignal(machine.terminal.text);
   const [notice, setNotice] = createSignal<string | null>(null);
   /** O fonte em edição no painel "fonte" — o que o botão montar usa. */
@@ -242,6 +244,8 @@ export function createStore(initial?: { source: string; name: string }) {
     breakpoints,
     memVersion,
     lastAccess,
+    memStart,
+    setMemStart,
     terminalText,
     notice,
     source,

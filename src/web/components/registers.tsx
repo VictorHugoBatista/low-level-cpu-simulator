@@ -18,8 +18,7 @@ function ByteRow(props: { name: string; value: number; wide?: boolean }) {
 export function RegistersPanel(props: { regs: Accessor<RegSnapshot> }) {
   const r = () => props.regs();
   return (
-    <section class="panel">
-      <h2>registradores</h2>
+    <>
       <table class="registers">
         <thead>
           <tr>
@@ -54,6 +53,6 @@ export function RegistersPanel(props: { regs: Accessor<RegSnapshot> }) {
           </tr>
         </tbody>
       </table>
-    </section>
+    </>
   );
 }

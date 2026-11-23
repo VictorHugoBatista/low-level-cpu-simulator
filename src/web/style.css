@@ -222,6 +222,22 @@ h1 {
   gap: 12px;
 }
 
+/* Destaque: edição de controles e de código no topo, acima dos indicadores. */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.hero .panel {
+  border-top: 2px solid var(--accent);
+}
+
+.hero .panel h2 {
+  color: var(--accent);
+}
+
 .col {
   display: flex;
   flex-direction: column;
@@ -241,6 +257,30 @@ h1 {
   letter-spacing: 0.08em;
   color: var(--dim);
   margin: 0 0 8px;
+}
+
+/* Cabeçalho dos painéis indicadores: título à esquerda, dropdown de troca à direita. */
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.panel-head h2 {
+  margin: 0;
+}
+
+.panel-head .panel-picker {
+  padding: 1px 4px;
+  font-size: 11px;
+  color: var(--dim);
+}
+
+.panel-head .panel-picker:hover {
+  border-color: var(--accent);
+  color: var(--text);
 }
 
 .row {
@@ -497,6 +537,11 @@ button.run {
 
 .editor .srcedit::placeholder {
   color: var(--dim);
+}
+
+/* No destaque, o editor ganha altura para ser a superfície principal de trabalho. */
+.hero .srcedit {
+  min-height: 240px;
 }
 
 .listing .src {

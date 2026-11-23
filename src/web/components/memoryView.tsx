@@ -23,8 +23,10 @@ const COLS = 16;
 /** Hex dump virtualizado: só as linhas visíveis são lidas e renderizadas. */
 export function MemoryView(props: { store: Store }) {
   const s = props.store;
-  const [start, setStart] = createSignal(0x0200);
   const [jump, setJump] = createSignal("");
+  // A posição vive no store: trocar o painel de lugar não volta a vista para $0200.
+  const start = () => s.memStart();
+  const setStart = s.setMemStart;
 
   const rows = createMemo(() => {
     void s.memVersion();
@@ -47,8 +49,7 @@ export function MemoryView(props: { store: Store }) {
   };
 
   return (
-    <section class="panel">
-      <h2>memória</h2>
+    <>
       <div class="row">
         <input
           class="jump"
@@ -90,6 +91,6 @@ export function MemoryView(props: { store: Store }) {
           </For>
         </tbody>
       </table>
-    </section>
+    </>
   );
 }
