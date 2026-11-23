@@ -8,9 +8,10 @@ busca e execução e, por fim, assembly. O simulador reproduz esse percurso em s
 peça que o Akita desenha no quadro vira um componente separado aqui, e o objetivo didático é
 poder enxergar cada byte trafegando por cada barramento a cada ciclo de clock.
 
-> **Status**: passos 1 e 2 concluídos — ISA congelada, núcleo M1 e assembler M2 com o CLI
-> (`lcs assemble` / `lcs run`); a prova da soma monta exatamente os bytes que o M1 executa.
-> Próximo: M3, o dashboard no navegador.
+> **Status**: M1, M2 e M3 concluídos — núcleo, assembler com CLI e dashboard no navegador
+> (Vite + SolidJS), com workflow de deploy para o GitHub Pages em
+> `.github/workflows/deploy.yml`. O deploy efetivo acontece quando o repositório for
+> publicado no GitHub com Pages na origem "GitHub Actions". Próximo: M4, disco e E/S.
 
 ## A máquina-alvo: AK-8
 
@@ -207,6 +208,9 @@ um monólito disfarçado de simulador.
 | M1 Núcleo | barramentos, RAM, CPU com 8 instruções, clock com step/run/dump | soma 2+3 em binário cru, resultado conferido no dump |
 | M2 Assembler | pipeline completo, labels, diretivas, listing, CLI | soma.asm e desvio.asm montam, os bytes batem com a tabela e rodam (fib espera o ADD absoluto do M5) |
 | M3 Dashboard no navegador | controles Run/Pause/Reset e Passo de clock, painel de registradores, vista da memória, monitor de barramentos, carga de .asm/.bin, deploy no GitHub Pages | a soma 2+3 roda direto e clock a clock na URL do Pages, com o byte acendendo na memória a cada ciclo |
+
+✅ M3 implementado (dashboard completo; o apontamento final da URL depende de publicar o
+repositório no GitHub com Pages na origem "GitHub Actions" — o workflow já está no projeto).
 | M4 Disco e E/S | imagem .disk, controlador, terminal, vetor de reset | hello-disk.asm boota do disco e imprime no terminal do dashboard |
 | M5 ISA completa | X/Y, stack, JSR/RTS, modos indexados, flags C/N/V | programa com função recursiva e loops roda certo |
 | M6 Trace e docs | histórico de micro-ops no dashboard e no CLI; ISA, mapa de memória, formato do disco, guia do assembler | exemplos comentados rodam sem consultar o código |

@@ -3,11 +3,13 @@ import type { Pass1Result } from "./pass1.js";
 import type { AsmProblem } from "./lexer.js";
 import type { Statement, Term } from "./parser.js";
 import { buildListing, collectBytes } from "./emitter.js";
+import type { ListingLine } from "./emitter.js";
 
 export interface Pass2Result {
   origin: Word;
   bytes: Byte[];
   listing: string;
+  entries: ListingLine[];
 }
 
 /**
@@ -16,7 +18,7 @@ export interface Pass2Result {
  */
 export function pass2(p1: Pass1Result, file: string, problems: AsmProblem[]): Pass2Result {
   const cells = new Map<Word, Byte>();
-  const lines: { addr: Word; bytes: Byte[]; raw: string }[] = [];
+  const lines: ListingLine[] = [];
 
   const problem = (stmt: Statement, message: string): void => {
     problems.push({ file, line: stmt.line, col: stmt.argCol || 1, message });
@@ -45,7 +47,7 @@ export function pass2(p1: Pass1Result, file: string, problems: AsmProblem[]): Pa
       if (arg !== undefined) {
         target = resolve(arg.term, stmt);
         if (target === null) {
-          lines.push({ addr, bytes: out, raw: stmt.raw });
+          lines.push({ addr, bytes: out, raw: stmt.raw, line: stmt.line });
           continue; // erro já anotado
         }
       }
@@ -82,9 +84,9 @@ export function pass2(p1: Pass1Result, file: string, problems: AsmProblem[]): Pa
     }
 
     out.forEach((b, k) => cells.set((addr + k) & 0xffff, b));
-    lines.push({ addr, bytes: out, raw: stmt.raw });
+    lines.push({ addr, bytes: out, raw: stmt.raw, line: stmt.line });
   }
 
   const { origin, bytes } = collectBytes(cells);
-  return { origin, bytes, listing: buildListing(lines, p1) };
+  return { origin, bytes, listing: buildListing(lines, p1), entries: lines };
 }

@@ -7,6 +7,8 @@ export interface ListingLine {
   addr: Word;
   bytes: Byte[];
   raw: string;
+  /** Número da linha no fonte (1-based), para o painel do programa no navegador. */
+  line: number;
 }
 
 export interface AssembledOutput {

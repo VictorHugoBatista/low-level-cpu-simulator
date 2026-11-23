@@ -4,11 +4,14 @@ import type { AsmProblem } from "./lexer.js";
 import { parse } from "./parser.js";
 import { pass1 } from "./pass1.js";
 import { pass2 } from "./pass2.js";
+import type { ListingLine } from "./emitter.js";
 
 export interface AsmResult {
   origin: Word;
   bytes: Byte[];
   listing: string;
+  /** Listing estruturado, para o painel do programa no navegador. */
+  entries: ListingLine[];
 }
 
 export class AsmError extends Error {
@@ -26,5 +29,5 @@ export function assemble(source: string, file = "programa.asm"): AsmResult {
   const first = pass1(stmts, file, problems);
   const second = pass2(first, file, problems);
   if (problems.length > 0) throw new AsmError(problems);
-  return { origin: second.origin, bytes: second.bytes, listing: second.listing };
+  return { origin: second.origin, bytes: second.bytes, listing: second.listing, entries: second.entries };
 }

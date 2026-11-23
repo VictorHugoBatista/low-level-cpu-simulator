@@ -31,6 +31,9 @@ export class SystemBus {
   private history: BusTransaction[] = [];
   private cycleProvider: () => number = () => 0;
 
+  /** Teto do histórico em memória, para sessões longas no navegador não vazarem. */
+  historyLimit = 8192;
+
   attach(device: BusDevice): void {
     this.device = device;
   }
@@ -75,5 +78,8 @@ export class SystemBus {
       data: this.data,
       write: this.write,
     });
+    if (this.history.length > this.historyLimit * 2) {
+      this.history.splice(0, this.history.length - this.historyLimit);
+    }
   }
 }
