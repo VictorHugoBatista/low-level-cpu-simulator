@@ -1,0 +1,16 @@
+{
+  "name": "low-level-cpu-simulator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Simulador didático de um computador von Neumann de 8 bits (AK-8)",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^3.2.4"
+  }
+}
