@@ -5,7 +5,8 @@ memória primária e secundária e um assembler próprio. Inspirado na série "C
 Funcionam?" do Fabio Akita ([episódio 80](https://www.youtube.com/watch?v=8G80nuEyDN4)).
 
 O plano completo está em [PLAN.md](PLAN.md); a tabela de opcodes congelada, em
-[docs/ISA.md](docs/ISA.md); o guia do assembler, em [docs/asm.md](docs/asm.md).
+[docs/ISA.md](docs/ISA.md); o guia do assembler, em [docs/asm.md](docs/asm.md); a
+arquitetura do software, em [ARCHITECTURE.md](ARCHITECTURE.md).
 
 **Status**: M1 a M4 concluídos — núcleo (barramentos, RAM, CPU microprogramada, boot por
 vetor de reset), assembler com CLI, dashboard no navegador (Vite + SolidJS) e memória
