@@ -28,9 +28,20 @@ const STORAGE_KEY = "ak8-exercises";
 function loadProgress(): ExerciseProgress {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw !== null) return JSON.parse(raw) as ExerciseProgress;
+    if (raw !== null) {
+      // Shape guard: JSON válido com estrutura inesperada (dado adulterado ou schema de
+      // versão futura) não pode derrubar a página — cada campo volta ao default.
+      const parsed = JSON.parse(raw) as Partial<ExerciseProgress>;
+      const rec = (v: unknown): Record<string, unknown> =>
+        typeof v === "object" && v !== null && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+      return {
+        solved: rec(parsed.solved) as ExerciseProgress["solved"],
+        drafts: rec(parsed.drafts) as ExerciseProgress["drafts"],
+        hints: rec(parsed.hints) as ExerciseProgress["hints"],
+      };
+    }
   } catch {
-    /* localStorage indisponível: progresso só vale para a sessão */
+    /* localStorage indisponível ou JSON inválido: progresso só vale para a sessão */
   }
   return { solved: {}, drafts: {}, hints: {} };
 }
@@ -73,6 +84,18 @@ export function ExercisesPage(props: { store: Store }) {
       saveProgress(next);
       return next;
     });
+  };
+
+  /** Salva o fonte corrente como rascunho do nível ativo (troca de nível e blur do editor). */
+  const saveDraft = (def: ExerciseDef | undefined): void => {
+    if (def === undefined) return;
+    update((p) => ({ ...p, drafts: { ...p.drafts, [def.id]: s.source() } }));
+  };
+
+  /** Clique na lista de níveis: preserva o rascunho do nível que está saindo. */
+  const select = (def: ExerciseDef): void => {
+    saveDraft(current());
+    open(def);
   };
 
   /** Abre o nível: restaura o rascunho (ou o template) no editor e na máquina. */
@@ -133,6 +156,10 @@ export function ExercisesPage(props: { store: Store }) {
     setResults(null);
   };
 
+  /** Ao montar a aba, o nível corrente entra no editor — não sobra o exemplo anterior. */
+  const initial = EXERCISES[firstOpen] ?? EXERCISES[0];
+  if (initial !== undefined) open(initial);
+
   return (
     <div class="ex">
       <aside class="panel ex-levels">
@@ -155,7 +182,7 @@ export function ExercisesPage(props: { store: Store }) {
                     locked: !isUnlocked(i(), progress()),
                   }}
                   disabled={!isUnlocked(i(), progress())}
-                  onClick={() => open(def)}
+                  onClick={() => select(def)}
                   title={
                     isUnlocked(i(), progress())
                       ? def.title
@@ -276,7 +303,7 @@ export function ExercisesPage(props: { store: Store }) {
           )}
         </Show>
 
-        <Editor store={s} />
+        <Editor store={s} onBlur={() => saveDraft(current())} />
       </div>
     </div>
   );

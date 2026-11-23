@@ -117,7 +117,7 @@ const ex4Cases: ExerciseCase[] = [
     expect: [{ addr: 0x0302, value: 91 }],
   },
   {
-    name: "5 × 0 = 0 (contador que já nasce zero)",
+    name: "5 × 0 = 0 (somar zero n vezes)",
     preset: [
       { addr: 0x0300, value: 5 },
       { addr: 0x0301, value: 0 },
