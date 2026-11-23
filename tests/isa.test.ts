@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { Machine } from "../src/runtime/machine.js";
 import { assemble } from "../src/asm/assembler.js";
+import { OPCODES } from "../src/cpu/opcodes.js";
+import { MICROPROGRAMS } from "../src/cpu/microops.js";
+import { hex2 } from "../src/core/bytes.js";
 
 /** Monta, carrega, reseta e roda até HLT — e devolve a máquina para inspeção. */
 function runProgram(source: string): Machine {
@@ -244,6 +247,23 @@ negativo:
 fim:  hlt
 `);
     expect(m.ram.read(0x0300)).toBe(0x33);
+  });
+});
+
+describe("M5 — cobertura da tabela congelada", () => {
+  it("todo opcode congelado tem microprograma — a referência não volta a ficar apagada", () => {
+    for (const key of Object.keys(OPCODES)) {
+      const opcode = Number(key);
+      const info = OPCODES[opcode];
+      expect(MICROPROGRAMS[opcode], `0x${hex2(opcode)} (${info.mnemonic}) sem microprograma`).toBeDefined();
+    }
+  });
+
+  it("todo microprograma corresponde a um opcode congelado — nada fora do contrato", () => {
+    for (const key of Object.keys(MICROPROGRAMS)) {
+      const opcode = Number(key);
+      expect(OPCODES[opcode], `microprograma órfão em 0x${hex2(opcode)}`).toBeDefined();
+    }
   });
 });
 

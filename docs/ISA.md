@@ -1,7 +1,7 @@
 # ISA AK-8 — tabela congelada de opcodes (v1)
 
 Este arquivo é o **contrato** entre o assembler (M2) e a CPU (M1–M5). A tabela de opcodes
-está espelhada em `src/cpu/decoder.ts`; as duas fontes não podem divergir. Qualquer mudança
+está espelhada em `src/cpu/opcodes.ts`; as duas fontes não podem divergir. Qualquer mudança
 a partir daqui exige nota na seção "Revisões", no fim do arquivo.
 
 ## Convenções
