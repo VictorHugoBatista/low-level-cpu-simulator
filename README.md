@@ -35,9 +35,9 @@ loader no setor 0 e o programa "Ola, AK-8!" no setor 1, bootando pelo disco.
 ### GitHub Pages
 
 O workflow `.github/workflows/deploy.yml` publica a cada push na `main`: roda os testes, o
-typecheck, o `vite build` e publica `dist/` com `actions/deploy-pages`. Para ativar:
-publique o repositório e, em Settings → Pages, escolha **Source: GitHub Actions**. O `base`
-do Vite já aponta para `/low-level-cpu-simulator/` (subcaminho do projeto).
+typecheck, o `vite build` e publica `dist/` com `actions/deploy-pages`. **Já está ativo:**
+<https://victorhugobatista.github.io/low-level-cpu-simulator/> (Pages com origem
+"GitHub Actions"; o `base` do Vite aponta para o subcaminho `/low-level-cpu-simulator/`).
 
 ## CLI
 
