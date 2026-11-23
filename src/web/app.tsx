@@ -7,6 +7,7 @@ import { Editor } from "./components/editor.js";
 import { IndicatorPanel } from "./components/indicatorPanel.js";
 import type { IndicatorKind } from "./components/indicatorPanel.js";
 import { ReferencePage } from "./components/reference.js";
+import { ExercisesPage } from "./components/exercises.js";
 import somaAsm from "../../examples/soma.asm?raw";
 import desvioAsm from "../../examples/desvio.asm?raw";
 import bootAsm from "../../examples/boot.asm?raw";
@@ -87,7 +88,7 @@ function applyTheme(theme: Theme) {
 
 export function App() {
   const store = createStore({ source: somaAsm, name: "soma.asm" });
-  const [tab, setTab] = createSignal<"maquina" | "referencia">("maquina");
+  const [tab, setTab] = createSignal<"maquina" | "exercicios" | "referencia">("maquina");
   const [slots, setSlots] = createSignal<IndicatorKind[]>([...INITIAL_SLOTS]);
 
   /** Escolher um painel para um espaço troca com o espaço onde ele estava. */
@@ -129,6 +130,12 @@ export function App() {
             onClick={() => setTab("maquina")}
           >
             máquina
+          </button>
+          <button
+            classList={{ active: tab() === "exercicios" }}
+            onClick={() => setTab("exercicios")}
+          >
+            exercícios
           </button>
           <button
             classList={{ active: tab() === "referencia" }}
@@ -227,6 +234,10 @@ export function App() {
             </div>
           </div>
         </Show>
+      </Show>
+
+      <Show when={tab() === "exercicios"}>
+        <ExercisesPage store={store} />
       </Show>
 
       <Show when={tab() === "referencia"}>
