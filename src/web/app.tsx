@@ -59,6 +59,19 @@ type Theme = "dark" | "light";
 /** Duplicada no script inline do index.html, que roda antes do build e não consegue importar daqui. */
 const THEME_KEY = "ak8-theme";
 
+type Layout = "colunas" | "lateral";
+
+const LAYOUT_KEY = "ak8-layout";
+
+function initialLayout(): Layout {
+  try {
+    if (localStorage.getItem(LAYOUT_KEY) === "lateral") return "lateral";
+  } catch {
+    /* localStorage indisponível: layout só vale para a sessão */
+  }
+  return "colunas";
+}
+
 function initialTheme(): Theme {
   return document.documentElement.dataset.theme === "light" ? "light" : "dark";
 }
@@ -95,6 +108,16 @@ export function App() {
     setTheme(t);
   };
 
+  const [layout, setLayout] = createSignal<Layout>(initialLayout());
+  const setAndStoreLayout = (l: Layout) => {
+    try {
+      localStorage.setItem(LAYOUT_KEY, l);
+    } catch {
+      /* localStorage indisponível: layout só vale para a sessão */
+    }
+    setLayout(l);
+  };
+
   return (
     <main>
       <header>
@@ -126,6 +149,14 @@ export function App() {
           {store.cycles()} ciclos
         </div>
         <select
+          title="layout"
+          value={layout()}
+          onChange={(e) => setAndStoreLayout(e.currentTarget.value as Layout)}
+        >
+          <option value="colunas">duas colunas</option>
+          <option value="lateral">lateral</option>
+        </select>
+        <select
           title="tema"
           value={theme()}
           onChange={(e) => setAndStoreTheme(e.currentTarget.value as Theme)}
@@ -140,36 +171,62 @@ export function App() {
       </Show>
 
       <Show when={tab() === "maquina"}>
-        <div class="hero">
-          <Controls store={store} examples={EXAMPLES} />
-          <Editor store={store} />
-        </div>
-        <div class="grid">
-          <div class="col">
-            <For each={slots().slice(0, 2)}>
-              {(kind, i) => (
-                <IndicatorPanel
-                  kind={kind}
-                  index={i()}
-                  store={store}
-                  onPick={pickSlot}
-                />
-              )}
-            </For>
+        <Show
+          when={layout() === "lateral"}
+          fallback={
+            <div class="machine-cols">
+              <div class="hero">
+                <Controls store={store} examples={EXAMPLES} />
+                <Editor store={store} />
+              </div>
+              <div class="grid">
+                <div class="col">
+                  <For each={slots().slice(0, 2)}>
+                    {(kind, i) => (
+                      <IndicatorPanel
+                        kind={kind}
+                        index={i()}
+                        store={store}
+                        onPick={pickSlot}
+                      />
+                    )}
+                  </For>
+                </div>
+                <div class="col">
+                  <For each={slots().slice(2)}>
+                    {(kind, i) => (
+                      <IndicatorPanel
+                        kind={kind}
+                        index={i() + 2}
+                        store={store}
+                        onPick={pickSlot}
+                      />
+                    )}
+                  </For>
+                </div>
+              </div>
+            </div>
+          }
+        >
+          <div class="layout-side">
+            <div class="hero">
+              <Controls store={store} examples={EXAMPLES} />
+              <Editor store={store} />
+            </div>
+            <div class="col">
+              <For each={slots()}>
+                {(kind, i) => (
+                  <IndicatorPanel
+                    kind={kind}
+                    index={i()}
+                    store={store}
+                    onPick={pickSlot}
+                  />
+                )}
+              </For>
+            </div>
           </div>
-          <div class="col">
-            <For each={slots().slice(2)}>
-              {(kind, i) => (
-                <IndicatorPanel
-                  kind={kind}
-                  index={i() + 2}
-                  store={store}
-                  onPick={pickSlot}
-                />
-              )}
-            </For>
-          </div>
-        </div>
+        </Show>
       </Show>
 
       <Show when={tab() === "referencia"}>
