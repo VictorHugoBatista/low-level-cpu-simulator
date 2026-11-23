@@ -58,12 +58,28 @@ export function Controls(props: { store: Store; examples: ExampleDef[] }) {
           )}
         </For>
       </div>
-      <div class="row">
-        <button onClick={() => s.reset()}>Reset</button>
-        <button onClick={() => s.stepClock()}>Passo (1 clock)</button>
-        <button onClick={() => s.stepInstruction()}>Passo (1 instrução)</button>
-        <button class="run" onClick={() => s.toggleRun()}>
-          {s.running() ? "Pause" : "Run"}
+      <div class="row exec">
+        <span class="exec-label">execução</span>
+        <button class="exec-btn" onClick={() => s.stepClock()}>
+          <span class="glyph">▷</span> Passo (1 clock)
+        </button>
+        <button class="exec-btn" onClick={() => s.stepInstruction()}>
+          <span class="glyph">⏭</span> Passo (1 instrução)
+        </button>
+        <button class="run exec-btn" onClick={() => s.toggleRun()}>
+          {s.running() ? (
+            <>
+              <span class="glyph">⏸</span> Pause
+            </>
+          ) : s.speed() === 0 ? (
+            <>
+              <span class="glyph">⏩</span> Run
+            </>
+          ) : (
+            <>
+              <span class="glyph">▶</span> Run
+            </>
+          )}
         </button>
         <select
           title="velocidade do Run"
@@ -74,9 +90,14 @@ export function Controls(props: { store: Store; examples: ExampleDef[] }) {
           <option value="10">10 Hz</option>
           <option value="100">100 Hz</option>
           <option value="1000">1 kHz</option>
-          <option value="0">Máximo</option>
+          <option value="0">⏩ Máximo</option>
         </select>
-        <button onClick={() => s.bootFromDisk()}>Boot do disco</button>
+        <button class="exec-btn" onClick={() => s.bootFromDisk()}>
+          <span class="glyph">⏻</span> Boot do disco
+        </button>
+      </div>
+      <div class="row">
+        <button onClick={() => s.reset()}>↺ Reset</button>
       </div>
       <div class="hint">
         Passo avança exatamente um clock. Breakpoints: clique nas linhas do programa. O Boot
