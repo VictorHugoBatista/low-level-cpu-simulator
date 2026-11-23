@@ -40,6 +40,8 @@ export function Controls(props: { store: Store; examples: ExampleDef[] }) {
           onChange={onFile}
           title="carregar .asm, .bin ou .disk"
         />
+      </div>
+      <div class="row">
         <For each={props.examples}>
           {(ex) => (
             <button
