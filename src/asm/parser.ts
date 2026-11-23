@@ -4,7 +4,7 @@ import type { AsmProblem, Token } from "./lexer.js";
 export type Term = { kind: "num"; value: number } | { kind: "sym"; name: string };
 
 export type Arg =
-  | { kind: "imm"; term: Term }
+  | { kind: "imm"; term: Term; part?: "lo" | "hi" }
   | { kind: "plain"; term: Term }
   | { kind: "indexX"; term: Term }
   | { kind: "indexY"; term: Term }
@@ -72,7 +72,16 @@ function parseLine(
 
     if (t.kind === "hash") {
       i++;
-      return { kind: "imm", term: parseTerm() };
+      // #<expr e #>expr: byte baixo / byte alto (bootstrap de ponteiro na página zero)
+      let part: "lo" | "hi" | undefined;
+      if (toks[i]?.kind === "lt") {
+        part = "lo";
+        i++;
+      } else if (toks[i]?.kind === "gt") {
+        part = "hi";
+        i++;
+      }
+      return { kind: "imm", term: parseTerm(), part };
     }
 
     if (t.kind === "lparen") {

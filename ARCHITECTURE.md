@@ -101,7 +101,9 @@ Pontos fixos do modelo:
 | `cpu/cpu.ts` | o sequenciador | `tick()` executa exatamente uma micro-op; `reset(bus)` lê o vetor |
 | `runtime/machine.ts` | a fiação de tudo | único lugar que conhece RAM + dispositivos + CPU juntos; API: `tick`, `run`, `reset`, `loadProgram`, `bootFromDisk`, `insertDisk` |
 
-### Como adicionar uma instrução (o caminho do M5)
+### Como adicionar uma instrução
+
+(O caminho que o M5 seguiu para completar a tabela.)
 
 1. Ela já está congelada em `docs/ISA.md` (contrato) e espelhada em `src/cpu/opcodes.ts`.
 2. Escrever o microprograma em `src/cpu/microops.ts` (`MICROPROGRAMS[opcode]`), composto
@@ -176,10 +178,12 @@ Mudar qualquer um deles exige revisão explícita no fim do arquivo.
 
 - **Typecheck**: `tsconfig.json` (NodeNext, DOM + JSX Solid, `noEmit`) cobre núcleo, CLI,
   web e testes. **Emissão**: `tsconfig.build.json` → `dist-cli/` sem `src/web`.
-- **Testes** (vitest, `vitest.config.ts` próprio para não carregar o plugin Solid): 46
-  testes em 7 arquivos — ULA, barramento/mapa, CPU (branches, JMP, erros), máquina (vetor,
-  HLT idempotente, teto), assembler (golden bytes, integração, erros) e disco/E-S
-  (terminal, controlador, **prova M4: boot → "Ola, AK-8!" no terminal em 111 ciclos**).
+- **Testes** (vitest, `vitest.config.ts` próprio para não carregar o plugin Solid): 67
+  testes em 8 arquivos — ULA, barramento/mapa, CPU (branches, JMP, erros), máquina (vetor,
+  HLT idempotente, teto), assembler (golden bytes, integração, erros), disco/E-S (**prova
+  M4: boot → "Ola, AK-8!" no terminal em 111 ciclos**) e ISA completa (transfers, stack,
+  lógicas, CMP sem tocar o V, INC/DEC com wrap, modos indexados, **provas M5: fib(9) = 34
+  e hello em loop**).
 - **Deploy**: `.github/workflows/deploy.yml` — push na `main` roda testes + typecheck +
   `vite build` e publica `dist/` via `actions/deploy-pages`. `base` do Vite fixado no
   subcaminho `/low-level-cpu-simulator/`.

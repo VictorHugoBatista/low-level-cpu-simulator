@@ -1,7 +1,7 @@
 # ISA AK-8 — tabela congelada de opcodes (v1)
 
 Este arquivo é o **contrato** entre o assembler (M2) e a CPU (M1–M5). A tabela de opcodes
-está espelhada em `src/cpu/decoder.ts`; as duas fontes não podem divergir. Qualquer mudança
+está espelhada em `src/cpu/opcodes.ts`; as duas fontes não podem divergir. Qualquer mudança
 a partir daqui exige nota na seção "Revisões", no fim do arquivo.
 
 ## Convenções
@@ -129,11 +129,12 @@ STA $0300     T0  fetch → T1 TMP←M[PC] (lo) → T2 TMP.hi←M[PC]
 
 ## Status de implementação
 
-- **M1 (implementado)**: 0x10, 0x12, 0x22, 0x70, 0x80, 0xF0, 0xF2, 0xF3, 0xFF
-  (LDA imm/abs, STA abs, ADD imm, SUB imm, JMP, JZ, JNZ, HLT).
-- **M2**: assembler que gera exatamente estes bytes.
-- **M5 (ISA completa)**: todo o restante desta tabela.
+- ✅ **Tabela inteira implementada no núcleo (M5)**: todos os opcodes desta tabela têm
+  microprograma em `src/cpu/microops.ts`.
+- **M2**: assembler que gera exatamente estes bytes (com `#<`/`#>` para byte baixo/alto).
 
 ## Revisões
 
 - 2026-11-23 — v1 congelada junto com o M1.
+- 2026-11-23 — M5: microprogramas para toda a tabela; nenhuma mudança de opcode ou de
+  semântica.

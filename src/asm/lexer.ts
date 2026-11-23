@@ -10,6 +10,8 @@ export type TokenKind =
   | "rparen"
   | "comma"
   | "colon"
+  | "lt"
+  | "gt"
   | "number"
   | "symbol"
   | "directive"
@@ -72,6 +74,13 @@ function tokenizeLine(text: string, line: number, file: string, problems: AsmPro
     if (ch === "(" || ch === ")" || ch === "," || ch === ":") {
       const kind =
         ch === "(" ? "lparen" : ch === ")" ? "rparen" : ch === "," ? "comma" : "colon";
+      tokens.push({ kind, value: ch, col });
+      i++;
+      continue;
+    }
+
+    if (ch === "<" || ch === ">") {
+      const kind = ch === "<" ? "lt" : "gt";
       tokens.push({ kind, value: ch, col });
       i++;
       continue;
