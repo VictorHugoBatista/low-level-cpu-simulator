@@ -71,12 +71,18 @@ body {
   background: var(--bg);
   color: var(--text);
   font-size: 13px;
+  /* Coluna única esticada: o rodapé encosta no fim da viewport mesmo quando
+     o conteúdo da aba é curto (a máquina com painéis baixos). */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 main {
   max-width: 1200px;
   margin: 0 auto;
   padding: 16px;
+  flex: 1;
 }
 
 header {
@@ -854,16 +860,41 @@ button.run .glyph {
   color: var(--dim);
 }
 
-/* Rodapé: barra de status do console — o efeito CRT mora aqui embaixo, longe
-   dos controles de trabalho. O select fica visível mesmo com o efeito desligado,
-   para dar para religar. */
+/* Rodapé: barra de status do console — github à esquerda, efeito CRT à direita.
+   Grudado no fundo da viewport (body em flex, main estica), mesmo com a aba
+   máquina curta; o select fica visível mesmo com o efeito desligado, para dar
+   para religar. */
 .footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
-  margin-top: 16px;
+  gap: 8px;
+  margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid var(--line);
+}
+
+.footer .gh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--dim);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 3px 10px;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.footer .gh:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.footer .gh svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
 }
 
 /* ===== Chrome CRT — scanlines, vinheta e glow, sob o select "crt" ===== */
