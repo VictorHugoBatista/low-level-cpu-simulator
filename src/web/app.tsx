@@ -10,6 +10,7 @@ import { ReferencePage } from "./components/reference.js";
 import { ExercisesPage } from "./components/exercises.js";
 import { ExercisePanel } from "./components/exercisePanel.js";
 import { BootScreen } from "./components/boot.js";
+import { FundoChuva } from "./components/fundo.js";
 import { restoreLast, saveDraftActive } from "./exerciseState.js";
 import somaAsm from "../../examples/soma.asm?raw";
 import desvioAsm from "../../examples/desvio.asm?raw";
@@ -181,6 +182,9 @@ export function App() {
 
   return (
     <main>
+      <Show when={crt() === "on"}>
+        <FundoChuva />
+      </Show>
       <Show when={booting()}>
         <BootScreen onDone={encerrarBoot} />
       </Show>
@@ -233,14 +237,6 @@ export function App() {
         >
           <option value="dark">escuro</option>
           <option value="light">claro</option>
-        </select>
-        <select
-          title="crt"
-          value={crt()}
-          onChange={(e) => setAndStoreCrt(e.currentTarget.value as Crt)}
-        >
-          <option value="on">crt ligado</option>
-          <option value="off">crt desligado</option>
         </select>
       </header>
 
@@ -316,6 +312,26 @@ export function App() {
       <Show when={tab() === "referencia"}>
         <ReferencePage examples={REF_EXAMPLES} />
       </Show>
+
+      <footer class="footer">
+        <iframe
+          class="gh-btn"
+          src="https://ghbtns.com/github-btn.html?user=VictorHugoBatista&type=follow&count=true"
+          title="github do autor"
+          frameborder="0"
+          scrolling="no"
+          width="170"
+          height="20"
+        />
+        <select
+          title="crt"
+          value={crt()}
+          onChange={(e) => setAndStoreCrt(e.currentTarget.value as Crt)}
+        >
+          <option value="on">crt ligado</option>
+          <option value="off">crt desligado</option>
+        </select>
+      </footer>
     </main>
   );
 }

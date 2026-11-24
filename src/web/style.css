@@ -4,7 +4,7 @@
 :root {
   color-scheme: dark;
   --bg: #060a08;
-  --panel: #0b120d;
+  --panel: rgba(11, 18, 13, 0.5);
   --line: #1e3527;
   --text: #b8cdb9;
   --dim: #63806a;
@@ -16,12 +16,13 @@
   --btn-bg: #101b13;
   --row-hover: #12211a;
   --hot-line: #14301f;
-  --sunken: #040705;
-  --gutter: #0a0f0b;
+  --sunken: rgba(4, 7, 5, 0.9);
+  --gutter: rgba(10, 15, 11, 0.92);
   --err-bg: #2a0d14;
   --err-line: #7d2b3f;
   --err-text: #ff8fa3;
   --stripe: rgba(74, 255, 127, 0.03);
+  --sombra: 0 8px 24px rgba(0, 0, 0, 0.5);
   --r-zp: #39d7d7;
   --r-stack: #c39bff;
   --r-term: #63e68a;
@@ -35,7 +36,7 @@
 :root[data-theme="light"] {
   color-scheme: light;
   --bg: #f2f5f1;
-  --panel: #ffffff;
+  --panel: rgba(255, 255, 255, 0.5);
   --line: #c6d4c8;
   --text: #233021;
   --dim: #5c6e5c;
@@ -53,6 +54,7 @@
   --err-line: #d0536d;
   --err-text: #a02440;
   --stripe: rgba(0, 0, 0, 0.04);
+  --sombra: 0 8px 24px rgba(35, 48, 33, 0.14);
   --r-zp: #0d7d8c;
   --r-stack: #7a3ff0;
   --r-term: #177f3c;
@@ -69,12 +71,18 @@ body {
   background: var(--bg);
   color: var(--text);
   font-size: 13px;
+  /* Coluna única esticada: o rodapé encosta no fim da viewport mesmo quando
+     o conteúdo da aba é curto (a máquina com painéis baixos). */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 main {
   max-width: 1200px;
   margin: 0 auto;
   padding: 16px;
+  flex: 1;
 }
 
 header {
@@ -197,7 +205,7 @@ a {
 .ref details pre {
   background: var(--sunken);
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 2px;
   padding: 8px;
   overflow: auto;
   font-size: 12px;
@@ -205,7 +213,7 @@ a {
 }
 
 h1 {
-  font-size: 22px;
+  font-size: 24px;
   margin: 0;
   color: var(--accent);
 }
@@ -230,7 +238,9 @@ h1 {
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* minmax(0, …): track de 1fr puro cresce com o min-width do conteúdo (as
+     tabelas de memória não quebram linha) e o grid ultrapassa o container. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
   align-items: start;
 }
@@ -243,10 +253,6 @@ h1 {
   margin-bottom: 12px;
 }
 
-.hero .panel {
-  border-top: 2px solid var(--accent);
-}
-
 .hero .panel h2 {
   color: var(--accent);
 }
@@ -255,6 +261,8 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  /* Coluna de grid/flex não pode ser forçada a largo pelo conteúdo dos painéis. */
+  min-width: 0;
 }
 
 /* Layout lateral: controles e fonte em ~40% à esquerda, painéis em ~60% à direita. */
@@ -274,6 +282,7 @@ h1 {
    (as áreas roláveis usam os tetos padrão do tema). A página rola quando não cabe. */
 .machine-cols {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   align-items: start;
 }
@@ -292,16 +301,44 @@ h1 {
 .panel {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 2px;
   padding: 10px 12px;
+  min-width: 0;
+  /* Vidro: o fundo da página (a chuva) atravessa o painel borrado. */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--sombra);
+}
+
+/* A chuva de fundo: canvas fixo atrás de todo o conteúdo, acima do fundo do
+   body (mesma cor — o acúmulo do rastro não forma placa) e abaixo dos painéis
+   de vidro, que a borram. A paleta (glifo e rastro) segue o tema, trocada por
+   quadro em crt.ts. */
+.fundo-rain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* No papel claro o verde escuro some menos que o fósforo no preto — um pouco
+   mais de opacidade para o efeito existir sem virar cortina. */
+:root[data-theme="light"] .fundo-rain {
+  opacity: 0.4;
 }
 
 .panel h2 {
-  font-size: 12px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--dim);
-  margin: 0 0 8px;
+  margin: 0 0 10px;
+  /* Separação de janela: o título tem a sua régua, em toda a largura do painel. */
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
 }
 
 /* Cabeçalho dos painéis indicadores: título à esquerda, dropdown de troca à direita. */
@@ -310,11 +347,16 @@ h1 {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  /* A mesma régua de janela dos títulos simples, aqui na linha do seletor. */
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
 }
 
 .panel-head h2 {
   margin: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .panel-head .panel-picker {
@@ -342,7 +384,7 @@ input {
   background: var(--btn-bg);
   color: var(--text);
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 2px;
   padding: 4px 8px;
   font: inherit;
   cursor: pointer;
@@ -365,7 +407,7 @@ button.run {
 .exec {
   border: 1px solid var(--accent);
   background: color-mix(in srgb, var(--accent) 10%, transparent);
-  border-radius: 6px;
+  border-radius: 2px;
   padding: 8px 10px;
   margin-bottom: 8px;
 }
@@ -433,7 +475,7 @@ button.run .glyph {
 .flag {
   display: inline-block;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: 2px;
   padding: 0 6px;
   margin-right: 4px;
   color: var(--dim);
@@ -447,6 +489,12 @@ button.run .glyph {
 
 .memgrid {
   border-collapse: collapse;
+}
+
+/* A tabela de memória tem min-width fixo (16 colunas de hexa não quebram);
+   em painel estreito ela rola dentro do próprio painel em vez de vazar. */
+.panel:has(> .memgrid) {
+  overflow-x: auto;
 }
 
 .memgrid td {
@@ -502,7 +550,7 @@ button.run .glyph {
 
 .busnow {
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 2px;
   padding: 6px 8px;
   margin-bottom: 8px;
 }
@@ -524,6 +572,7 @@ button.run .glyph {
 .bushist {
   max-height: 220px;
   overflow-y: auto;
+  overflow-x: auto; /* linhas longas de barramento rolam dentro, sem empurrar o painel */
 }
 
 .busline {
@@ -534,6 +583,7 @@ button.run .glyph {
 .listing {
   max-height: 300px;
   overflow-y: auto;
+  overflow-x: auto; /* fonte com linha comprida rola dentro, sem empurrar o painel */
 }
 
 .listing .line {
@@ -577,7 +627,7 @@ button.run .glyph {
 .term {
   background: var(--sunken);
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 2px;
   padding: 8px;
   margin: 0;
   min-height: 44px;
@@ -590,7 +640,7 @@ button.run .glyph {
 .editor {
   display: flex;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 2px;
   background: var(--sunken);
   overflow: hidden;
 }
@@ -689,7 +739,7 @@ button.run .glyph {
 .ex-bar {
   flex: 1;
   height: 8px;
-  border-radius: 4px;
+  border-radius: 2px;
   background: var(--sunken);
   border: 1px solid var(--line);
   overflow: hidden;
@@ -793,7 +843,7 @@ button.run .glyph {
 .ex-solution {
   background: var(--sunken);
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 2px;
   padding: 8px;
   margin: 0;
   overflow: auto;
@@ -848,6 +898,35 @@ button.run .glyph {
 .ex-case-label,
 .ex-case-name {
   color: var(--dim);
+}
+
+/* Rodapé: barra de status do console — o botão pronto do github (widget
+   github-buttons, iframe do ghbtns.com) à esquerda, efeito CRT à direita.
+   Grudado no fundo da viewport (body em flex, main estica), mesmo com a aba
+   máquina curta; o select fica visível mesmo com o efeito desligado, para dar
+   para religar. O margin-top auto some quando o conteúdo é alto — a régua
+   garante um vão mínimo de 24px entre o conteúdo e a linha, sempre. */
+.footer {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 34px; /* 24px de vão até a régua + 10px da régua à linha de controles */
+}
+
+.footer::before {
+  content: "";
+  position: absolute;
+  top: 24px;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--line);
+}
+
+.footer .gh-btn {
+  border: 0;
 }
 
 /* ===== Chrome CRT — scanlines, vinheta e glow, sob o select "crt" ===== */
@@ -993,8 +1072,9 @@ button.run .glyph {
   overflow: hidden;
   margin-top: 8px;
   border: 1px solid #1e3527;
-  border-radius: 4px;
+  border-radius: 2px;
   background: #040705;
+  box-shadow: var(--sombra);
 }
 
 .ex-celebrate-box canvas {
