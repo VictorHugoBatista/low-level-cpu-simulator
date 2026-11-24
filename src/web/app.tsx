@@ -319,7 +319,7 @@ export function App() {
           src="https://ghbtns.com/github-btn.html?user=VictorHugoBatista&type=follow&count=true"
           title="github do autor"
           frameborder="0"
-          scrolling="0"
+          scrolling="no"
           width="170"
           height="20"
         />
