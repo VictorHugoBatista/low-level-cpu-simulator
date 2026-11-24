@@ -1,6 +1,7 @@
 import { For, Show } from "solid-js";
 import type { Store } from "../store.js";
 import { EXERCISES } from "../exerciseCatalog.js";
+import { Celebrate } from "./celebrate.js";
 import {
   activeExercise,
   applyActiveCase,
@@ -89,7 +90,7 @@ export function ExercisePanel(props: { store: Store; onOpenExercises?: () => voi
             </Show>
           </div>
           <Show when={celebrate() !== null}>
-            <p class="ex-celebrate">🏆 {celebrate()}</p>
+            <Celebrate texto={celebrate()!} />
           </Show>
           <Show when={results() !== null && verifiedId() === def().id}>
             <ExerciseResults results={results()!} />

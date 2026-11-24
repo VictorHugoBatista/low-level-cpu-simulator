@@ -9,6 +9,7 @@ import type { IndicatorKind } from "./components/indicatorPanel.js";
 import { ReferencePage } from "./components/reference.js";
 import { ExercisesPage } from "./components/exercises.js";
 import { ExercisePanel } from "./components/exercisePanel.js";
+import { BootScreen } from "./components/boot.js";
 import { restoreLast, saveDraftActive } from "./exerciseState.js";
 import somaAsm from "../../examples/soma.asm?raw";
 import desvioAsm from "../../examples/desvio.asm?raw";
@@ -61,6 +62,39 @@ type Theme = "dark" | "light";
 
 /** Duplicada no script inline do index.html, que roda antes do build e não consegue importar daqui. */
 const THEME_KEY = "ak8-theme";
+
+type Crt = "on" | "off";
+
+/** Duplicada no script inline do index.html, junto com THEME_KEY. */
+const CRT_KEY = "ak8-crt";
+
+/** O boot toca uma vez por sessão — refresh no mesmo nano não reboota a máquina. */
+const BOOT_KEY = "ak8-boot-visto";
+
+function initialCrt(): Crt {
+  return document.documentElement.dataset.crt === "off" ? "off" : "on";
+}
+
+function applyCrt(crt: Crt) {
+  document.documentElement.dataset.crt = crt;
+  try {
+    localStorage.setItem(CRT_KEY, crt);
+  } catch {
+    /* localStorage indisponível: CRT só vale para a sessão */
+  }
+}
+
+/** A cerimônia de boot só acontece para quem ligou o CRT, ainda não a viu nesta
+ * sessão e não pediu menos animação no sistema — todo mundo entra direto na máquina. */
+function deveBootar(): boolean {
+  if (initialCrt() === "off") return false;
+  try {
+    if (sessionStorage.getItem(BOOT_KEY) !== null) return false;
+  } catch {
+    /* sessionStorage indisponível: boota sempre */
+  }
+  return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
 
 type Layout = "colunas" | "lateral";
 
@@ -117,6 +151,24 @@ export function App() {
     setTheme(t);
   };
 
+  const [crt, setCrt] = createSignal<Crt>(initialCrt());
+  const setAndStoreCrt = (c: Crt) => {
+    applyCrt(c);
+    setCrt(c);
+  };
+
+  const [booting, setBooting] = createSignal(deveBootar());
+  /** Fim do boot: timeout de 1,1 s ou clique na tela. Marca a sessão para o
+   * refresh seguinte entrar direto. */
+  const encerrarBoot = () => {
+    try {
+      sessionStorage.setItem(BOOT_KEY, "1");
+    } catch {
+      /* sessionStorage indisponível: o boot só volta no refresh */
+    }
+    setBooting(false);
+  };
+
   const [layout, setLayout] = createSignal<Layout>(initialLayout());
   const setAndStoreLayout = (l: Layout) => {
     try {
@@ -129,6 +181,9 @@ export function App() {
 
   return (
     <main>
+      <Show when={booting()}>
+        <BootScreen onDone={encerrarBoot} />
+      </Show>
       <header>
         <h1>MOS-6502</h1>
         <div class="subtitle">Simulador de CPU de 8 bits</div>
@@ -178,6 +233,14 @@ export function App() {
         >
           <option value="dark">escuro</option>
           <option value="light">claro</option>
+        </select>
+        <select
+          title="crt"
+          value={crt()}
+          onChange={(e) => setAndStoreCrt(e.currentTarget.value as Crt)}
+        >
+          <option value="on">crt ligado</option>
+          <option value="off">crt desligado</option>
         </select>
       </header>
 
