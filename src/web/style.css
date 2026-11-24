@@ -220,6 +220,7 @@ h1 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  align-items: start;
 }
 
 /* Destaque: edição de controles e de código no topo, em coluna única de 100%. */
@@ -256,15 +257,13 @@ h1 {
   margin-bottom: 0;
 }
 
-/* No layout editor cheio: controles e fonte no topo (~40% da altura da janela, mas sem
-   encolher abaixo do conteúdo — o editor não colapsa) e os painéis indicadores em ~60%,
-   preenchendo a tela toda. Se o conteúdo do topo pedir mais que a fatia, a grade estoura
-   o contêiner para baixo (a página rola) — os painéis nunca ficam abaixo do piso. */
+/* No layout editor cheio: controles e fonte no topo, em largura cheia, e os painéis
+   indicadores abaixo, em duas colunas — todos os cards com a altura do conteúdo
+   (as áreas roláveis usam os tetos padrão do tema). A página rola quando não cabe. */
 .machine-cols {
   display: grid;
-  grid-template-rows: minmax(min-content, 2fr) minmax(360px, 3fr);
   gap: 12px;
-  height: calc(100vh - 70px); /* padding do main + header + margem */
+  align-items: start;
 }
 
 .machine-cols .hero {
@@ -274,60 +273,8 @@ h1 {
   margin-bottom: 0;
 }
 
-/* O painel da fonte encolhe ou cresce para preencher o que sobra no topo. */
-.machine-cols .hero .panel:last-child {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.machine-cols .hero .editor {
-  flex: 1;
-  min-height: 0;
-}
-
-.machine-cols .hero .srcedit {
-  min-height: 160px; /* o editor nunca some, mesmo com o painel de exercício no topo */
-}
-
 .machine-cols .col {
   min-height: 0;
-}
-
-/* Com exercício ativo, o painel dele vira uma linha própria no topo da grade —
-   com altura pelo conteúdo (resultados de verificação crescem para baixo e a
-   página rola), nunca cortados por um teto. */
-.machine-cols:has(> .ex-banner) {
-  grid-template-rows: auto minmax(min-content, 2fr) minmax(360px, 3fr);
-}
-
-/* Os painéis preenchem a área toda; o conteúdo rola dentro de cada um,
-   com o cabeçalho (título + dropdown) sempre visível. */
-.machine-cols .col > .panel {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.machine-cols .col > .panel > :not(.panel-head) {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;
-}
-
-.machine-cols .col > .panel > .row,
-.machine-cols .col > .panel > .panel-head {
-  flex: 0 0 auto;
-}
-
-/* Sem os tetos de altura padrão: os corpos usam o espaço que a área dá. */
-.machine-cols .listing,
-.machine-cols .bushist,
-.machine-cols .term {
-  max-height: none;
 }
 
 .panel {
