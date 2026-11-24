@@ -1,6 +1,7 @@
 import { For, Show } from "solid-js";
 import { Editor } from "./editor.js";
 import { ExerciseResults } from "./exercisePanel.js";
+import { Celebrate } from "./celebrate.js";
 import type { Store } from "../store.js";
 import { EXERCISES } from "../exerciseCatalog.js";
 import type { ExerciseDef } from "../exerciseCatalog.js";
@@ -170,7 +171,7 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
                   diferentes nos endereços de origem, e confere os endereços de destino.
                 </div>
                 <Show when={celebrate() !== null}>
-                  <p class="ex-celebrate">🏆 {celebrate()}</p>
+                  <Celebrate texto={celebrate()!} />
                 </Show>
                 <Show when={results() !== null && verifiedId() === def().id}>
                   <ExerciseResults results={results()!} />

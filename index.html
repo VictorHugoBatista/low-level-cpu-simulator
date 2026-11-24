@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MOS-6502 — Simulador de CPU de 8 bits</title>
     <script>
-      // A chave do tema também é definida em src/web/app.tsx (THEME_KEY).
+      // As chaves de tema e CRT também são definidas em src/web/app.tsx (THEME_KEY e CRT_KEY).
       try {
         document.documentElement.dataset.theme =
           localStorage.getItem("ak8-theme") === "light" ? "light" : "dark";
+        document.documentElement.dataset.crt =
+          localStorage.getItem("ak8-crt") === "off" ? "off" : "on";
       } catch {
-        /* sem localStorage: fica no tema padrão (escuro) */
+        /* sem localStorage: ficam nos padrões (escuro, CRT ligado) */
       }
     </script>
   </head>
