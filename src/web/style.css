@@ -4,7 +4,7 @@
 :root {
   color-scheme: dark;
   --bg: #060a08;
-  --panel: #0b120d;
+  --panel: rgba(11, 18, 13, 0.82);
   --line: #1e3527;
   --text: #b8cdb9;
   --dim: #63806a;
@@ -16,12 +16,13 @@
   --btn-bg: #101b13;
   --row-hover: #12211a;
   --hot-line: #14301f;
-  --sunken: #040705;
-  --gutter: #0a0f0b;
+  --sunken: rgba(4, 7, 5, 0.9);
+  --gutter: rgba(10, 15, 11, 0.92);
   --err-bg: #2a0d14;
   --err-line: #7d2b3f;
   --err-text: #ff8fa3;
   --stripe: rgba(74, 255, 127, 0.03);
+  --sombra: 0 8px 24px rgba(0, 0, 0, 0.5);
   --r-zp: #39d7d7;
   --r-stack: #c39bff;
   --r-term: #63e68a;
@@ -53,6 +54,7 @@
   --err-line: #d0536d;
   --err-text: #a02440;
   --stripe: rgba(0, 0, 0, 0.04);
+  --sombra: 0 8px 24px rgba(35, 48, 33, 0.14);
   --r-zp: #0d7d8c;
   --r-stack: #7a3ff0;
   --r-term: #177f3c;
@@ -294,6 +296,23 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 10px 12px;
+  /* Vidro: o fundo da página (a chuva) atravessa o painel borrado. */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--sombra);
+}
+
+/* A chuva de fundo: canvas fixo atrás de todo o conteúdo, acima do fundo do
+   body (mesma cor — o acúmulo do rastro não forma placa) e abaixo dos painéis
+   de vidro, que a borram. Escura só: no tema claro ela nem é montada. */
+.fundo-rain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  opacity: 0.3;
+  pointer-events: none;
 }
 
 .panel h2 {
@@ -969,6 +988,7 @@ button.run .glyph {
   border: 1px solid #1e3527;
   border-radius: 4px;
   background: #040705;
+  box-shadow: var(--sombra);
 }
 
 .ex-celebrate-box canvas {

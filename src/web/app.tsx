@@ -10,6 +10,7 @@ import { ReferencePage } from "./components/reference.js";
 import { ExercisesPage } from "./components/exercises.js";
 import { ExercisePanel } from "./components/exercisePanel.js";
 import { BootScreen } from "./components/boot.js";
+import { FundoChuva } from "./components/fundo.js";
 import { restoreLast, saveDraftActive } from "./exerciseState.js";
 import somaAsm from "../../examples/soma.asm?raw";
 import desvioAsm from "../../examples/desvio.asm?raw";
@@ -181,6 +182,9 @@ export function App() {
 
   return (
     <main>
+      <Show when={crt() === "on" && theme() === "dark"}>
+        <FundoChuva />
+      </Show>
       <Show when={booting()}>
         <BootScreen onDone={encerrarBoot} />
       </Show>

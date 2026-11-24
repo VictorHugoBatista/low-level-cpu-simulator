@@ -11,9 +11,19 @@ import { OPCODES } from "../cpu/opcodes.js";
  */
 
 /** Os hexas que a máquina realmente executa: "00", "EA", "A9"… */
-const BYTES: string[] = Object.keys(OPCODES).map((decimal) =>
+export const BYTES_OPCODES: string[] = Object.keys(OPCODES).map((decimal) =>
   Number(decimal).toString(16).padStart(2, "0").toUpperCase(),
 );
+
+/** A faixa completa de um byte, "00" a "FF" — puro ruído hexadecimal, para a
+ * chuva de fundo da página, que não precisa ser opcode de verdade. */
+export const BYTES_TODOS: string[] = Array.from({ length: 256 }, (_, i) =>
+  i.toString(16).padStart(2, "0").toUpperCase(),
+);
+
+/** Opções da chuva: por padrão caem os opcodes da ISA; o fundo da página pede
+ * os 256 bytes possíveis. */
+export type ChuvaOpcoes = { bytes?: string[] };
 
 /** Passo vertical da coluna em px — também é o tamanho do glifo. */
 const PASSO = 14;
@@ -25,7 +35,11 @@ const COLUNA = 22;
  * Inicia a animação no canvas e devolve a função de limpeza (cancela o loop e
  * os observadores). Não retorna nada visível se o movimento deve ser reduzido.
  */
-export function iniciarChuva(canvas: HTMLCanvasElement): () => void {
+export function iniciarChuva(
+  canvas: HTMLCanvasElement,
+  opcoes: ChuvaOpcoes = {},
+): () => void {
+  const bytes = opcoes.bytes ?? BYTES_OPCODES;
   const ctx = canvas.getContext("2d");
   if (ctx === null) return () => {};
 
@@ -64,7 +78,7 @@ export function iniciarChuva(canvas: HTMLCanvasElement): () => void {
     for (let i = 0; i < colunas.length; i++) {
       const y = colunas[i]! * PASSO;
       ctx.fillStyle = "#4aff7f";
-      ctx.fillText(BYTES[Math.floor(Math.random() * BYTES.length)]!, i * COLUNA, y);
+      ctx.fillText(bytes[Math.floor(Math.random() * bytes.length)]!, i * COLUNA, y);
       colunas[i]! += 1;
       if (y > canvas.height && Math.random() > 0.975) colunas[i] = 0;
     }
