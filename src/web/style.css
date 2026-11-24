@@ -117,7 +117,7 @@ table.ref {
 
 table.ref td,
 table.ref th {
-  padding: 3px 8px;
+  padding: 3px 12px;
   border-bottom: 1px solid var(--line);
   text-align: left;
 }
@@ -157,9 +157,10 @@ table.ref td.todo {
 }
 
 /* O texto de ajuda dos painéis de referência respira acima e abaixo — seja depois
-   de uma tabela (mapa de memória), seja antes (instruções → opcodes). */
+   de uma tabela (mapa de memória), seja antes (instruções → opcodes) — e alinha
+   com a primeira coluna da tabela (o padding esquerdo das células). */
 .ref .panel .hint {
-  margin: 10px 0;
+  margin: 10px 0 10px 12px;
 }
 
 a {
