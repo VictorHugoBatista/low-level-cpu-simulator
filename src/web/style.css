@@ -238,7 +238,9 @@ h1 {
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* minmax(0, …): track de 1fr puro cresce com o min-width do conteúdo (as
+     tabelas de memória não quebram linha) e o grid ultrapassa o container. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
   align-items: start;
 }
@@ -259,6 +261,8 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  /* Coluna de grid/flex não pode ser forçada a largo pelo conteúdo dos painéis. */
+  min-width: 0;
 }
 
 /* Layout lateral: controles e fonte em ~40% à esquerda, painéis em ~60% à direita. */
@@ -278,6 +282,7 @@ h1 {
    (as áreas roláveis usam os tetos padrão do tema). A página rola quando não cabe. */
 .machine-cols {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   align-items: start;
 }
@@ -298,6 +303,7 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 2px;
   padding: 10px 12px;
+  min-width: 0;
   /* Vidro: o fundo da página (a chuva) atravessa o painel borrado. */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -485,6 +491,12 @@ button.run .glyph {
   border-collapse: collapse;
 }
 
+/* A tabela de memória tem min-width fixo (16 colunas de hexa não quebram);
+   em painel estreito ela rola dentro do próprio painel em vez de vazar. */
+.panel:has(> .memgrid) {
+  overflow-x: auto;
+}
+
 .memgrid td {
   padding: 1px 5px;
 }
@@ -560,6 +572,7 @@ button.run .glyph {
 .bushist {
   max-height: 220px;
   overflow-y: auto;
+  overflow-x: auto; /* linhas longas de barramento rolam dentro, sem empurrar o painel */
 }
 
 .busline {
@@ -570,6 +583,7 @@ button.run .glyph {
 .listing {
   max-height: 300px;
   overflow-y: auto;
+  overflow-x: auto; /* fonte com linha comprida rola dentro, sem empurrar o painel */
 }
 
 .listing .line {
