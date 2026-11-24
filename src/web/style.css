@@ -860,7 +860,8 @@ button.run .glyph {
   color: var(--dim);
 }
 
-/* Rodapé: barra de status do console — github à esquerda, efeito CRT à direita.
+/* Rodapé: barra de status do console — o botão pronto do github (widget
+   github-buttons, iframe do ghbtns.com) à esquerda, efeito CRT à direita.
    Grudado no fundo da viewport (body em flex, main estica), mesmo com a aba
    máquina curta; o select fica visível mesmo com o efeito desligado, para dar
    para religar. */
@@ -874,27 +875,8 @@ button.run .glyph {
   border-top: 1px solid var(--line);
 }
 
-.footer .gh {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--dim);
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  padding: 3px 10px;
-  text-decoration: none;
-  font-size: 12px;
-}
-
-.footer .gh:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-.footer .gh svg {
-  width: 14px;
-  height: 14px;
-  fill: currentColor;
+.footer .gh-btn {
+  border: 0;
 }
 
 /* ===== Chrome CRT — scanlines, vinheta e glow, sob o select "crt" ===== */
