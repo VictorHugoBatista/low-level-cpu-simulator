@@ -296,14 +296,10 @@ h1 {
 }
 
 /* Com exercício ativo, o painel dele vira uma linha própria no topo da grade —
-   as proporções dos painéis continuam as mesmas daí para baixo. */
+   com altura pelo conteúdo (resultados de verificação crescem para baixo e a
+   página rola), nunca cortados por um teto. */
 .machine-cols:has(> .ex-banner) {
   grid-template-rows: auto minmax(min-content, 2fr) minmax(360px, 3fr);
-}
-
-.machine-cols > .ex-banner {
-  max-height: 40vh; /* o resultado da verificação rola dentro do painel, sem empurrar a máquina */
-  overflow: auto;
 }
 
 /* Os painéis preenchem a área toda; o conteúdo rola dentro de cada um,

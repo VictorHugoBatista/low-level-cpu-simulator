@@ -168,8 +168,8 @@ export function App() {
           value={layout()}
           onChange={(e) => setAndStoreLayout(e.currentTarget.value as Layout)}
         >
-          <option value="lateral">lateral</option>
           <option value="colunas">editor cheio</option>
+          <option value="lateral">lateral</option>
         </select>
         <select
           title="tema"
