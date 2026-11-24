@@ -1,4 +1,4 @@
-/** Constantes do mapa de memória da AK-8 (ver PLAN.md e docs/ISA.md). */
+/** Constantes do mapa de memória da MOS-6508 (ver PLAN.md e docs/ISA.md). */
 
 export const STACK_PAGE = 0x0100;
 export const TERMINAL_BASE = 0xe800;

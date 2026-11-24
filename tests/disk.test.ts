@@ -32,7 +32,7 @@ loop:
 fim:
   hlt
 msg:
-  .ascii "Ola, AK-8!\\n"
+  .ascii "Ola, MOS-6508!\\n"
   .db 0
 `;
 
@@ -136,7 +136,7 @@ describe("M4 — prova: boot pelo disco e saída no terminal", () => {
 
     m.run();
 
-    expect(m.terminal.text).toBe("Ola, AK-8!\n");
+    expect(m.terminal.text).toBe("Ola, MOS-6508!\n");
     expect(m.isHalted).toBe(true);
   });
 

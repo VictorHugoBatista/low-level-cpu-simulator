@@ -12,7 +12,7 @@ import { Cpu } from "../cpu/cpu.js";
 
 /**
  * A máquina inteira ligada: barramento, memória, terminal, disco e CPU. É o ponto de
- * entrada do simulador — o CLI e o dashboard no navegador falam com a AK-8 por aqui.
+ * entrada do simulador — o CLI e o dashboard no navegador falam com a MOS-6508 por aqui.
  */
 export class Machine {
   readonly clock = new Clock();

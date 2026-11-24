@@ -39,12 +39,12 @@ const REF_EXAMPLES = [
   {
     name: "boot.asm — o LOADER, mora no setor 0 do disco",
     source: bootAsm,
-    note: "É o MBR da AK-8. Ao bootar, a máquina copia o setor 0 para $0200, aponta o vetor de reset ($FFFC) para lá e reseta. Este loader então configura o controlador do disco ($F001 = LBA 1, $F002/$F003 = destino $0300, $F000 = CMD 1, 'ler setor') e dá JMP $0300 para disparar o programa que veio do disco. Memória secundária só vira execução depois de copiada para a primária.",
+    note: "É o MBR da MOS-6508. Ao bootar, a máquina copia o setor 0 para $0200, aponta o vetor de reset ($FFFC) para lá e reseta. Este loader então configura o controlador do disco ($F001 = LBA 1, $F002/$F003 = destino $0300, $F000 = CMD 1, 'ler setor') e dá JMP $0300 para disparar o programa que veio do disco. Memória secundária só vira execução depois de copiada para a primária.",
   },
   {
     name: "hello.asm — o PROGRAMA, mora no setor 1 do disco (entrada $0300)",
     source: helloAsm,
-    note: "Imprime 'Ola, AK-8!' no terminal escrevendo caractere por caractere em $E800 e para. Como o núcleo ainda não tem X/Y, o eco é desenrolado: cada caractere é um LDA + STA — no M5, com indexação, isto vira um loop de quatro linhas.",
+    note: "Imprime 'Ola, MOS-6508!' no terminal escrevendo caractere por caractere em $E800 e para. Como o núcleo ainda não tem X/Y, o eco é desenrolado: cada caractere é um LDA + STA — no M5, com indexação, isto vira um loop de quatro linhas.",
   },
 ];
 
@@ -130,7 +130,7 @@ export function App() {
   return (
     <main>
       <header>
-        <h1>AK-8</h1>
+        <h1>MOS-6508</h1>
         <div class="subtitle">Simulador de CPU de 8 bits</div>
         <nav class="tabs">
           <button

@@ -132,13 +132,23 @@ export function ReferencePage(props: {
           </a>{" "}
           — a série que constrói a computação de baixo para cima: transistor, porta lógica,
           flip-flop, registrador, ULA, barramentos, memória, ciclo de busca e execução e, por fim,
-          assembly. A arquitetura da AK-8 segue o mesmo percurso da aula: barramentos que registram
+          assembly. A arquitetura da MOS-6508 segue o mesmo percurso da aula: barramentos que registram
           cada byte, micro-operações uma por clock, boot por vetor de reset e disco em setores
           carregado por um loader. A{" "}
           <a href={AKITA_TRANSCRIPT} target="_blank" rel="noreferrer">
             transcrição da aula no site do Akita
           </a>{" "}
           acompanha o vídeo e vale como material de estudo.
+        </p>
+        <p>
+          O nome MOS-6508 homenageia o 6502 de verdade: em 1975, o time de Chuck Peddle e Bill
+          Mensch — que havia deixado a Motorola depois do 6800 — anunciou o processador da MOS
+          Technology por US$ 25, num mercado em que o Intel 8080 e o próprio 6800 custavam
+          centenas de dólares, e o preço mudou a indústria. Uma família de primos de 8 bits da
+          MOS rodou o Apple II, o Commodore PET, o BBC Micro, o Atari 2600 e o NES — o videogame
+          que o Akita usa para ensinar o 6502 no vídeo seguinte da playlist. Este MOS-6508 é um
+          primo fictício dessa linhagem: registradores, flags, stack e o ciclo de busca e
+          execução seguem o espírito do 6502, com uma ISA própria e enxuta para caber na cabeça.
         </p>
       </section>
 

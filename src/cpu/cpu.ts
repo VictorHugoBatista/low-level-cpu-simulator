@@ -7,7 +7,7 @@ import type { MicroOp, MicroOpContext } from "./microops.js";
 import { microprogramFor } from "./decoder.js";
 
 /**
- * A CPU da AK-8. Cada chamada a tick() executa exatamente UMA micro-operação — um ciclo de
+ * A CPU da MOS-6508. Cada chamada a tick() executa exatamente UMA micro-operação — um ciclo de
  * clock. A instrução começa sempre pelo fetch do opcode; o resto vem do microprograma.
  */
 export class Cpu {

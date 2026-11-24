@@ -1,4 +1,4 @@
-# Formato .disk — memória secundária da AK-8
+# Formato .disk — memória secundária da MOS-6508
 
 Arquivo **bruto**: N setores de 256 bytes, setor 0 primeiro, sem cabeçalho. Um arquivo de
 10 KiB é uma imagem de 40 setores; bytes que sobraram no último setor valem $00.
