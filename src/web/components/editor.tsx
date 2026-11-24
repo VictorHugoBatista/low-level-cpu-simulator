@@ -1,4 +1,4 @@
-import { For, createEffect, createMemo, createSignal } from "solid-js";
+import { For, createEffect, createMemo, createSignal, onCleanup, onMount } from "solid-js";
 import type { Store } from "../store.js";
 
 /** Editor do fonte em assembly: o que está aqui é o que o botão "Montar e carregar" usa. */
@@ -79,6 +79,14 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
   createEffect(() => {
     s.source(); // rastreia trocas de fonte
     queueMicrotask(syncCursor);
+  });
+
+  // Toda mudança de seleção passa por aqui — cobre os furos de click/keyup:
+  // arrastar seleção e soltar fora do campo, e setas seguradas (o keyup só vem
+  // na solta). O listener no document é o caminho universal nos navegadores.
+  onMount(() => {
+    document.addEventListener("selectionchange", syncCursor);
+    onCleanup(() => document.removeEventListener("selectionchange", syncCursor));
   });
 
   return (
