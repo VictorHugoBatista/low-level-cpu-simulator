@@ -238,14 +238,6 @@ export function App() {
           <option value="dark">escuro</option>
           <option value="light">claro</option>
         </select>
-        <select
-          title="crt"
-          value={crt()}
-          onChange={(e) => setAndStoreCrt(e.currentTarget.value as Crt)}
-        >
-          <option value="on">crt ligado</option>
-          <option value="off">crt desligado</option>
-        </select>
       </header>
 
       <Show when={store.notice() !== null}>
@@ -320,6 +312,17 @@ export function App() {
       <Show when={tab() === "referencia"}>
         <ReferencePage examples={REF_EXAMPLES} />
       </Show>
+
+      <footer class="footer">
+        <select
+          title="crt"
+          value={crt()}
+          onChange={(e) => setAndStoreCrt(e.currentTarget.value as Crt)}
+        >
+          <option value="on">crt ligado</option>
+          <option value="off">crt desligado</option>
+        </select>
+      </footer>
     </main>
   );
 }

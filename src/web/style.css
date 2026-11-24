@@ -854,6 +854,18 @@ button.run .glyph {
   color: var(--dim);
 }
 
+/* Rodapé: barra de status do console — o efeito CRT mora aqui embaixo, longe
+   dos controles de trabalho. O select fica visível mesmo com o efeito desligado,
+   para dar para religar. */
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
 /* ===== Chrome CRT — scanlines, vinheta e glow, sob o select "crt" ===== */
 
 /* A vinheta escurece os cantos como um tubo curvo; as scanlines são a máscara de
