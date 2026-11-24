@@ -305,10 +305,10 @@ loop: lda (ptr),y
       inc ptr
       jmp loop
 fim:  hlt
-msg:  .ascii "Ola, AK-8!\\n"
+msg:  .ascii "Ola, MOS-6502!\\n"
       .db 0
 `);
-    expect(m.terminal.text).toBe("Ola, AK-8!\n");
+    expect(m.terminal.text).toBe("Ola, MOS-6502!\n");
     expect(m.isHalted).toBe(true);
   });
 });

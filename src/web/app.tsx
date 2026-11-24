@@ -8,6 +8,8 @@ import { IndicatorPanel } from "./components/indicatorPanel.js";
 import type { IndicatorKind } from "./components/indicatorPanel.js";
 import { ReferencePage } from "./components/reference.js";
 import { ExercisesPage } from "./components/exercises.js";
+import { ExercisePanel } from "./components/exercisePanel.js";
+import { restoreLast, saveDraftActive } from "./exerciseState.js";
 import somaAsm from "../../examples/soma.asm?raw";
 import desvioAsm from "../../examples/desvio.asm?raw";
 import bootAsm from "../../examples/boot.asm?raw";
@@ -37,12 +39,12 @@ const REF_EXAMPLES = [
   {
     name: "boot.asm — o LOADER, mora no setor 0 do disco",
     source: bootAsm,
-    note: "É o MBR da AK-8. Ao bootar, a máquina copia o setor 0 para $0200, aponta o vetor de reset ($FFFC) para lá e reseta. Este loader então configura o controlador do disco ($F001 = LBA 1, $F002/$F003 = destino $0300, $F000 = CMD 1, 'ler setor') e dá JMP $0300 para disparar o programa que veio do disco. Memória secundária só vira execução depois de copiada para a primária.",
+    note: "É o MBR da MOS-6502. Ao bootar, a máquina copia o setor 0 para $0200, aponta o vetor de reset ($FFFC) para lá e reseta. Este loader então configura o controlador do disco ($F001 = LBA 1, $F002/$F003 = destino $0300, $F000 = CMD 1, 'ler setor') e dá JMP $0300 para disparar o programa que veio do disco. Memória secundária só vira execução depois de copiada para a primária.",
   },
   {
     name: "hello.asm — o PROGRAMA, mora no setor 1 do disco (entrada $0300)",
     source: helloAsm,
-    note: "Imprime 'Ola, AK-8!' no terminal escrevendo caractere por caractere em $E800 e para. Como o núcleo ainda não tem X/Y, o eco é desenrolado: cada caractere é um LDA + STA — no M5, com indexação, isto vira um loop de quatro linhas.",
+    note: "Imprime 'Ola, MOS-6502!' no terminal escrevendo caractere por caractere em $E800 e para. Como o núcleo ainda não tem X/Y, o eco é desenrolado: cada caractere é um LDA + STA — no M5, com indexação, isto vira um loop de quatro linhas.",
   },
 ];
 
@@ -64,13 +66,16 @@ type Layout = "colunas" | "lateral";
 
 const LAYOUT_KEY = "ak8-layout";
 
+/** O padrão é o lateral; o valor persistido continua "colunas" (o layout "editor cheio")
+ * para não invalidar o localStorage de quem já escolheu. */
 function initialLayout(): Layout {
   try {
-    if (localStorage.getItem(LAYOUT_KEY) === "lateral") return "lateral";
+    const saved = localStorage.getItem(LAYOUT_KEY);
+    if (saved === "colunas" || saved === "lateral") return saved;
   } catch {
     /* localStorage indisponível: layout só vale para a sessão */
   }
-  return "colunas";
+  return "lateral";
 }
 
 function initialTheme(): Theme {
@@ -88,6 +93,9 @@ function applyTheme(theme: Theme) {
 
 export function App() {
   const store = createStore({ source: somaAsm, name: "soma.asm" });
+  // A página carregada com um exercício: o último nível aberto volta com o rascunho no
+  // editor e as entradas do caso gravadas na RAM — a pessoa continua de onde parou.
+  restoreLast(store);
   const [tab, setTab] = createSignal<"maquina" | "exercicios" | "referencia">("maquina");
   const [slots, setSlots] = createSignal<IndicatorKind[]>([...INITIAL_SLOTS]);
 
@@ -122,8 +130,8 @@ export function App() {
   return (
     <main>
       <header>
-        <h1>AK-8</h1>
-        <div class="subtitle">simulador de CPU em baixo nível — von Neumann de 8 bits</div>
+        <h1>MOS-6502</h1>
+        <div class="subtitle">Simulador de CPU de 8 bits</div>
         <nav class="tabs">
           <button
             classList={{ active: tab() === "maquina" }}
@@ -160,7 +168,7 @@ export function App() {
           value={layout()}
           onChange={(e) => setAndStoreLayout(e.currentTarget.value as Layout)}
         >
-          <option value="colunas">duas colunas</option>
+          <option value="colunas">editor cheio</option>
           <option value="lateral">lateral</option>
         </select>
         <select
@@ -182,9 +190,10 @@ export function App() {
           when={layout() === "lateral"}
           fallback={
             <div class="machine-cols">
+              <ExercisePanel store={store} onOpenExercises={() => setTab("exercicios")} />
               <div class="hero">
                 <Controls store={store} examples={EXAMPLES} />
-                <Editor store={store} />
+                <Editor store={store} onBlur={() => saveDraftActive(store)} />
               </div>
               <div class="grid">
                 <div class="col">
@@ -217,8 +226,9 @@ export function App() {
         >
           <div class="layout-side">
             <div class="hero">
+              <ExercisePanel store={store} onOpenExercises={() => setTab("exercicios")} />
               <Controls store={store} examples={EXAMPLES} />
-              <Editor store={store} />
+              <Editor store={store} onBlur={() => saveDraftActive(store)} />
             </div>
             <div class="col">
               <For each={slots()}>
@@ -237,7 +247,7 @@ export function App() {
       </Show>
 
       <Show when={tab() === "exercicios"}>
-        <ExercisesPage store={store} />
+        <ExercisesPage store={store} onOpenMachine={() => setTab("maquina")} />
       </Show>
 
       <Show when={tab() === "referencia"}>

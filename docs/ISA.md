@@ -1,4 +1,4 @@
-# ISA AK-8 — tabela congelada de opcodes (v1)
+# ISA MOS-6502 — tabela congelada de opcodes (v1)
 
 Este arquivo é o **contrato** entre o assembler (M2) e a CPU (M1–M5). A tabela de opcodes
 está espelhada em `src/cpu/opcodes.ts`; as duas fontes não podem divergir. Qualquer mudança

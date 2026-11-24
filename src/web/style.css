@@ -117,16 +117,16 @@ table.ref {
 
 table.ref td,
 table.ref th {
-  padding: 3px 8px;
+  padding: 7px 12px;
   border-bottom: 1px solid var(--line);
   text-align: left;
 }
 
-table.ref .rng,
-table.ref .reg {
+table.ref .rng {
   color: var(--accent);
   font-weight: bold;
   white-space: nowrap;
+  padding-right: 24px; /* vão decidido até a coluna seguinte: 36px no total */
 }
 
 table.ref .what {
@@ -154,6 +154,13 @@ table.ref td.todo {
 .ref .credit p {
   margin: 0;
   line-height: 1.6;
+}
+
+/* O texto de ajuda dos painéis de referência respira acima e abaixo — seja depois
+   de uma tabela (mapa de memória), seja antes (instruções → opcodes) — e alinha
+   com a primeira coluna da tabela (o padding esquerdo das células). */
+.ref .panel .hint {
+  margin: 10px 0 10px 12px;
 }
 
 a {
@@ -220,6 +227,7 @@ h1 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  align-items: start;
 }
 
 /* Destaque: edição de controles e de código no topo, em coluna única de 100%. */
@@ -256,13 +264,13 @@ h1 {
   margin-bottom: 0;
 }
 
-/* No layout de duas colunas: controles e fonte em ~40% da altura da janela
-   (2fr) e os painéis indicadores em ~60% (3fr), preenchendo a tela toda. */
+/* No layout editor cheio: controles e fonte no topo, em largura cheia, e os painéis
+   indicadores abaixo, em duas colunas — todos os cards com a altura do conteúdo
+   (as áreas roláveis usam os tetos padrão do tema). A página rola quando não cabe. */
 .machine-cols {
   display: grid;
-  grid-template-rows: minmax(0, 2fr) minmax(0, 3fr);
   gap: 12px;
-  height: calc(100vh - 70px); /* padding do main + header + margem */
+  align-items: start;
 }
 
 .machine-cols .hero {
@@ -272,53 +280,8 @@ h1 {
   margin-bottom: 0;
 }
 
-/* O painel da fonte encolhe ou cresce para preencher o que sobra no topo. */
-.machine-cols .hero .panel:last-child {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.machine-cols .hero .editor {
-  flex: 1;
-  min-height: 0;
-}
-
-.machine-cols .hero .srcedit {
-  min-height: 0;
-}
-
 .machine-cols .col {
   min-height: 0;
-}
-
-/* Os painéis preenchem a área toda; o conteúdo rola dentro de cada um,
-   com o cabeçalho (título + dropdown) sempre visível. */
-.machine-cols .col > .panel {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.machine-cols .col > .panel > :not(.panel-head) {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;
-}
-
-.machine-cols .col > .panel > .row,
-.machine-cols .col > .panel > .panel-head {
-  flex: 0 0 auto;
-}
-
-/* Sem os tetos de altura padrão: os corpos usam o espaço que a área dá. */
-.machine-cols .listing,
-.machine-cols .bushist,
-.machine-cols .term {
-  max-height: none;
 }
 
 .panel {
@@ -448,7 +411,7 @@ button.run .glyph {
 
 .registers td,
 .registers th {
-  padding: 2px 8px;
+  padding: 4px 8px;
   text-align: left;
   border-bottom: 1px solid var(--line);
 }
@@ -804,6 +767,56 @@ button.run .glyph {
   margin: 0;
   overflow: auto;
   font-size: 12px;
+}
+
+/* Exercício ativo na aba máquina */
+
+.ex-banner h2 {
+  margin: 0 0 8px;
+}
+
+.ex-statement {
+  margin-bottom: 10px;
+}
+
+.ex-statement summary {
+  cursor: pointer;
+  color: var(--accent);
+}
+
+.ex-statement p {
+  margin: 6px 0 0;
+  line-height: 1.55;
+}
+
+.ex-case-row {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ex-banner .hint {
+  margin: 4px 0 10px; /* o texto de ajuda não encosta nos botões de cima nem de baixo */
+}
+
+.ex-banner .row {
+  row-gap: 10px; /* botões empilhados (painel estreito) também respiram */
+}
+
+.ex-case {
+  width: 26px;
+  padding: 2px 0;
+  text-align: center;
+}
+
+.ex-case.active {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+
+.ex-case-label,
+.ex-case-name {
+  color: var(--dim);
 }
 
 @media (max-width: 900px) {

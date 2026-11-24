@@ -1,143 +1,49 @@
-import { For, Show, createSignal } from "solid-js";
+import { For, Show } from "solid-js";
 import { Editor } from "./editor.js";
+import { ExerciseResults } from "./exercisePanel.js";
 import type { Store } from "../store.js";
 import { EXERCISES } from "../exerciseCatalog.js";
 import type { ExerciseDef } from "../exerciseCatalog.js";
-import { AsmError, assemble } from "../../asm/assembler.js";
-import { runExerciseCases } from "../../runtime/exercise.js";
-import type { CaseResult } from "../../runtime/exercise.js";
+import {
+  activeExercise,
+  openExercise,
+  progress,
+  selectExercise,
+  saveDraftActive,
+  solveWithHelp,
+  updateProgress,
+  verifyActive,
+  celebrate,
+  results,
+  verifiedId,
+} from "../exerciseState.js";
 
 /**
  * A série de exercícios de fixação, gamificada: níveis que se desbloqueiam em sequência,
  * teoria breve + enunciado + dicas progressivas, e verificação por comportamento — cada
  * caso de teste roda o programa do aluno numa máquina fresca com valores de entrada
- * diferentes e confere os endereços de destino. Progresso e rascunhos ficam em
- * localStorage, no mesmo padrão do tema e do layout.
+ * diferentes e confere os endereços de destino. O estado (progresso, exercício ativo,
+ * resultado da verificação) mora em exerciseState.ts, compartilhado com a aba máquina —
+ * dá para desenvolver lá, com os painéis da máquina à vista, e submeter de qualquer
+ * uma das duas abas.
  */
 
-type LevelStatus = "full" | "help";
-
-interface ExerciseProgress {
-  solved: Record<string, LevelStatus>;
-  drafts: Record<string, string>;
-  hints: Record<string, number>;
-}
-
-const STORAGE_KEY = "ak8-exercises";
-
-function loadProgress(): ExerciseProgress {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw !== null) {
-      // Shape guard: JSON válido com estrutura inesperada (dado adulterado ou schema de
-      // versão futura) não pode derrubar a página — cada campo volta ao default.
-      const parsed = JSON.parse(raw) as Partial<ExerciseProgress>;
-      const rec = (v: unknown): Record<string, unknown> =>
-        typeof v === "object" && v !== null && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
-      return {
-        solved: rec(parsed.solved) as ExerciseProgress["solved"],
-        drafts: rec(parsed.drafts) as ExerciseProgress["drafts"],
-        hints: rec(parsed.hints) as ExerciseProgress["hints"],
-      };
-    }
-  } catch {
-    /* localStorage indisponível ou JSON inválido: progresso só vale para a sessão */
-  }
-  return { solved: {}, drafts: {}, hints: {} };
-}
-
-function saveProgress(p: ExerciseProgress): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
-  } catch {
-    /* localStorage indisponível: progresso só vale para a sessão */
-  }
-}
-
-const isSolved = (p: ExerciseProgress, def: ExerciseDef): boolean =>
+const isSolved = (p: { solved: Record<string, unknown> }, def: ExerciseDef): boolean =>
   p.solved[def.id] !== undefined;
 
 /** O próximo nível só abre quando o anterior foi concluído. */
-const isUnlocked = (index: number, p: ExerciseProgress): boolean =>
+const isUnlocked = (index: number, p: { solved: Record<string, unknown> }): boolean =>
   index === 0 || isSolved(p, EXERCISES[index - 1]);
 
-export function ExercisesPage(props: { store: Store }) {
+export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void }) {
   const s = props.store;
-  const [progress, setProgress] = createSignal<ExerciseProgress>(loadProgress());
-  const firstOpen = Math.max(
-    0,
-    EXERCISES.findIndex((def) => !isSolved(progress(), def)),
-  );
-  const [currentId, setCurrentId] = createSignal<string>(EXERCISES[firstOpen]?.id ?? "");
-  const [results, setResults] = createSignal<CaseResult[] | null>(null);
-  const [verifiedId, setVerifiedId] = createSignal<string | null>(null);
-  const [celebrate, setCelebrate] = createSignal<string | null>(null);
 
-  const current = (): ExerciseDef | undefined => EXERCISES.find((d) => d.id === currentId());
+  const current = (): ExerciseDef | undefined => activeExercise();
   const hintCount = (def: ExerciseDef): number => progress().hints[def.id] ?? 0;
-  const solvedCount = (): number =>
-    EXERCISES.filter((d) => isSolved(progress(), d)).length;
-
-  const update = (fn: (p: ExerciseProgress) => ExerciseProgress): void => {
-    setProgress((prev) => {
-      const next = fn(prev);
-      saveProgress(next);
-      return next;
-    });
-  };
-
-  /** Salva o fonte corrente como rascunho do nível ativo (troca de nível e blur do editor). */
-  const saveDraft = (def: ExerciseDef | undefined): void => {
-    if (def === undefined) return;
-    update((p) => ({ ...p, drafts: { ...p.drafts, [def.id]: s.source() } }));
-  };
-
-  /** Clique na lista de níveis: preserva o rascunho do nível que está saindo. */
-  const select = (def: ExerciseDef): void => {
-    saveDraft(current());
-    open(def);
-  };
-
-  /** Abre o nível: restaura o rascunho (ou o template) no editor e na máquina. */
-  const open = (def: ExerciseDef): void => {
-    setCurrentId(def.id);
-    setResults(null);
-    setVerifiedId(null);
-    setCelebrate(null);
-    const draft = progress().drafts[def.id];
-    s.loadAsm(draft ?? def.template, `${def.id}.asm`);
-  };
-
-  /** Roda a sequência de casos com os valores de entrada diferentes e confere os destinos. */
-  const verify = (): void => {
-    const def = current();
-    if (def === undefined) return;
-    setCelebrate(null);
-    let program;
-    try {
-      const r = assemble(s.source(), `${def.id}.asm`);
-      program = { origin: r.origin, bytes: r.bytes };
-    } catch (e) {
-      s.report(e instanceof AsmError ? e.message : String(e));
-      setResults(null);
-      return;
-    }
-    s.report(null);
-    update((p) => ({ ...p, drafts: { ...p.drafts, [def.id]: s.source() } }));
-    const out = runExerciseCases(program, def.cases);
-    setResults(out);
-    setVerifiedId(def.id);
-    const allPassed = out.every((r) => r.passed);
-    if (allPassed && !isSolved(progress(), def)) {
-      update((p) => ({ ...p, solved: { ...p.solved, [def.id]: "full" } }));
-      setCelebrate("Nível concluído! O próximo desbloqueou — continue a sequência.");
-    } else if (allPassed) {
-      setCelebrate("Ainda passando — pode revisar ou seguir adiante.");
-    }
-  };
+  const solvedCount = (): number => EXERCISES.filter((d) => isSolved(progress(), d)).length;
 
   const revealHint = (def: ExerciseDef): void => {
-    update((p) => {
+    updateProgress((p) => {
       const used = p.hints[def.id] ?? 0;
       if (used >= def.hints.length) return p;
       return { ...p, hints: { ...p.hints, [def.id]: used + 1 } };
@@ -146,19 +52,16 @@ export function ExercisesPage(props: { store: Store }) {
 
   /** Depois de todas as dicas: ver a solução avança o nível, marcado como "com ajuda". */
   const giveUp = (def: ExerciseDef): void => {
-    update((p) => ({ ...p, solved: { ...p.solved, [def.id]: "help" } }));
-    setCelebrate("Nível concluído com a solução de referência. Estude-a e siga adiante!");
+    solveWithHelp(def);
   };
 
-  const restoreTemplate = (def: ExerciseDef): void => {
-    update((p) => ({ ...p, drafts: { ...p.drafts, [def.id]: def.template } }));
-    s.loadAsm(def.template, `${def.id}.asm`);
-    setResults(null);
-  };
-
-  /** Ao montar a aba, o nível corrente entra no editor — não sobra o exemplo anterior. */
-  const initial = EXERCISES[firstOpen] ?? EXERCISES[0];
-  if (initial !== undefined) open(initial);
+  /** Ao montar a aba, se nenhum exercício está ativo (primeira visita), abre o próximo
+   * nível não resolvido — o contexto (editor + entradas do caso) já fica na máquina. */
+  if (current() === undefined) {
+    const firstOpen = Math.max(0, EXERCISES.findIndex((def) => !isSolved(progress(), def)));
+    const initial = EXERCISES[firstOpen] ?? EXERCISES[0];
+    if (initial !== undefined) openExercise(initial, s);
+  }
 
   return (
     <div class="ex">
@@ -178,11 +81,11 @@ export function ExercisesPage(props: { store: Store }) {
                   classList={{
                     "ex-lvl": true,
                     done: isSolved(progress(), def),
-                    current: def.id === currentId(),
+                    current: def.id === current()?.id,
                     locked: !isUnlocked(i(), progress()),
                   }}
                   disabled={!isUnlocked(i(), progress())}
-                  onClick={() => select(def)}
+                  onClick={() => selectExercise(def, s)}
                   title={
                     isUnlocked(i(), progress())
                       ? def.title
@@ -219,8 +122,12 @@ export function ExercisesPage(props: { store: Store }) {
                 <h3>o problema</h3>
                 <p>{def().statement}</p>
                 <div class="row">
-                  <button onClick={() => open(def())}>Recarregar no editor</button>
-                  <button onClick={() => restoreTemplate(def())}>Restaurar template</button>
+                  <button onClick={() => props.onOpenMachine?.()}>Ir para o editor</button>
+                </div>
+                <div class="hint">
+                  o editor é o mesmo das duas abas — o exercício já está lá, com as entradas do
+                  caso de teste gravadas na RAM e o botão de submeter. Clicar no nível na lista
+                  reabre o rascunho salvo se você o tiver trocado por outro programa.
                 </div>
               </section>
 
@@ -254,7 +161,7 @@ export function ExercisesPage(props: { store: Store }) {
               <section class="panel">
                 <h3>verificação</h3>
                 <div class="row">
-                  <button class="run" onClick={verify}>
+                  <button class="run" onClick={() => verifyActive(s)}>
                     Verificar (roda {def().cases.length} casos de teste)
                   </button>
                 </div>
@@ -266,30 +173,7 @@ export function ExercisesPage(props: { store: Store }) {
                   <p class="ex-celebrate">🏆 {celebrate()}</p>
                 </Show>
                 <Show when={results() !== null && verifiedId() === def().id}>
-                  <table class="ref ex-cases">
-                    <tbody>
-                      <For each={results()}>
-                        {(r) => (
-                          <tr classList={{ pass: r.passed, fail: !r.passed }}>
-                            <td class="mark">{r.passed ? "✓" : "✗"}</td>
-                            <td class="cname">{r.name}</td>
-                            <td class="detail">
-                              <Show
-                                when={r.passed}
-                                fallback={
-                                  <ul class="ex-fails">
-                                    <For each={r.failures}>{(f) => <li>{f}</li>}</For>
-                                  </ul>
-                                }
-                              >
-                                {r.cycles} ciclos
-                              </Show>
-                            </td>
-                          </tr>
-                        )}
-                      </For>
-                    </tbody>
-                  </table>
+                  <ExerciseResults results={results()!} />
                 </Show>
               </section>
 
@@ -303,7 +187,7 @@ export function ExercisesPage(props: { store: Store }) {
           )}
         </Show>
 
-        <Editor store={s} onBlur={() => saveDraft(current())} />
+        <Editor store={s} onBlur={() => saveDraftActive(s)} />
       </div>
     </div>
   );

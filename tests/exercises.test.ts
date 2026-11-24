@@ -1,11 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { assemble, AsmError } from "../src/asm/assembler.js";
 import {
+  applyCasePresets,
   runExerciseCase,
   runExerciseCases,
 } from "../src/runtime/exercise.js";
+import { Machine } from "../src/runtime/machine.js";
 import { EXERCISES } from "../src/web/exerciseCatalog.js";
 import type { ExerciseDef } from "../src/web/exerciseCatalog.js";
+import type { Store } from "../src/web/store.js";
 
 function mounted(def: ExerciseDef, source: string) {
   const r = assemble(source, `${def.id}.asm`);
@@ -84,6 +87,76 @@ describe("verificador de exercícios — mecanismo", () => {
       { name: "b", preset: [], expect: [{ addr: 0x0300, value: 5 }] },
     ]);
     expect(results.map((r) => r.passed)).toEqual([true, true]);
+  });
+});
+
+describe("applyCasePresets — o caso desenvolvido na máquina visível do dashboard", () => {
+  it("grava as entradas na RAM e reseta: o caso roda à mão e o resultado sai igual", () => {
+    const m = new Machine();
+    const r = assemble("lda $0300\nadd $0301\nsta $0302\nhlt", "dev.asm");
+    m.loadProgram(r.bytes, r.origin);
+    applyCasePresets(m, [
+      { addr: 0x0300, value: 10 },
+      { addr: 0x0301, value: 32 },
+    ]);
+    m.run();
+    expect(m.isHalted).toBe(true);
+    expect(m.ram.read(0x0302)).toBe(42);
+  });
+
+  it("remontar o programa depois do preset preserva as entradas: a RAM não é zerada", () => {
+    const m = new Machine();
+    applyCasePresets(m, [
+      { addr: 0x0300, value: 200 },
+      { addr: 0x0301, value: 55 },
+    ]);
+    const r = assemble("lda $0300\nadd $0301\nsta $0302\nhlt", "dev.asm");
+    m.loadProgram(r.bytes, r.origin);
+    m.run();
+    expect(m.ram.read(0x0302)).toBe(255);
+  });
+
+  it("limpa o terminal: um caso novo começa sem o texto do caso anterior", () => {
+    const m = new Machine();
+    m.terminal.busWrite(0xe800, 0x41); // "A" impresso pelo caso anterior
+    applyCasePresets(m, [{ addr: 0x0300, value: 10 }]);
+    expect(m.terminal.text).toBe("");
+  });
+});
+
+describe("saveDraftActive — só fonte digitado vira rascunho do exercício", () => {
+  it("rascunho é sobrescrito por digitação, mas não por programa recém-carregado", async () => {
+    // localStorage em memória: o exercícioState lê e grava progresso nele no import.
+    const mem = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => mem.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        mem.set(key, value);
+      },
+    });
+    try {
+      const es = await import("../src/web/exerciseState.js");
+      const def = EXERCISES[0] as ExerciseDef;
+      const fake = (dirty: boolean, text: string) =>
+        ({
+          loadAsm: () => {},
+          applyPresets: () => {},
+          sourceDirty: () => dirty,
+          source: () => text,
+        }) as unknown as Store;
+
+      es.openExercise(def, fake(false, def.template));
+      es.saveDraftActive(fake(true, "lda $0300\nhlt")); // a pessoa digitou
+      expect(es.progress().drafts[def.id]).toBe("lda $0300\nhlt");
+
+      es.saveDraftActive(fake(false, "soma.asm inteiro")); // exemplo carregado: não é rascunho
+      expect(es.progress().drafts[def.id]).toBe("lda $0300\nhlt");
+
+      es.saveDraftActive(fake(true, "lda $0300\nsta $0302\nhlt")); // digitou de novo
+      expect(es.progress().drafts[def.id]).toBe("lda $0300\nsta $0302\nhlt");
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
 

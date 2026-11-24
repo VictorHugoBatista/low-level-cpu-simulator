@@ -81,6 +81,13 @@ export function Controls(props: { store: Store; examples: ExampleDef[] }) {
             </>
           )}
         </button>
+        <button
+          class="exec-btn"
+          onClick={() => s.restart()}
+          title="voltar ao começo da execução: regrava o programa na RAM, limpa o terminal e reseta (o Reset só zera registradores e clock)"
+        >
+          <span class="glyph">⏮</span> Início
+        </button>
         <select
           title="velocidade do Run"
           value={String(s.speed())}
@@ -101,7 +108,8 @@ export function Controls(props: { store: Store; examples: ExampleDef[] }) {
       </div>
       <div class="hint">
         Passo avança exatamente um clock. Breakpoints: clique nas linhas do programa. O Boot
-        copia o setor 0 do disco para $0200 e dispara.
+        copia o setor 0 do disco para $0200 e dispara. Início regrava o programa na RAM e limpa
+        o terminal antes de resetar; Reset só volta registradores e clock.
       </div>
     </section>
   );

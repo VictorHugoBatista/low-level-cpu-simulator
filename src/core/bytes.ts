@@ -1,4 +1,4 @@
-/** Tipos e ajudantes numéricos da AK-8: bytes de 8 bits, words de 16 bits. */
+/** Tipos e ajudantes numéricos da MOS-6502: bytes de 8 bits, words de 16 bits. */
 
 export type Byte = number; // 0x00..0xFF
 export type Word = number; // 0x0000..0xFFFF

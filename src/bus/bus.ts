@@ -15,7 +15,7 @@ export interface BusTransaction {
 }
 
 /**
- * O barramento da AK-8: endereços de 16 bits, dados de 8 bits e sinais de controle.
+ * O barramento da MOS-6502: endereços de 16 bits, dados de 8 bits e sinais de controle.
  * Toda leitura e escrita da CPU passa por aqui e fica registrada — nada é invisível.
  */
 export class SystemBus {

@@ -52,7 +52,7 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
           Montar e carregar (Ctrl+Enter)
         </button>
         <button onClick={download}>Baixar .asm</button>
-        <button onClick={() => s.setSource("")}>Novo</button>
+        <button onClick={() => s.newSource()}>Novo</button>
       </div>
       <div class="editor">
         <div class="gutter" ref={gutter} aria-hidden="true">
@@ -66,7 +66,7 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
           spellcheck={false}
           wrap="off"
           value={s.source()}
-          placeholder={"; escreva seu programa em assembly AK-8 aqui\n; Ctrl+Enter monta e carrega"}
+          placeholder={"; escreva seu programa em assembly MOS-6502 aqui\n; Ctrl+Enter monta e carrega"}
           onInput={(e) => s.setSource(e.currentTarget.value)}
           onBlur={() => props.onBlur?.()}
           onKeyDown={onKeyDown}

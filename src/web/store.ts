@@ -3,6 +3,8 @@ import { Machine } from "../runtime/machine.js";
 import type { BusTransaction } from "../bus/bus.js";
 import { AsmError, assemble } from "../asm/assembler.js";
 import { DiskImage, SECTOR_SIZE } from "../storage/diskImage.js";
+import { applyCasePresets } from "../runtime/exercise.js";
+import type { MemExpect } from "../runtime/exercise.js";
 import type { ListingLine } from "../asm/emitter.js";
 
 export interface LoadedProgram {
@@ -74,7 +76,23 @@ export function createStore(initial?: { source: string; name: string }) {
   const [terminalText, setTerminal] = createSignal(machine.terminal.text);
   const [notice, setNotice] = createSignal<string | null>(null);
   /** O fonte em edição no painel "fonte" — o que o botão montar usa. */
-  const [source, setSource] = createSignal(initial?.source ?? "");
+  const [source, setSourceValue] = createSignal(initial?.source ?? "");
+  /** true quando o texto em edição veio de digitação (vale como rascunho do exercício
+   * ativo); false quando acabou de ser carregado (exemplo, .bin, template, "Novo") —
+   * é o que impede o rascunho do aluno de ser sobrescrito por outro programa. */
+  const [sourceDirty, setSourceDirty] = createSignal(false);
+
+  const setSource = (v: string): void => {
+    setSourceDirty(true);
+    setSourceValue(v);
+  };
+
+  /** Fonte em branco: nada em edição e nada carregado — o rascunho do exercício
+   * ativo não é sobrescrito por um editor vazio. */
+  const newSource = (): void => {
+    setSourceDirty(false);
+    setSourceValue("");
+  };
 
   let raf = 0;
 
@@ -150,12 +168,22 @@ export function createStore(initial?: { source: string; name: string }) {
     sync();
   };
 
+  /** Voltar ao começo da execução: regrava os bytes do programa na RAM, limpa o terminal
+   * e reseta. Writes em área de dados permanecem (é o que preserva as entradas de
+   * exercício); o Reset é o recuo leve: só registradores, clock e barramento. */
+  const restart = (): void => {
+    setRunning(false);
+    machine.restartProgram();
+    sync();
+  };
+
   const report = (message: string | null): void => {
     setNotice(message);
   };
 
   const loadAsm = (newSource: string, name: string): void => {
-    setSource(newSource); // o editor passa a mostrar o que foi carregado
+    setSourceValue(newSource); // o editor passa a mostrar o que foi carregado — sem marcar como rascunho
+    setSourceDirty(false);
     try {
       const r = assemble(newSource, name);
       setNotice(null);
@@ -170,9 +198,19 @@ export function createStore(initial?: { source: string; name: string }) {
     sync();
   };
 
+  /** Grava os valores de entrada de um caso de exercício na RAM e reseta — as entradas
+   * ficam na máquina visível para o caso ser desenvolvido e rodado à mão. O terminal
+   * também é limpo (applyCasePresets), igual a uma máquina fresca do verificador. */
+  const applyPresets = (preset: readonly MemExpect[]): void => {
+    setRunning(false);
+    applyCasePresets(machine, preset);
+    sync();
+  };
+
   const loadBin = (bytes: Uint8Array, name: string, origin = 0x0200): void => {
     setNotice(null);
-    setSource(""); // binário cru não tem fonte para editar
+    setSourceValue(""); // binário cru não tem fonte para editar
+    setSourceDirty(false);
     machine.terminal.clear();
     machine.loadProgram(bytes, origin);
     machine.reset();
@@ -250,13 +288,17 @@ export function createStore(initial?: { source: string; name: string }) {
     notice,
     source,
     setSource,
+    sourceDirty,
+    newSource,
     assembleCurrent,
     toggleRun,
     stepClock,
     stepInstruction,
     reset,
+    restart,
     report,
     loadAsm,
+    applyPresets,
     loadBin,
     loadDisk,
     loadDiskFromAsm,
