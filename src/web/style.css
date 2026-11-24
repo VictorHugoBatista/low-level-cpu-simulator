@@ -117,16 +117,16 @@ table.ref {
 
 table.ref td,
 table.ref th {
-  padding: 3px 12px;
+  padding: 5px 12px;
   border-bottom: 1px solid var(--line);
   text-align: left;
 }
 
-table.ref .rng,
-table.ref .reg {
+table.ref .rng {
   color: var(--accent);
   font-weight: bold;
   white-space: nowrap;
+  padding-right: 24px; /* vão decidido até a coluna seguinte: 36px no total */
 }
 
 table.ref .what {
