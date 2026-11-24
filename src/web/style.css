@@ -765,7 +765,11 @@ button.run .glyph {
 /* Exercício ativo na aba máquina */
 
 .ex-banner h2 {
-  margin: 0 0 4px;
+  margin: 0 0 8px;
+}
+
+.ex-statement {
+  margin-bottom: 10px;
 }
 
 .ex-statement summary {
@@ -781,6 +785,14 @@ button.run .glyph {
 .ex-case-row {
   align-items: center;
   flex-wrap: wrap;
+}
+
+.ex-banner .hint {
+  margin: 4px 0 10px; /* o texto de ajuda não encosta nos botões de cima nem de baixo */
+}
+
+.ex-banner .row {
+  row-gap: 10px; /* botões empilhados (painel estreito) também respiram */
 }
 
 .ex-case {
