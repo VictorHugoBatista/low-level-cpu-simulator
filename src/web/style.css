@@ -117,7 +117,7 @@ table.ref {
 
 table.ref td,
 table.ref th {
-  padding: 5px 12px;
+  padding: 7px 12px;
   border-bottom: 1px solid var(--line);
   text-align: left;
 }
@@ -411,7 +411,7 @@ button.run .glyph {
 
 .registers td,
 .registers th {
-  padding: 2px 8px;
+  padding: 4px 8px;
   text-align: left;
   border-bottom: 1px solid var(--line);
 }
