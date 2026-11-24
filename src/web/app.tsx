@@ -131,7 +131,7 @@ export function App() {
     <main>
       <header>
         <h1>AK-8</h1>
-        <div class="subtitle">simulador de CPU em baixo nível — von Neumann de 8 bits</div>
+        <div class="subtitle">Simulador de CPU de 8 bits</div>
         <nav class="tabs">
           <button
             classList={{ active: tab() === "maquina" }}
