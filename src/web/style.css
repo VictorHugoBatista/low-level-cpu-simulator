@@ -864,14 +864,24 @@ button.run .glyph {
    github-buttons, iframe do ghbtns.com) à esquerda, efeito CRT à direita.
    Grudado no fundo da viewport (body em flex, main estica), mesmo com a aba
    máquina curta; o select fica visível mesmo com o efeito desligado, para dar
-   para religar. */
+   para religar. O margin-top auto some quando o conteúdo é alto — a régua
+   garante um vão mínimo de 24px entre o conteúdo e a linha, sempre. */
 .footer {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
   margin-top: auto;
-  padding-top: 10px;
+  padding-top: 34px; /* 24px de vão até a régua + 10px da régua à linha de controles */
+}
+
+.footer::before {
+  content: "";
+  position: absolute;
+  top: 24px;
+  left: 0;
+  right: 0;
   border-top: 1px solid var(--line);
 }
 
