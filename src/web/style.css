@@ -645,6 +645,24 @@ button.run .glyph {
   overflow: hidden;
 }
 
+/* A faixa da linha do cursor mora no wrapper do campo: atrás do texto (o
+   textarea fica por cima, com fundo transparente) e ao lado do gutter, que
+   acende o número da linha ativa. Position e z-index garantem essa ordem. */
+.srcwrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-width: 0;
+}
+
+.cursor-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  pointer-events: none;
+}
+
 .editor .gutter {
   padding: 8px 6px;
   text-align: right;
@@ -657,7 +675,15 @@ button.run .glyph {
   min-width: 28px;
 }
 
+/* Número da linha onde está o cursor — o mesmo destaque da faixa, do lado de fora. */
+.editor .gutter div.ativa {
+  color: var(--accent);
+  font-weight: bold;
+}
+
 .editor .srcedit {
+  position: relative;
+  z-index: 1;
   flex: 1;
   border: none;
   resize: none;
