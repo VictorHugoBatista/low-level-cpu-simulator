@@ -244,7 +244,7 @@ export function App() {
       </Show>
 
       <Show when={tab() === "exercicios"}>
-        <ExercisesPage store={store} />
+        <ExercisesPage store={store} onOpenMachine={() => setTab("maquina")} />
       </Show>
 
       <Show when={tab() === "referencia"}>

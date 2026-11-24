@@ -35,7 +35,7 @@ const isSolved = (p: { solved: Record<string, unknown> }, def: ExerciseDef): boo
 const isUnlocked = (index: number, p: { solved: Record<string, unknown> }): boolean =>
   index === 0 || isSolved(p, EXERCISES[index - 1]);
 
-export function ExercisesPage(props: { store: Store }) {
+export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void }) {
   const s = props.store;
 
   const current = (): ExerciseDef | undefined => activeExercise();
@@ -53,11 +53,6 @@ export function ExercisesPage(props: { store: Store }) {
   /** Depois de todas as dicas: ver a solução avança o nível, marcado como "com ajuda". */
   const giveUp = (def: ExerciseDef): void => {
     solveWithHelp(def);
-  };
-
-  const restoreTemplate = (def: ExerciseDef): void => {
-    updateProgress((p) => ({ ...p, drafts: { ...p.drafts, [def.id]: def.template } }));
-    openExercise(def, s);
   };
 
   /** Ao montar a aba, se nenhum exercício está ativo (primeira visita), abre o próximo
@@ -127,12 +122,12 @@ export function ExercisesPage(props: { store: Store }) {
                 <h3>o problema</h3>
                 <p>{def().statement}</p>
                 <div class="row">
-                  <button onClick={() => openExercise(def(), s)}>Recarregar no editor</button>
-                  <button onClick={() => restoreTemplate(def())}>Restaurar template</button>
+                  <button onClick={() => props.onOpenMachine?.()}>Ir para o editor</button>
                 </div>
                 <div class="hint">
-                  este exercício também está aberto na aba máquina — com as entradas do caso
-                  de teste gravadas na RAM e o botão de submeter junto do editor.
+                  o editor é o mesmo das duas abas — o exercício já está lá, com as entradas do
+                  caso de teste gravadas na RAM e o botão de submeter. Clicar no nível na lista
+                  reabre o rascunho salvo se você o tiver trocado por outro programa.
                 </div>
               </section>
 
