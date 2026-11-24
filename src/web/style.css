@@ -1,49 +1,54 @@
+/* Tema "fósforo": console CRT verde sobre preto, âmbar para o que está quente.
+   O verde puro fica em acento e números; o corpo de texto é branco-esverdeado
+   para não vibrar na tela (contraste ≥ 10:1 sobre --bg). */
 :root {
   color-scheme: dark;
-  --bg: #12141a;
-  --panel: #1a1e28;
-  --line: #2a3040;
-  --text: #d6dae3;
-  --dim: #7a8296;
-  --accent: #6ea8fe;
-  --on-accent: #0b0d12;
-  --hot: #ffd54f;
-  --hot-text: #ffd54f;
-  --on-hot: #0b0d12;
-  --btn-bg: #232937;
-  --row-hover: #232937;
-  --hot-line: #23304a;
-  --sunken: #0d0f14;
-  --gutter: #161a22;
-  --err-bg: #3a1420;
+  --bg: #060a08;
+  --panel: #0b120d;
+  --line: #1e3527;
+  --text: #b8cdb9;
+  --dim: #63806a;
+  --accent: #4aff7f;
+  --on-accent: #04130a;
+  --hot: #ffb000;
+  --hot-text: #ffb000;
+  --on-hot: #1a0f00;
+  --btn-bg: #101b13;
+  --row-hover: #12211a;
+  --hot-line: #14301f;
+  --sunken: #040705;
+  --gutter: #0a0f0b;
+  --err-bg: #2a0d14;
   --err-line: #7d2b3f;
-  --err-text: #ff9db1;
-  --stripe: rgba(255, 255, 255, 0.03);
-  --r-zp: #7fd8d8;
+  --err-text: #ff8fa3;
+  --stripe: rgba(74, 255, 127, 0.03);
+  --r-zp: #39d7d7;
   --r-stack: #c39bff;
-  --r-term: #86e39c;
-  --r-disk: #ffb066;
-  --r-vec: #ff8a8a;
+  --r-term: #63e68a;
+  --r-disk: #ff9e4d;
+  --r-vec: #ff6b6b;
   font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
 }
 
+/* Modo dia: fundo neutro com tint verde discreto e os mesmos acentos escurecidos
+   para contraste sobre claro. */
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #f4f6f9;
+  --bg: #f2f5f1;
   --panel: #ffffff;
-  --line: #d3dae4;
-  --text: #2a3140;
-  --dim: #677082;
-  --accent: #2f6bd8;
+  --line: #c6d4c8;
+  --text: #233021;
+  --dim: #5c6e5c;
+  --accent: #087a35;
   --on-accent: #ffffff;
-  --hot: #ffe08a;
+  --hot: #ffd54f;
   --hot-text: #8a6a00;
   --on-hot: #3a2e00;
-  --btn-bg: #e9edf4;
-  --row-hover: #eef1f7;
-  --hot-line: #dce8ff;
-  --sunken: #f0f3f8;
-  --gutter: #e4e9f1;
+  --btn-bg: #e6ece4;
+  --row-hover: #ebf1ea;
+  --hot-line: #d9edda;
+  --sunken: #eef3ec;
+  --gutter: #e2e9e0;
   --err-bg: #fbe4e9;
   --err-line: #d0536d;
   --err-text: #a02440;
