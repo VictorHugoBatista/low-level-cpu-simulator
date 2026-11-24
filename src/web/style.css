@@ -156,6 +156,12 @@ table.ref td.todo {
   line-height: 1.6;
 }
 
+/* O texto de ajuda dos painéis de referência respira acima e abaixo — seja depois
+   de uma tabela (mapa de memória), seja antes (instruções → opcodes). */
+.ref .panel .hint {
+  margin: 10px 0;
+}
+
 a {
   color: var(--accent);
 }
