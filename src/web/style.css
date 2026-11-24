@@ -304,7 +304,8 @@ h1 {
 
 /* A chuva de fundo: canvas fixo atrás de todo o conteúdo, acima do fundo do
    body (mesma cor — o acúmulo do rastro não forma placa) e abaixo dos painéis
-   de vidro, que a borram. Escura só: no tema claro ela nem é montada. */
+   de vidro, que a borram. A paleta (glifo e rastro) segue o tema, trocada por
+   quadro em crt.ts. */
 .fundo-rain {
   position: fixed;
   inset: 0;
@@ -313,6 +314,12 @@ h1 {
   height: 100%;
   opacity: 0.3;
   pointer-events: none;
+}
+
+/* No papel claro o verde escuro some menos que o fósforo no preto — um pouco
+   mais de opacidade para o efeito existir sem virar cortina. */
+:root[data-theme="light"] .fundo-rain {
+  opacity: 0.4;
 }
 
 .panel h2 {

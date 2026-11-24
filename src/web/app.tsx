@@ -182,7 +182,7 @@ export function App() {
 
   return (
     <main>
-      <Show when={crt() === "on" && theme() === "dark"}>
+      <Show when={crt() === "on"}>
         <FundoChuva />
       </Show>
       <Show when={booting()}>
