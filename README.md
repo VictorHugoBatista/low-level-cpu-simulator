@@ -1,6 +1,6 @@
 # low-level-cpu-simulator
 
-Simulador didático de um computador von Neumann de 8 bits — a **MOS-6508** — com barramentos,
+Simulador didático de um computador von Neumann de 8 bits — a **MOS-6502** — com barramentos,
 memória primária e secundária e um assembler próprio. Inspirado na série "Como Computadores
 Funcionam?" do Fabio Akita ([episódio 80](https://www.youtube.com/watch?v=8G80nuEyDN4)).
 
@@ -31,7 +31,7 @@ editar o próprio programa, com montagem na hora (Ctrl+Enter) e download do `.as
 "referência" traz o de-para completo de opcodes em hexa (gerado da tabela congelada), o
 mapa de memória, os modos de endereçamento e a explicação de cada exemplo. Carrega
 `.asm` (montado no próprio navegador), `.bin` e `.disk`; o exemplo `hello-disk` grava o
-loader no setor 0 e o programa "Ola, MOS-6508!" no setor 1, bootando pelo disco.
+loader no setor 0 e o programa "Ola, MOS-6502!" no setor 1, bootando pelo disco.
 
 ### GitHub Pages
 

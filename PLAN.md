@@ -13,7 +13,7 @@ poder enxergar cada byte trafegando por cada barramento a cada ciclo de clock.
 > fluxo de trabalho por branches + PRs (AGENTS.md, com proteção da `main`). Restam o M6
 > (trace rico de micro-operações e documentação de fechamento).
 
-## A máquina-alvo: MOS-6508
+## A máquina-alvo: MOS-6502
 
 Um computador von Neumann de 8 bits, com espírito 6502 (a CPU do NES, que o Akita usa no
 episódio 81), mas com um conjunto de instruções próprio, enxuto (~30 instruções), para que
@@ -221,7 +221,7 @@ um monólito disfarçado de simulador.
 | M4 Disco e E/S | imagem .disk, controlador, terminal, vetor de reset | hello-disk.asm boota do disco e imprime no terminal do dashboard |
 
 ✅ M4 implementado (terminal em $E800, controlador em $F000, `bootFromDisk` no núcleo;
-prova: loader do setor 0 + hello do setor 1 → "Ola, MOS-6508!" no terminal, 111 ciclos).
+prova: loader do setor 0 + hello do setor 1 → "Ola, MOS-6502!" no terminal, 111 ciclos).
 | M5 ISA completa | X/Y, stack, JSR/RTS, modos indexados, flags C/N/V | programa com função recursiva e loops roda certo |
 
 ✅ M5 implementado: tabela congelada 100% executável no núcleo; hello vira loop com

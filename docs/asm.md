@@ -1,4 +1,4 @@
-# Guia do assembler MOS-6508
+# Guia do assembler MOS-6502
 
 O assembler gera exatamente os bytes da tabela congelada em `docs/ISA.md` — ele nunca
 "inventa" opcode. O binário roda na máquina; o fonte nunca é interpretado direto.

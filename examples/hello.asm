@@ -1,5 +1,5 @@
 ; hello.asm — o PROGRAMA que mora no setor 1 do disco (entrada em $0300)
-; imprime "Ola, MOS-6508!" no terminal ($E800) e para. Agora com loop de verdade:
+; imprime "Ola, MOS-6502!" no terminal ($E800) e para. Agora com loop de verdade:
 ; o ponteiro da string mora na página zero ($30/$31) e caminha com INC.
 ; (a string não pode cruzar uma página de 256 bytes — o INC só carrega o byte baixo)
 
@@ -20,5 +20,5 @@ loop:
         jmp loop
 fim:    hlt
 
-msg:    .ascii "Ola, MOS-6508!\n"
+msg:    .ascii "Ola, MOS-6502!\n"
         .db 0

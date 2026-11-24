@@ -66,7 +66,7 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
           spellcheck={false}
           wrap="off"
           value={s.source()}
-          placeholder={"; escreva seu programa em assembly MOS-6508 aqui\n; Ctrl+Enter monta e carrega"}
+          placeholder={"; escreva seu programa em assembly MOS-6502 aqui\n; Ctrl+Enter monta e carrega"}
           onInput={(e) => s.setSource(e.currentTarget.value)}
           onBlur={() => props.onBlur?.()}
           onKeyDown={onKeyDown}

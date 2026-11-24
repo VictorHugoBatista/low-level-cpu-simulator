@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "Simulador didático de um computador von Neumann de 8 bits (MOS-6508)",
+  "description": "Simulador didático de um computador von Neumann de 8 bits (MOS-6502)",
   "bin": {
     "lcs": "dist-cli/cli/lcs.js"
   },

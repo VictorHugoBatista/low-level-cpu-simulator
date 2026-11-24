@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// CLI da MOS-6508 (low-level cpu simulator). Único lugar do projeto que fala com o Node.
+// CLI da MOS-6502 (low-level cpu simulator). Único lugar do projeto que fala com o Node.
 import { readFileSync, writeFileSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { AsmError, assemble } from "../asm/assembler.js";

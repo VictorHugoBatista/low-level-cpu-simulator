@@ -172,7 +172,7 @@ const ex5Cases: ExerciseCase[] = [
 
 const ex6Cases: ExerciseCase[] = [
   {
-    name: 'string "MOS-6508" termina em 0',
+    name: 'string "MOS-6502" termina em 0',
     preset: [
       { addr: 0x0400, value: 0x4d },
       { addr: 0x0401, value: 0x4f },
@@ -181,10 +181,10 @@ const ex6Cases: ExerciseCase[] = [
       { addr: 0x0404, value: 0x36 },
       { addr: 0x0405, value: 0x35 },
       { addr: 0x0406, value: 0x30 },
-      { addr: 0x0407, value: 0x38 },
+      { addr: 0x0407, value: 0x32 },
       { addr: 0x0408, value: 0x00 },
     ],
-    expectTerminal: "MOS-6508",
+    expectTerminal: "MOS-6502",
   },
   {
     name: 'string "oi" termina em 0',
@@ -224,7 +224,7 @@ export const EXERCISES: ExerciseDef[] = [
       "aconteceu um LDA? o byte apareceu no barramento de dados.",
     statement:
       "Os valores de entrada já estão na RAM: um em $0300 e outro em $0301. Escreva um programa " +
-      "que some os dois e grave o resultado em $0302, terminando com HLT. A MOS-6508 é de 8 bits: " +
+      "que some os dois e grave o resultado em $0302, terminando com HLT. A MOS-6502 é de 8 bits: " +
       "a soma dá a volta em módulo 256 (o último teste prova isso).",
     template: ex1Template,
     solution: ex1Solution,
@@ -260,7 +260,7 @@ export const EXERCISES: ExerciseDef[] = [
     title: "o maior de dois (comparação)",
     theory:
       "CMP é um SUB que joga fora o resultado e fica só com as flags — A não muda. A convenção " +
-      "da MOS-6508: C=1 significa 'não houve borrow', ou seja, o valor comparado era menor ou " +
+      "da MOS-6502: C=1 significa 'não houve borrow', ou seja, o valor comparado era menor ou " +
       "igual a A. Comparação sem sinal: $FA (250) é maior que $04 (4), apesar do bit 7 aceso — " +
       "a flag N diria 'negativo' se fosse aritmética com sinal, mas C compara magnitude.",
     statement:

@@ -1,4 +1,4 @@
-# Arquitetura — Simulador MOS-6508
+# Arquitetura — Simulador MOS-6502
 
 Este documento descreve a arquitetura **real do software implementado** (marcos M1–M4 +
 dashboard), as regras de dependência que seguram o projeto e os contratos congelados.
@@ -6,7 +6,7 @@ O porquê didático e o plano de marcos estão em [PLAN.md](PLAN.md).
 
 ## Visão geral
 
-O projeto é um simulador didático de um computador von Neumann de 8 bits (a "MOS-6508"), com
+O projeto é um simulador didático de um computador von Neumann de 8 bits (a "MOS-6502"), com
 três camadas que compartilham o mesmo núcleo:
 
 | Camada | Onde | O que é |
@@ -181,7 +181,7 @@ Mudar qualquer um deles exige revisão explícita no fim do arquivo.
 - **Testes** (vitest, `vitest.config.ts` próprio para não carregar o plugin Solid): 67
   testes em 8 arquivos — ULA, barramento/mapa, CPU (branches, JMP, erros), máquina (vetor,
   HLT idempotente, teto), assembler (golden bytes, integração, erros), disco/E-S (**prova
-  M4: boot → "Ola, MOS-6508!" no terminal em 111 ciclos**) e ISA completa (transfers, stack,
+  M4: boot → "Ola, MOS-6502!" no terminal em 111 ciclos**) e ISA completa (transfers, stack,
   lógicas, CMP sem tocar o V, INC/DEC com wrap, modos indexados, **provas M5: fib(9) = 34
   e hello em loop**).
 - **Deploy**: `.github/workflows/deploy.yml` — push na `main` roda testes + typecheck +
