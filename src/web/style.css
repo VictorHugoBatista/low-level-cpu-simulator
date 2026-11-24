@@ -207,7 +207,7 @@ a {
 }
 
 h1 {
-  font-size: 22px;
+  font-size: 24px;
   margin: 0;
   color: var(--accent);
 }
@@ -243,10 +243,6 @@ h1 {
   grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   margin-bottom: 12px;
-}
-
-.hero .panel {
-  border-top: 2px solid var(--accent);
 }
 
 .hero .panel h2 {
@@ -323,11 +319,14 @@ h1 {
 }
 
 .panel h2 {
-  font-size: 12px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--dim);
-  margin: 0 0 8px;
+  margin: 0 0 10px;
+  /* Separação de janela: o título tem a sua régua, em toda a largura do painel. */
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
 }
 
 /* Cabeçalho dos painéis indicadores: título à esquerda, dropdown de troca à direita. */
@@ -336,11 +335,16 @@ h1 {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  /* A mesma régua de janela dos títulos simples, aqui na linha do seletor. */
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
 }
 
 .panel-head h2 {
   margin: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .panel-head .panel-picker {
