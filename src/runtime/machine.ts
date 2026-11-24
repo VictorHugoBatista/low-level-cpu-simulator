@@ -22,6 +22,9 @@ export class Machine {
   readonly diskController = new DiskController(new DiskImage(256));
   readonly cpu: Cpu;
 
+  /** O último programa carregado (loadProgram ou boot do disco), para o restartProgram. */
+  private loadedProgram?: { bytes: Uint8Array; origin: Word };
+
   constructor() {
     const map = new MemoryMap();
     map.map(0x0000, 0xdfff, this.ram);
@@ -44,7 +47,9 @@ export class Machine {
    * reset para lá e reseta — a partir daí quem roda é o loader gravado no disco.
    */
   bootFromDisk(origin: Word = 0x0200): void {
-    this.ram.load(origin, this.diskController.disk.readSector(0));
+    const loader = this.diskController.disk.readSector(0);
+    this.loadedProgram = { bytes: Uint8Array.from(loader), origin };
+    this.ram.load(origin, loader);
     this.ram.write(RESET_VECTOR, loByte(origin));
     this.ram.write(RESET_VECTOR + 1, hiByte(origin));
     this.reset();
@@ -53,9 +58,22 @@ export class Machine {
   /** Carrega um programa montado na RAM e grava o vetor de reset apontando para a origem —
    * ligar a máquina não "roda o arquivo", ela lê o vetor e desvia. */
   loadProgram(bytes: ArrayLike<number>, origin: Word = 0x0200): void {
+    this.loadedProgram = { bytes: Uint8Array.from(bytes), origin };
     this.ram.load(origin, bytes);
     this.ram.write(RESET_VECTOR, loByte(origin));
     this.ram.write(RESET_VECTOR + 1, hiByte(origin));
+  }
+
+  /** Voltar ao começo da execução: regrava os bytes do último programa carregado (o que
+   * restaura código que a execução tenha modificado), limpa o terminal e reseta — a
+   * máquina fica como se o programa tivesse acabado de ser montado. Writes em área de
+   * dados permanecem (é o que preserva as entradas de exercício na RAM), e reset() é o
+   * recuo ainda mais leve: só registradores, clock e barramento. */
+  restartProgram(): void {
+    const loaded = this.loadedProgram;
+    if (loaded !== undefined) this.loadProgram(loaded.bytes, loaded.origin);
+    this.terminal.clear();
+    this.reset();
   }
 
   reset(): void {

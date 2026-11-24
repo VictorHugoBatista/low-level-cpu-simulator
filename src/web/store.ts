@@ -152,6 +152,15 @@ export function createStore(initial?: { source: string; name: string }) {
     sync();
   };
 
+  /** Voltar ao começo da execução: regrava os bytes do programa na RAM, limpa o terminal
+   * e reseta. Writes em área de dados permanecem (é o que preserva as entradas de
+   * exercício); o Reset é o recuo leve: só registradores, clock e barramento. */
+  const restart = (): void => {
+    setRunning(false);
+    machine.restartProgram();
+    sync();
+  };
+
   const report = (message: string | null): void => {
     setNotice(message);
   };
@@ -265,6 +274,7 @@ export function createStore(initial?: { source: string; name: string }) {
     stepClock,
     stepInstruction,
     reset,
+    restart,
     report,
     loadAsm,
     applyPresets,
