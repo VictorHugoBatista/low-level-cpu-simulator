@@ -4,7 +4,7 @@
 :root {
   color-scheme: dark;
   --bg: #060a08;
-  --panel: rgba(11, 18, 13, 0.82);
+  --panel: rgba(11, 18, 13, 0.5);
   --line: #1e3527;
   --text: #b8cdb9;
   --dim: #63806a;
@@ -36,7 +36,7 @@
 :root[data-theme="light"] {
   color-scheme: light;
   --bg: #f2f5f1;
-  --panel: #ffffff;
+  --panel: rgba(255, 255, 255, 0.5);
   --line: #c6d4c8;
   --text: #233021;
   --dim: #5c6e5c;
