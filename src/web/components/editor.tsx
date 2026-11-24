@@ -52,7 +52,7 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
           Montar e carregar (Ctrl+Enter)
         </button>
         <button onClick={download}>Baixar .asm</button>
-        <button onClick={() => s.setSource("")}>Novo</button>
+        <button onClick={() => s.newSource()}>Novo</button>
       </div>
       <div class="editor">
         <div class="gutter" ref={gutter} aria-hidden="true">

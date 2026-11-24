@@ -105,10 +105,14 @@ export const selectExercise = (def: ExerciseDef, s: Store): void => {
   openExercise(def, s);
 };
 
-/** Salva o fonte corrente como rascunho do exercício ativo (blur do editor, submit). */
+/** Salva o fonte corrente como rascunho do exercício ativo (blur do editor, submit,
+ * troca de nível). Só grava fonte DIGITADO: exemplos, .bin e "Novo" entram no editor
+ * sem passar pela digitação, e o rascunho do aluno não pode ser sobrescrito por eles —
+ * é o que garante que clicar no nível na lista reabra o trabalho salvo. */
 export const saveDraftActive = (s: Store): void => {
   const def = activeExercise();
   if (def === undefined) return;
+  if (!s.sourceDirty()) return;
   updateProgress((p) => ({ ...p, drafts: { ...p.drafts, [def.id]: s.source() } }));
 };
 
