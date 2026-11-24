@@ -256,11 +256,13 @@ h1 {
   margin-bottom: 0;
 }
 
-/* No layout de duas colunas: controles e fonte em ~40% da altura da janela
-   (2fr) e os painéis indicadores em ~60% (3fr), preenchendo a tela toda. */
+/* No layout editor cheio: controles e fonte no topo (~40% da altura da janela, mas sem
+   encolher abaixo do conteúdo — o editor não colapsa) e os painéis indicadores em ~60%,
+   preenchendo a tela toda. Se o conteúdo do topo pedir mais que a fatia, a grade estoura
+   o contêiner para baixo (a página rola) — os painéis nunca ficam abaixo do piso. */
 .machine-cols {
   display: grid;
-  grid-template-rows: minmax(0, 2fr) minmax(0, 3fr);
+  grid-template-rows: minmax(min-content, 2fr) minmax(360px, 3fr);
   gap: 12px;
   height: calc(100vh - 70px); /* padding do main + header + margem */
 }
@@ -286,7 +288,7 @@ h1 {
 }
 
 .machine-cols .hero .srcedit {
-  min-height: 0;
+  min-height: 160px; /* o editor nunca some, mesmo com o painel de exercício no topo */
 }
 
 .machine-cols .col {
@@ -296,7 +298,7 @@ h1 {
 /* Com exercício ativo, o painel dele vira uma linha própria no topo da grade —
    as proporções dos painéis continuam as mesmas daí para baixo. */
 .machine-cols:has(> .ex-banner) {
-  grid-template-rows: auto minmax(0, 2fr) minmax(0, 3fr);
+  grid-template-rows: auto minmax(min-content, 2fr) minmax(360px, 3fr);
 }
 
 .machine-cols > .ex-banner {

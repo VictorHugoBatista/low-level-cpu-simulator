@@ -66,13 +66,16 @@ type Layout = "colunas" | "lateral";
 
 const LAYOUT_KEY = "ak8-layout";
 
+/** O padrão é o lateral; o valor persistido continua "colunas" (o layout "editor cheio")
+ * para não invalidar o localStorage de quem já escolheu. */
 function initialLayout(): Layout {
   try {
-    if (localStorage.getItem(LAYOUT_KEY) === "lateral") return "lateral";
+    const saved = localStorage.getItem(LAYOUT_KEY);
+    if (saved === "colunas" || saved === "lateral") return saved;
   } catch {
     /* localStorage indisponível: layout só vale para a sessão */
   }
-  return "colunas";
+  return "lateral";
 }
 
 function initialTheme(): Theme {
@@ -165,8 +168,8 @@ export function App() {
           value={layout()}
           onChange={(e) => setAndStoreLayout(e.currentTarget.value as Layout)}
         >
-          <option value="colunas">duas colunas</option>
           <option value="lateral">lateral</option>
+          <option value="colunas">editor cheio</option>
         </select>
         <select
           title="tema"
