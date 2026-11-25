@@ -106,7 +106,10 @@ header {
   font-weight: bold;
 }
 
-.ref {
+/* Contêiner da página de referência: div.ref, e não .ref — as tabelas da página
+   também têm class="ref" (table.ref) e herdariam o display:flex daqui, quebrando
+   o layout de tabela: thead e tbody passam a dimensionar colunas separadamente. */
+div.ref {
   display: flex;
   flex-direction: column;
   gap: 12px;
