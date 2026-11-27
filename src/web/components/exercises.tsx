@@ -80,7 +80,7 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
         <p class="hint">{activeTrack().description}</p>
         <div class="ex-progress">
           <div class="ex-bar">
-            <div class="ex-bar-fill" style={{ width: `${(solvedCount() / list().length) * 100}%` }} />
+            <div class="ex-bar-fill" style={{ width: `${(solvedCount() / Math.max(1, list().length)) * 100}%` }} />
           </div>
           <span class="ex-count">{solvedCount()}/{list().length} níveis</span>
         </div>

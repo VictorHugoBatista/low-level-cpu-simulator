@@ -2,7 +2,7 @@ import { createSignal } from "solid-js";
 import { AsmError, assemble } from "../asm/assembler.js";
 import { runExerciseCases } from "../runtime/exercise.js";
 import type { CaseResult } from "../runtime/exercise.js";
-import { EXERCISES, TRACKS } from "./exerciseCatalog.js";
+import { TRACKS } from "./exerciseCatalog.js";
 import type { ExerciseDef, TrackDef } from "./exerciseCatalog.js";
 import type { Store } from "./store.js";
 
@@ -84,8 +84,13 @@ const [trackId, setTrackId] = createSignal(TRACKS[0]?.id);
 
 export const activeTrack = (): TrackDef => TRACKS.find((t) => t.id === trackId()) ?? (TRACKS[0] as TrackDef);
 
-export const activeExercise = (): ExerciseDef | undefined =>
-  EXERCISES.find((d) => d.id === activeId());
+const findExercise = (id: string): ExerciseDef | undefined =>
+  TRACKS.flatMap((t) => t.exercises).find((d) => d.id === id);
+
+export const activeExercise = (): ExerciseDef | undefined => {
+  const id = activeId();
+  return id === null ? undefined : findExercise(id);
+};
 
 const isSolved = (def: ExerciseDef): boolean => progress().solved[def.id] !== undefined;
 
@@ -93,9 +98,9 @@ const isSolved = (def: ExerciseDef): boolean => progress().solved[def.id] !== un
  * as entradas do primeiro caso na RAM, prontas para rodar e inspecionar nos painéis. */
 export const openExercise = (def: ExerciseDef, s: Store): void => {
   setActiveId(def.id);
-  if (!activeTrack().exercises.includes(def)) {
-    setTrackId(TRACKS.find((t) => t.exercises.includes(def))?.id ?? trackId());
-  }
+  const track = TRACKS.find((t) => t.exercises.includes(def));
+  if (track === undefined) throw new Error(`exercício ${def.id} não pertence a nenhuma trilha`);
+  setTrackId(track.id);
   setCaseIndex(0);
   setResults(null);
   setVerifiedId(null);
@@ -175,7 +180,7 @@ export const verifyActive = (s: Store): CaseResult[] | null => {
  * rascunho no editor e entradas do primeiro caso gravadas na máquina. */
 export const restoreLast = (s: Store): void => {
   const id = progress().last;
-  const def = id === undefined ? undefined : EXERCISES.find((d) => d.id === id);
+  const def = id === undefined ? undefined : findExercise(id);
   if (def !== undefined) openExercise(def, s);
 };
 
