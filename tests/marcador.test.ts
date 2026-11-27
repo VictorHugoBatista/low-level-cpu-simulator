@@ -1,47 +1,65 @@
 import { describe, expect, it, vi } from "vitest";
 import { atualizarMelhor, melhor, registrarMelhor } from "../src/web/marcador.js";
-import type { MarcadorState } from "../src/web/marcador.js";
+import type { CasoCiclos, MarcaExercicio, MarcadorState } from "../src/web/marcador.js";
 
 const vazio = (): MarcadorState => ({ marcas: {} });
 
+const casos = (ciclosPorCaso: number[]): CasoCiclos[] =>
+  ciclosPorCaso.map((ciclos, i) => ({ name: `caso ${i + 1}`, ciclos }));
+
+const marcaDe = (ciclosPorCaso: number[]): MarcaExercicio => ({
+  total: ciclosPorCaso.reduce((s, c) => s + c, 0),
+  casos: casos(ciclosPorCaso),
+});
+
 describe("card de melhor performance — registrarMelhor", () => {
-  it("grava a primeira marca e guarda a menor (a marca só recua, nunca sobe)", () => {
-    let s = registrarMelhor(vazio(), "ex1-soma", 62);
-    expect(s.marcas["ex1-soma"]).toBe(62);
+  it("grava a primeira marca e guarda a de menor total (a marca só recua, nunca sobe)", () => {
+    let s = registrarMelhor(vazio(), "ex1-soma", marcaDe([20, 42]));
+    expect(s.marcas["ex1-soma"]?.total).toBe(62);
 
-    s = registrarMelhor(s, "ex1-soma", 55);
-    expect(s.marcas["ex1-soma"]).toBe(55);
+    s = registrarMelhor(s, "ex1-soma", marcaDe([18, 37]));
+    expect(s.marcas["ex1-soma"]?.total).toBe(55);
 
-    s = registrarMelhor(s, "ex1-soma", 70);
-    expect(s.marcas["ex1-soma"]).toBe(55);
+    s = registrarMelhor(s, "ex1-soma", marcaDe([19, 40]));
+    expect(s.marcas["ex1-soma"]?.total).toBe(55);
+    // a rodada guardada é inteira: o detalhe acompanha o total
+    expect(s.marcas["ex1-soma"]?.casos.map((c) => c.ciclos)).toEqual([18, 37]);
   });
 
   it("guarda cada exercício separadamente e não toca no estado original", () => {
     const antes = vazio();
-    let s = registrarMelhor(antes, "ex1-soma", 62);
-    s = registrarMelhor(s, "ex2-desvio", 40);
+    let s = registrarMelhor(antes, "ex1-soma", marcaDe([20, 42]));
+    s = registrarMelhor(s, "ex2-desvio", marcaDe([40]));
     expect(antes.marcas).toEqual({});
-    expect(s.marcas["ex1-soma"]).toBe(62);
-    expect(s.marcas["ex2-desvio"]).toBe(40);
+    expect(s.marcas["ex1-soma"]?.total).toBe(62);
+    expect(s.marcas["ex2-desvio"]?.total).toBe(40);
   });
 });
 
 describe("card de melhor performance — atualizarMelhor", () => {
-  it("sem marca anterior: registra e devolve true", () => {
+  it("sem marca anterior: soma os casos, registra e devolve true", () => {
     expect(melhor("ex1-soma")).toBeUndefined();
-    expect(atualizarMelhor("ex1-soma", 62)).toBe(true);
-    expect(melhor("ex1-soma")).toBe(62);
+    expect(atualizarMelhor("ex1-soma", casos([20, 42]))).toBe(true);
+    const marca = melhor("ex1-soma");
+    expect(marca?.total).toBe(62);
+    // e guarda o detalhe por caso, com o nome de cada um
+    expect(marca?.casos).toEqual([
+      { name: "caso 1", ciclos: 20 },
+      { name: "caso 2", ciclos: 42 },
+    ]);
   });
 
   it("rodada pior (ou igual): não mexe no card e devolve false", () => {
-    expect(atualizarMelhor("ex1-soma", 70)).toBe(false);
-    expect(atualizarMelhor("ex1-soma", 62)).toBe(false);
-    expect(melhor("ex1-soma")).toBe(62);
+    expect(atualizarMelhor("ex1-soma", casos([21, 42]))).toBe(false);
+    expect(atualizarMelhor("ex1-soma", casos([20, 42]))).toBe(false);
+    expect(melhor("ex1-soma")?.total).toBe(62);
+    expect(melhor("ex1-soma")?.casos.map((c) => c.ciclos)).toEqual([20, 42]);
   });
 
-  it("rodada melhor: atualiza o card e devolve true", () => {
-    expect(atualizarMelhor("ex1-soma", 55)).toBe(true);
-    expect(melhor("ex1-soma")).toBe(55);
+  it("rodada melhor: atualiza o card inteiro (total e detalhe) e devolve true", () => {
+    expect(atualizarMelhor("ex1-soma", casos([18, 37]))).toBe(true);
+    expect(melhor("ex1-soma")?.total).toBe(55);
+    expect(melhor("ex1-soma")?.casos.map((c) => c.ciclos)).toEqual([18, 37]);
   });
 
   it("o card atualizado fica salvo no localStorage", () => {
@@ -53,15 +71,16 @@ describe("card de melhor performance — atualizarMelhor", () => {
       },
     });
     try {
-      atualizarMelhor("ex3-hello", 120);
+      atualizarMelhor("ex3-hello", casos([60, 60]));
       const salvo = JSON.parse(mem.get("ak8-marcador") as string) as MarcadorState;
-      expect(salvo.marcas["ex3-hello"]).toBe(120);
+      expect(salvo.marcas["ex3-hello"]?.total).toBe(120);
+      expect(salvo.marcas["ex3-hello"]?.casos).toHaveLength(2);
     } finally {
       vi.unstubAllGlobals();
     }
   });
 
-  it("dado antigo com outro schema (por pessoa) não derruba a leitura", async () => {
+  it("dado antigo com schema só de soma migra sem perder o total", async () => {
     const mem = new Map<string, string>();
     vi.stubGlobal("localStorage", {
       getItem: (key: string) => mem.get(key) ?? null,
@@ -70,14 +89,35 @@ describe("card de melhor performance — atualizarMelhor", () => {
       },
     });
     try {
-      // shape guard: marcas aninhadas por pessoa (schema antigo) voltam ao default vazio
-      mem.set("ak8-marcador", JSON.stringify({ jogador: "ana", marcas: { ana: { "ex1-soma": 1 } } }));
+      mem.set("ak8-marcador", JSON.stringify({ marcas: { "ex1-soma": 55 } }));
+      vi.resetModules();
+      const md = await import("../src/web/marcador.js");
+      expect(md.melhor("ex1-soma")).toEqual({ total: 55, casos: [] });
+      // e a rodada nova só vence se o total for melhor
+      expect(md.atualizarMelhor("ex1-soma", casos([18, 36]))).toBe(true);
+      expect(md.atualizarMelhor("ex1-soma", casos([20, 42]))).toBe(false);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("dado com estrutura inválida não derruba a leitura", async () => {
+    const mem = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => mem.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        mem.set(key, value);
+      },
+    });
+    try {
+      mem.set(
+        "ak8-marcador",
+        JSON.stringify({ marcas: { "ex1-soma": { total: "muito" }, "ex2-desvio": { jogador: "ana" } } }),
+      );
       vi.resetModules();
       const md = await import("../src/web/marcador.js");
       expect(md.melhor("ex1-soma")).toBeUndefined();
-      md.atualizarMelhor("ex1-soma", 9);
-      const salvo = JSON.parse(mem.get("ak8-marcador") as string) as MarcadorState;
-      expect(salvo.marcas).toEqual({ "ex1-soma": 9 });
+      expect(md.melhor("ex2-desvio")).toBeUndefined();
     } finally {
       vi.unstubAllGlobals();
     }

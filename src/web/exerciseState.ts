@@ -169,10 +169,10 @@ export const verifyActive = (s: Store): CaseResult[] | null => {
   setVerifiedId(def.id);
   const allPassed = out.every((r) => r.passed);
   if (allPassed) {
-    // Card de melhor performance: a marca é a soma dos ciclos de todos os casos, e só
-    // captura com tudo passando — resultado correto é pré-condição.
-    const ciclos = out.reduce((total, r) => total + r.cycles, 0);
-    atualizarMelhor(def.id, ciclos);
+    // Card de melhor performance: os ciclos de cada caso somam no total que decide a
+    // melhor rodada, e o card guarda também o detalhe por caso.
+    const casos = out.map((r) => ({ name: r.name, ciclos: r.cycles }));
+    atualizarMelhor(def.id, casos);
     if (!isSolved(def)) {
       updateProgress((p) => ({ ...p, solved: { ...p.solved, [def.id]: "full" } }));
       setCelebrate("Nível concluído! O próximo desbloqueou — continue a sequência.");

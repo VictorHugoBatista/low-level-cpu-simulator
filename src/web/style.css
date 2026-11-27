@@ -1166,24 +1166,40 @@ button.run .glyph {
 
 .mp {
   display: flex;
-  gap: 12px;
-  align-items: baseline;
+  flex-direction: column;
+  gap: 4px;
   padding: 4px 0;
 }
 
 .mp-label {
   color: var(--accent);
   font-weight: bold;
-  white-space: nowrap;
 }
 
 .mp-valor {
   color: var(--hot-text);
 }
 
+/* Detalhe por caso de teste da melhor rodada. */
+.mp-casos {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 11px;
+}
+
+.mp-casos li {
+  margin: 1px 0;
+  line-height: 1.4;
+}
+
+.mp-caso {
+  color: var(--dim);
+}
+
 .mp-vazio {
   color: var(--dim);
   font-size: 11px;
 }
+
 
 

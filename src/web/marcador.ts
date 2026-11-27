@@ -1,22 +1,57 @@
 import { createSignal } from "solid-js";
 
 /**
- * O card de melhor performance: para cada exercício, a menor soma de ciclos de todos
- * os casos de teste já verificada. A verificação roda os casos e o resultado só vale
- * com todos passando (resultado correto é pré-condição, o conferente é o próprio
- * verificador); a cada verificação com sucesso a marca é avaliada e atualizada se for
- * melhor — menos ciclos, melhor performance.
+ * O card de melhor performance: para cada exercício, a melhor verificação já feita —
+ * a soma dos ciclos de todos os casos de teste e o detalhe por caso. A verificação só
+ * roda com todos os casos passando (resultado correto é pré-condição, o conferente é
+ * o próprio verificador); a cada verificação com sucesso a marca é avaliada e
+ * atualizada se for melhor — menos ciclos, melhor performance.
  *
  * Fica em localStorage, no mesmo padrão do progresso de exercícios (exerciseState.ts):
  * chave com prefixo "ak8-" e shape guard defensivo na leitura.
  */
 
+/** Ciclos de um caso de teste da melhor rodada. */
+export interface CasoCiclos {
+  name: string;
+  ciclos: number;
+}
+
+/** A melhor rodada de um exercício: o total que o card compara e o detalhe por caso. */
+export interface MarcaExercicio {
+  /** Soma dos ciclos de todos os casos — o número que decide a melhor performance. */
+  total: number;
+  /** Ciclos por caso de teste, na ordem do catálogo. */
+  casos: CasoCiclos[];
+}
+
 export interface MarcadorState {
-  /** exercício (id) → melhores ciclos. */
-  marcas: Record<string, number>;
+  /** exercício (id) → melhor rodada. */
+  marcas: Record<string, MarcaExercicio>;
 }
 
 const STORAGE_KEY = "ak8-marcador";
+
+const limparMarca = (v: unknown): MarcaExercicio | null => {
+  // Schema antigo, só a soma: migra para a marca nova, sem detalhe por caso.
+  if (typeof v === "number" && Number.isFinite(v) && v >= 0) return { total: v, casos: [] };
+  if (typeof v !== "object" || v === null || Array.isArray(v)) return null;
+  const m = v as Partial<MarcaExercicio>;
+  if (typeof m.total !== "number" || !Number.isFinite(m.total) || !Array.isArray(m.casos)) return null;
+  const casos: CasoCiclos[] = [];
+  for (const c of m.casos) {
+    if (
+      typeof c === "object" &&
+      c !== null &&
+      typeof (c as CasoCiclos).name === "string" &&
+      typeof (c as CasoCiclos).ciclos === "number" &&
+      Number.isFinite((c as CasoCiclos).ciclos)
+    ) {
+      casos.push({ name: (c as CasoCiclos).name, ciclos: (c as CasoCiclos).ciclos });
+    }
+  }
+  return { total: m.total, casos };
+};
 
 function loadMarcador(): MarcadorState {
   try {
@@ -25,13 +60,14 @@ function loadMarcador(): MarcadorState {
       // Shape guard: JSON válido com estrutura inesperada (dado adulterado ou schema de
       // versão futura) não pode derrubar a página — cada campo volta ao default.
       const parsed = JSON.parse(raw) as Partial<MarcadorState>;
-      const marcas = typeof parsed.marcas === "object" && parsed.marcas !== null && !Array.isArray(parsed.marcas)
-        ? parsed.marcas
-        : {};
-      const limpas: Record<string, number> = {};
-      for (const [exercicio, ciclos] of Object.entries(marcas)) {
-        if (typeof ciclos === "number" && Number.isFinite(ciclos) && ciclos >= 0)
-          limpas[exercicio] = ciclos;
+      const marcas =
+        typeof parsed.marcas === "object" && parsed.marcas !== null && !Array.isArray(parsed.marcas)
+          ? parsed.marcas
+          : {};
+      const limpas: Record<string, MarcaExercicio> = {};
+      for (const [exercicio, marca] of Object.entries(marcas)) {
+        const limpa = limparMarca(marca);
+        if (limpa !== null) limpas[exercicio] = limpa;
       }
       return { marcas: limpas };
     }
@@ -59,27 +95,30 @@ const updateMarcador = (fn: (m: MarcadorState) => MarcadorState): void => {
   });
 };
 
-/** A melhor performance registrada do exercício — undefined enquanto nada verificado. */
-export const melhor = (exercicio: string): number | undefined => marcador().marcas[exercicio];
+/** A melhor rodada registrada do exercício — undefined enquanto nada verificado. */
+export const melhor = (exercicio: string): MarcaExercicio | undefined =>
+  marcador().marcas[exercicio];
 
 /** Registra (ou melhora) a marca de um exercício. Puro: devolve o estado novo sem tocar
- * no atual — a marca só recua, nunca sobe. */
+ * no atual — a marca só recua, nunca sobe; quem compara é o total. */
 export function registrarMelhor(
   state: MarcadorState,
   exercicio: string,
-  ciclos: number,
+  marca: MarcaExercicio,
 ): MarcadorState {
   const atual = state.marcas[exercicio];
-  if (atual !== undefined && atual <= ciclos) return state;
-  return { ...state, marcas: { ...state.marcas, [exercicio]: ciclos } };
+  if (atual !== undefined && atual.total <= marca.total) return state;
+  return { ...state, marcas: { ...state.marcas, [exercicio]: marca } };
 }
 
-/** Atualiza o card a cada verificação com sucesso: registra quando é a primeira marca
- * do exercício ou quando a rodada foi melhor (menos ciclos); do contrário, não mexe.
- * Devolve true quando houve registro novo ou melhorado. */
-export function atualizarMelhor(exercicio: string, ciclos: number): boolean {
+/** Atualiza o card a cada verificação com sucesso: recebe os ciclos de cada caso de
+ * teste, soma no total e registra quando é a primeira marca do exercício ou quando a
+ * rodada foi melhor; do contrário, não mexe. Devolve true quando houve registro novo
+ * ou melhorado. */
+export function atualizarMelhor(exercicio: string, casos: readonly CasoCiclos[]): boolean {
+  const total = casos.reduce((soma, c) => soma + c.ciclos, 0);
   const atual = marcador().marcas[exercicio];
-  if (atual !== undefined && atual <= ciclos) return false;
-  updateMarcador((s) => registrarMelhor(s, exercicio, ciclos));
+  if (atual !== undefined && atual.total <= total) return false;
+  updateMarcador((s) => registrarMelhor(s, exercicio, { total, casos: [...casos] }));
   return true;
 }

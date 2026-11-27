@@ -272,8 +272,13 @@ describe("verifyActive — captura a marca do marcador de melhores execuções",
       } as unknown as Store;
       es.openExercise(def, fake); // a UI abre o nível antes de submeter
       es.verifyActive(fake);
+      const resultados = es.verifyActive(fake);
+      expect(resultados?.every((r) => r.passed)).toBe(true);
       const marca = md.melhor(def.id);
-      expect(marca).toBeGreaterThan(0);
+      expect(marca?.total).toBe(resultados?.reduce((s, r) => s + r.cycles, 0));
+      // e o card guarda o detalhe: um caso da verificação por entrada
+      expect(marca?.casos.map((c) => c.name)).toEqual(resultados?.map((r) => r.name));
+      expect(marca?.casos.map((c) => c.ciclos)).toEqual(resultados?.map((r) => r.cycles));
 
       // Fonte que falha (o template) não altera a marca já feita.
       es.verifyActive({
