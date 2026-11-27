@@ -242,8 +242,8 @@ describe("catálogo — nenhum template passa sem trabalho", () => {
 });
 
 describe("catálogo — integridade dos dados", () => {
-  it("a série tem os 15 níveis, com teoria, enunciado, dicas e ≥ 2 casos", () => {
-    expect(EXERCISES.length).toBe(15);
+  it("a série tem os 19 níveis, com teoria, enunciado, dicas e ≥ 2 casos", () => {
+    expect(EXERCISES.length).toBe(19);
     for (const def of EXERCISES) {
       expect(def.theory.length).toBeGreaterThan(40);
       expect(def.statement.length).toBeGreaterThan(40);
@@ -303,6 +303,16 @@ describe("trilhas", () => {
     for (const d of c?.exercises ?? []) {
       expect(d.cCode).toBeDefined();
     }
+  });
+
+  it("a trilha Estruturas de dados traz fila, pilha, árvore e grafo, nessa ordem", () => {
+    const d = TRACKS.find((t) => t.id === "estruturas-de-dados");
+    expect(d?.exercises.map((e) => e.id)).toEqual([
+      "d1-fila",
+      "d2-pilha",
+      "d3-arvore",
+      "d4-grafo",
+    ]);
   });
 });
 

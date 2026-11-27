@@ -28,7 +28,15 @@ import c7Template from "../../exercises/c7-struct.template.asm?raw";
 import c7Solution from "../../exercises/c7-struct.solucao.asm?raw";
 import c8Template from "../../exercises/c8-funcao.template.asm?raw";
 import c8Solution from "../../exercises/c8-funcao.solucao.asm?raw";
-import type { ExerciseCase } from "../runtime/exercise.js";
+import d1Template from "../../exercises/d1-fila.template.asm?raw";
+import d1Solution from "../../exercises/d1-fila.solucao.asm?raw";
+import d2Template from "../../exercises/d2-pilha.template.asm?raw";
+import d2Solution from "../../exercises/d2-pilha.solucao.asm?raw";
+import d3Template from "../../exercises/d3-arvore.template.asm?raw";
+import d3Solution from "../../exercises/d3-arvore.solucao.asm?raw";
+import d4Template from "../../exercises/d4-grafo.template.asm?raw";
+import d4Solution from "../../exercises/d4-grafo.solucao.asm?raw";
+import type { ExerciseCase, MemExpect } from "../runtime/exercise.js";
 
 /**
  * A série de exercícios de fixação, em ordem. Cada nível tem uma base teórica breve, um
@@ -827,7 +835,378 @@ const C_LOGICA: ExerciseDef[] = [
   },
 ];
 
-export const EXERCISES: ExerciseDef[] = [...HELLO, ...C_LOGICA];
+/**
+ * A trilha "Estruturas de dados": cada nível constrói uma estrutura clássica em cima do
+ * que a máquina oferece — memória, endereços e fluxo. A fila e a pilha mostram que
+ * "estrutura" é uma convenção de acesso em cima de um array (a fila com head/tail que
+ * dá a volta no buffer; a pilha com o SP manual, espelho da stack do hardware); a
+ * árvore segue ponteiros de 1 byte pela aritmética de base + 3×i; e o grafo fecha
+ * juntando fila + matriz de adjacência em uma BFS.
+ */
+const d1Cases: ExerciseCase[] = [
+  {
+    name: "fila 10,20,30,40 sai na ordem FIFO",
+    preset: [
+      { addr: 0x0030, value: 0 }, // head
+      { addr: 0x0031, value: 4 }, // tail
+      { addr: 0x0500, value: 10 },
+      { addr: 0x0501, value: 20 },
+      { addr: 0x0502, value: 30 },
+      { addr: 0x0503, value: 40 },
+    ],
+    expect: [
+      { addr: 0x0400, value: 10 },
+      { addr: 0x0401, value: 20 },
+      { addr: 0x0402, value: 30 },
+      { addr: 0x0403, value: 40 },
+    ],
+  },
+  {
+    name: "fila que deu a volta no buffer: 77,88,11,22",
+    preset: [
+      { addr: 0x0030, value: 6 }, // head
+      { addr: 0x0031, value: 2 }, // tail
+      { addr: 0x0506, value: 77 },
+      { addr: 0x0507, value: 88 },
+      { addr: 0x0500, value: 11 },
+      { addr: 0x0501, value: 22 },
+    ],
+    expect: [
+      { addr: 0x0400, value: 77 },
+      { addr: 0x0401, value: 88 },
+      { addr: 0x0402, value: 11 },
+      { addr: 0x0403, value: 22 },
+    ],
+  },
+  {
+    name: "fila vazia (head == tail): nada sai",
+    preset: [
+      { addr: 0x0030, value: 3 },
+      { addr: 0x0031, value: 3 },
+    ],
+    expect: [{ addr: 0x0400, value: 0 }],
+  },
+  {
+    name: "um elemento só: 99",
+    preset: [
+      { addr: 0x0030, value: 5 },
+      { addr: 0x0031, value: 6 },
+      { addr: 0x0505, value: 99 },
+    ],
+    expect: [{ addr: 0x0400, value: 99 }],
+  },
+];
+
+const d2Cases: ExerciseCase[] = [
+  {
+    name: "1,2,3,4 invertidos → 4,3,2,1",
+    preset: [
+      { addr: 0x0400, value: 1 },
+      { addr: 0x0401, value: 2 },
+      { addr: 0x0402, value: 3 },
+      { addr: 0x0403, value: 4 },
+    ],
+    expect: [
+      { addr: 0x0400, value: 4 },
+      { addr: 0x0401, value: 3 },
+      { addr: 0x0402, value: 2 },
+      { addr: 0x0403, value: 1 },
+    ],
+  },
+  {
+    name: "200,0,5,255 invertidos → 255,5,0,200",
+    preset: [
+      { addr: 0x0400, value: 200 },
+      { addr: 0x0401, value: 0 },
+      { addr: 0x0402, value: 5 },
+      { addr: 0x0403, value: 255 },
+    ],
+    expect: [
+      { addr: 0x0400, value: 255 },
+      { addr: 0x0401, value: 5 },
+      { addr: 0x0402, value: 0 },
+      { addr: 0x0403, value: 200 },
+    ],
+  },
+  {
+    name: "todos iguais: 7,7,7,7 → 7,7,7,7",
+    preset: [
+      { addr: 0x0400, value: 7 },
+      { addr: 0x0401, value: 7 },
+      { addr: 0x0402, value: 7 },
+      { addr: 0x0403, value: 7 },
+    ],
+    expect: [
+      { addr: 0x0400, value: 7 },
+      { addr: 0x0401, value: 7 },
+      { addr: 0x0402, value: 7 },
+      { addr: 0x0403, value: 7 },
+    ],
+  },
+  {
+    name: "10,20,0,0 invertidos → 0,0,20,10",
+    preset: [
+      { addr: 0x0400, value: 10 },
+      { addr: 0x0401, value: 20 },
+      { addr: 0x0402, value: 0 },
+      { addr: 0x0403, value: 0 },
+    ],
+    expect: [
+      { addr: 0x0400, value: 0 },
+      { addr: 0x0401, value: 0 },
+      { addr: 0x0402, value: 20 },
+      { addr: 0x0403, value: 10 },
+    ],
+  },
+];
+
+/**
+ * A árvore de busca do d3, fixa em todos os casos (só o alvo muda):
+ *
+ *            50          ← nó 0 (raiz)
+ *           /  \
+ *         30    70        ← nós 1 e 2
+ *        /  \   /  \
+ *      20   40 60   80    ← nós 3, 4, 5 e 6
+ *
+ * Cada nó são 3 bytes em $0400 + 3×i: valor, índice do filho esquerdo e do direito
+ * ($FF = não existe).
+ */
+const NOS_BST: Array<[number, number, number]> = [
+  [50, 1, 2],
+  [30, 3, 4],
+  [70, 5, 6],
+  [20, 0xff, 0xff],
+  [40, 0xff, 0xff],
+  [60, 0xff, 0xff],
+  [80, 0xff, 0xff],
+];
+
+const nosBst = (): MemExpect[] =>
+  NOS_BST.flatMap(([valor, esq, dir], i) => [
+    { addr: 0x0400 + 3 * i, value: valor },
+    { addr: 0x0401 + 3 * i, value: esq },
+    { addr: 0x0402 + 3 * i, value: dir },
+  ]);
+
+const buscaBst = (nome: string, alvo: number, resultado: number, raiz = 0): ExerciseCase => ({
+  name: nome,
+  preset: [...nosBst(), { addr: 0x0030, value: raiz }, { addr: 0x0031, value: alvo }],
+  expect: [{ addr: 0x0032, value: resultado }],
+});
+
+const d3Cases: ExerciseCase[] = [
+  buscaBst("alvo 60: desce 50 → 70 → 60, achou", 60, 1),
+  buscaBst("alvo 50: a própria raiz, na primeira comparação", 50, 1),
+  buscaBst("alvo 55: não está — desce 50 → 70 → 60 e o caminho acaba", 55, 0),
+  buscaBst("alvo 20: o canto extremo esquerdo, achou", 20, 1),
+  buscaBst("árvore vazia (raiz $FF): não tem onde procurar", 50, 0, 0xff),
+];
+
+/**
+ * O grafo do d4, fixo em todos os casos (só a origem muda): 8 nós, com um ciclo
+ * (4→1) e um segundo componente desconexo (5→6→7) — a busca tem que parar nele.
+ */
+const ARESTAS_BFS: Array<[number, number]> = [
+  [0, 1],
+  [0, 2],
+  [1, 3],
+  [2, 3],
+  [3, 4],
+  [4, 1],
+  [5, 6],
+  [6, 7],
+];
+
+const matrizBfs = (): MemExpect[] =>
+  ARESTAS_BFS.map(([de, para]) => ({ addr: 0x0400 + de * 8 + para, value: 1 }));
+
+const bfsCase = (origem: number, visitados: number[]): ExerciseCase => ({
+  name: `BFS a partir do nó ${origem}`,
+  preset: [...matrizBfs(), { addr: 0x0030, value: origem }],
+  expect: visitados.map((value, i) => ({ addr: 0x0500 + i, value })),
+});
+
+const d4Cases: ExerciseCase[] = [
+  bfsCase(0, [1, 1, 1, 1, 1, 0, 0, 0]),
+  bfsCase(5, [0, 0, 0, 0, 0, 1, 1, 1]),
+  bfsCase(7, [0, 0, 0, 0, 0, 0, 0, 1]),
+  bfsCase(6, [0, 0, 0, 0, 0, 0, 1, 1]),
+];
+
+const ESTRUTURAS: ExerciseDef[] = [
+  {
+    id: "d1-fila",
+    title: "fila circular: desenfileirar tudo",
+    theory:
+      "Fila é FIFO — quem chega primeiro sai primeiro. Na máquina não existe 'fila': " +
+      "existe um array e dois índices que seguem uma convenção — head aponta para a " +
+      "frente (de onde os bytes saem) e tail fica atrás do último (onde entram). A fila " +
+      "circular reusa as posições liberadas: os índices andam para frente e voltam a 0 " +
+      "ao passar do fim do buffer, como um relógio de módulo 8. A convenção do vazio é " +
+      "head == tail — os dois índices se encontraram. Toda fila de impressão, buffer de " +
+      "teclado e agendador de processos é isto: array + head + tail + a volta do módulo.",
+    statement:
+      "Há um buffer circular de 8 posições em $0500..$0507, com head em $0030 e tail em " +
+      "$0031 (índices de 0 a 7). Desenfileire todos os elementos, na ordem FIFO, gravando " +
+      "cada um em $0400 em diante — use $0032 como contador da saída. head == tail " +
+      "significa fila vazia. Um dos testes tem uma fila que deu a volta no buffer " +
+      "(head = 6, tail = 2): ela sai na ordem 77, 88, 11, 22.",
+    cCode:
+      "// q em $0500 (8 posições), head em $0030, tail em $0031, saída em $0400\n" +
+      "while (head != tail) {\n" +
+      "    out[n++] = q[head];        // sai da frente\n" +
+      "    head = (head + 1) % 8;     // a volta do buffer circular\n" +
+      "}",
+    template: d1Template,
+    solution: d1Solution,
+    hints: [
+      "No topo do laço: lda $0030, cmp $0031, jz fim — na fila circular, head == tail é " +
+      "exatamente vazio (head >= tail não funciona: a fila pode ter dado a volta).",
+      "Desenfileirar: X = head e lda $0500,x traz o byte da frente; depois X = contador " +
+      "e sta $0400,x grava na saída; inc $0032 e inc $0030 fecham a operação.",
+      "A volta do buffer: depois do inc $0030, cmp #$08 mostra se head chegou ao fim do " +
+      "buffer — se chegou, ele volta a 0 com lda #$00, sta $0030, e o laço recomeça.",
+    ],
+    cases: d1Cases,
+  },
+  {
+    id: "d2-pilha",
+    title: "pilha manual: inverter um array",
+    theory:
+      "Pilha é LIFO — o último a entrar é o primeiro a sair. A stack do hardware (PHA/PLA, " +
+      "página $01, SP começando em $FF) é exatamente isto: uma convenção sobre memória — " +
+      "push grava no topo e faz SP−−, pop faz SP++ e lê o topo. Nada no hardware é " +
+      "exclusivo dela: o programa pode ter outra pilha em outra página, com um SP próprio " +
+      "na página zero, e as mesmas duas operações escritas à mão. É a estrutura por trás " +
+      "de chamadas de função, expressões com parênteses e desfazer/refazer — e inverter " +
+      "uma sequência é o seu truque mais direto.",
+    statement:
+      "Há 4 bytes em $0400..$0403. Inverta a ordem deles usando uma pilha sua na página " +
+      "$05, com o SP em $0030 começando em $FF — a mesma convenção do hardware: push " +
+      "grava em $0500+SP e decrementa SP; pop incrementa SP e lê de $0500+SP. Ao final, " +
+      "$0400..$0403 deve conter os mesmos bytes ao contrário. Use $0031 como índice do " +
+      "array e observe no painel de memória: sua pilha cresce de $05FF para baixo, como " +
+      "a stack cresce de $01FF.",
+    cCode:
+      "int sp = 0xff;                  // o topo da página $05\n" +
+      "for (int i = 0; i < 4; i++) {   // push: grava e desce\n" +
+      "    pilha[sp] = a[i];\n" +
+      "    sp = sp - 1;\n" +
+      "}\n" +
+      "for (int i = 0; i < 4; i++) {   // pop: sobe e lê\n" +
+      "    sp = sp + 1;\n" +
+      "    a[i] = pilha[sp];\n" +
+      "}",
+    template: d2Template,
+    solution: d2Solution,
+    hints: [
+      "São duas passadas: primeiro empurre a[0..3] para a pilha, depois pop de volta para " +
+      "$0400.. — quem entrou por último (a[3]) volta como primeiro.",
+      "O push: X = i e lda $0400,x traz o byte; X = SP (ldx $0030) e sta $0500,x grava no " +
+      "topo; dec $0030 desce o SP. O pop é o espelho: inc $0030, ldx $0030, lda $0500,x e " +
+      "grava de volta com X = i.",
+      "Compare com o hardware: PHA escreve M[$0100+SP] e decrementa; seu push escreve " +
+      "M[$0500+SP] e decrementa — a stack do hardware é este mesmo par de operações.",
+    ],
+    cases: d2Cases,
+  },
+  {
+    id: "d3-arvore",
+    title: "árvore binária: busca descendo da raiz",
+    theory:
+      "Uma árvore binária de busca é uma coleção de nós espalhados na memória, costurados " +
+      "por ponteiros: cada nó guarda um valor, o índice do filho esquerdo e o do filho " +
+      "direito ($FF = não existe). A propriedade que dá nome a ela: tudo à esquerda é " +
+      "menor, tudo à direita é maior — então procurar é DESCER: compara com o nó e escolhe " +
+      "um só dos dois caminhos, sem nunca olhar o resto da árvore. É o salto em relação ao " +
+      "array do c6, onde a busca varre todos os elementos: aqui, cada comparação corta metade " +
+      "do que sobrou. Seguir ponteiro é aritmética: o nó i começa em $0400 + 3×i, e 3×i é " +
+      "i + 2×i, com o 2×i saindo de um SHL.",
+    statement:
+      "A árvore mora em $0400, 3 bytes por nó: valor, filho esquerdo, filho direito ($FF = " +
+      "nenhum). O índice do nó raiz está em $0030 e o valor procurado em $0031. Grave 1 em " +
+      "$0032 se o valor existe na árvore, ou 0 se o caminho acabou sem encontrá-lo. Desça " +
+      "da raiz: alvo menor desce à esquerda, maior desce à direita.",
+    cCode:
+      "struct No { int valor; int esq; int dir; };  // nó i em $0400 + 3*i\n" +
+      "\n" +
+      "int atual = raiz;\n" +
+      "int achou = 0;\n" +
+      "while (atual != 0xff && !achou) {\n" +
+      "    if (alvo == no[atual].valor) {\n" +
+      "        achou = 1;\n" +
+      "    } else if (alvo < no[atual].valor) {\n" +
+      "        atual = no[atual].esq;   // menor: desce à esquerda\n" +
+      "    } else {\n" +
+      "        atual = no[atual].dir;   // maior: desce à direita\n" +
+      "    }\n" +
+      "}",
+    template: d3Template,
+    solution: d3Solution,
+    hints: [
+      "O laço: lda $0030 (o nó corrente), cmp #$ff — $FF significa 'não existe': se o " +
+      "caminho acabou, o valor não está na árvore.",
+      "O endereço do nó é $0400 + 3×nó: shl dobra A (2×nó), add $0030 soma o nó de volta " +
+      "(3×nó), tax — e daí lda $0400,x é o valor, lda $0401,x o filho esquerdo, lda " +
+      "$0402,x o direito.",
+      "A decisão: cmp $0400,x compara o alvo com o valor do nó — jz achou; jc desvia " +
+      "quando alvo > valor (desce à direita); o que sobra (alvo < valor) desce à esquerda. " +
+      "Em qualquer dos dois, o filho vira o nó corrente e o laço recomeça.",
+    ],
+    cases: d3Cases,
+  },
+  {
+    id: "d4-grafo",
+    title: "desafio: BFS — a onda que marca alcançáveis",
+    theory:
+      "O grafo é a estrutura mais geral de todas: nós e arestas, sem hierarquia nenhuma — " +
+      "a árvore é o caso em que cada nó tem um pai. Na memória, a matriz de adjacência 8×8 " +
+      "mora em $0400: a linha u começa em $0400 + 8×u (o mesmo 8×u do c6, agora com três " +
+      "SHL), e matriz[u][v] vale 1 quando existe aresta u→v. O BFS (busca em largura) " +
+      "responde 'o que é alcançável a partir daqui?' — e quem orquestra a visita é a fila " +
+      "do primeiro nível: tira um nó da fila, marca os vizinhos ainda não visitados e os " +
+      "enfileira. A onda avança em anéis, na ordem certa, porque a fila devolve os nós " +
+      "na ordem em que foram descobertos.",
+    statement:
+      "O grafo de 8 nós (0..7) está na matriz de adjacência em $0400 — 8 bytes por linha, " +
+      "matriz[u][v] em $0400 + 8×u + v. O nó de partida está em $0030. Marque em " +
+      "$0500..$0507 os nós alcançáveis: visited[origem] = 1 e visited[v] = 1 para todo v " +
+      "alcançável a partir da origem. Use a fila em $0508..$050F com head em $0031 e tail " +
+      "em $0032, e $0033/$0034 como rascunhos (v e u). Cada nó entra na fila no máximo uma " +
+      "vez — o visited marca antes de enfileirar —, então as 8 posições bastam e os " +
+      "índices nunca dão a volta.",
+    cCode:
+      "// matriz[u][v] em $0400 + 8*u + v; visited em $0500; fila em $0508\n" +
+      "head = tail = 0;\n" +
+      "visited[origem] = 1;\n" +
+      "fila[tail++] = origem;\n" +
+      "while (head != tail) {              // enquanto a fila tiver gente\n" +
+      "    int u = fila[head++];           // a onda avança em anéis\n" +
+      "    for (int v = 0; v < 8; v++) {\n" +
+      "        if (matriz[u][v] == 1 && !visited[v]) {\n" +
+      "            visited[v] = 1;\n" +
+      "            fila[tail++] = v;\n" +
+      "        }\n" +
+      "    }\n" +
+      "}",
+    template: d4Template,
+    solution: d4Solution,
+    hints: [
+      "Comece fora do laço: zere visited ($0500..$0507) com um laço de índice em X; depois " +
+      "visited[origem] = 1 e a origem entra na fila (fila[tail] = origem, inc tail).",
+      "O laço principal: head == tail esvaziou a fila (fim); senão u = fila[head], inc " +
+      "head. Para cada v em 0..7: X = 8×u + v (três SHL dão 8×u; add v soma o índice) e " +
+      "lda $0400,x é matriz[u][v] — se 0, não há aresta, passe ao próximo v.",
+      "Tem aresta? Consulte visited[v] (X = v): se ainda é 0, escreva 1 lá mesmo e " +
+      "enfileire v (fila[tail] = v, inc tail). Marcando antes de enfileirar, ninguém " +
+      "entra duas vezes — e é isso que garante que a fila não estoura.",
+    ],
+    cases: d4Cases,
+  },
+];
+
+export const EXERCISES: ExerciseDef[] = [...HELLO, ...C_LOGICA, ...ESTRUTURAS];
 
 /**
  * Uma trilha é uma coleção ordenada de exercícios: os níveis se desbloqueiam em sequência
@@ -855,5 +1234,12 @@ export const TRACKS: TrackDef[] = [
     description:
       "Como as construções do C — variáveis, if/else, loops, strings, arrays, structs e uma função completa — se traduzem em endereços, flags e desvios: cada nível mostra a mesma lógica escrita nas duas linguagens.",
     exercises: C_LOGICA,
+  },
+  {
+    id: "estruturas-de-dados",
+    title: "Estruturas de dados",
+    description:
+      "Fila circular, pilha manual, busca em árvore binária e BFS em grafo — cada estrutura clássica montada à mão em cima do que a máquina tem: um array, ponteiros de 1 byte e uma convenção de acesso.",
+    exercises: ESTRUTURAS,
   },
 ];
