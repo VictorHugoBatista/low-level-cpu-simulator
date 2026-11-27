@@ -905,6 +905,25 @@ button.run .glyph {
   font-size: 12px;
 }
 
+/* Trecho em C exibido nos níveis da trilha "De C para assembly" */
+
+.ex-c-code {
+  background: var(--sunken);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 8px;
+  margin: 6px 0 10px;
+  overflow: auto;
+  font-size: 12px;
+}
+
+.ex-c-label {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted, #888);
+}
+
 /* Exercício ativo na aba máquina */
 
 .ex-banner h2 {

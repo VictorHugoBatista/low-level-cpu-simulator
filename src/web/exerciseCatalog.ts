@@ -12,6 +12,14 @@ import ex6Template from "../../exercises/ex6-string.template.asm?raw";
 import ex6Solution from "../../exercises/ex6-string.solucao.asm?raw";
 import ex7Template from "../../exercises/ex7-fib.template.asm?raw";
 import ex7Solution from "../../exercises/ex7-fib.solucao.asm?raw";
+import c1Template from "../../exercises/c1-variaveis.template.asm?raw";
+import c1Solution from "../../exercises/c1-variaveis.solucao.asm?raw";
+import c2Template from "../../exercises/c2-se.template.asm?raw";
+import c2Solution from "../../exercises/c2-se.solucao.asm?raw";
+import c3Template from "../../exercises/c3-se-senao.template.asm?raw";
+import c3Solution from "../../exercises/c3-se-senao.solucao.asm?raw";
+import c4Template from "../../exercises/c4-loop.template.asm?raw";
+import c4Solution from "../../exercises/c4-loop.solucao.asm?raw";
 import type { ExerciseCase } from "../runtime/exercise.js";
 
 /**
@@ -36,6 +44,9 @@ export interface ExerciseDef {
   solution: string;
   hints: string[];
   cases: ExerciseCase[];
+  /** A mesma lógica do nível escrita em C — presente nos níveis da trilha "De C para
+   * assembly", onde o ponto é ver a frase do C desmontada em instruções. */
+  cCode?: string;
 }
 
 const ex1Cases: ExerciseCase[] = [
@@ -212,7 +223,7 @@ const ex7Cases: ExerciseCase[] = [
   { name: "fib(12) = 144", preset: [{ addr: 0x0300, value: 12 }], expect: [{ addr: 0x0301, value: 144 }] },
 ];
 
-export const EXERCISES: ExerciseDef[] = [
+const HELLO: ExerciseDef[] = [
   {
     id: "ex1-soma",
     title: "soma de dois valores",
@@ -368,6 +379,142 @@ export const EXERCISES: ExerciseDef[] = [
 ];
 
 /**
+ * A trilha "De C para assembly": cada nível pega uma construção básica do C (atribuição,
+ * if/else, cadeia else if, while) e mostra como ela se desmonta em endereços, flags e
+ * desvios da MOS-6502. O campo cCode guarda o trecho em C que o nível traduz.
+ */
+const c1Cases: ExerciseCase[] = [
+  { name: "5 → 6", preset: [{ addr: 0x0300, value: 5 }], expect: [{ addr: 0x0300, value: 6 }] },
+  { name: "0 → 1", preset: [{ addr: 0x0300, value: 0 }], expect: [{ addr: 0x0300, value: 1 }] },
+  { name: "255 → 0 (a volta de 8 bits)", preset: [{ addr: 0x0300, value: 255 }], expect: [{ addr: 0x0300, value: 0 }] },
+  { name: "199 → 200", preset: [{ addr: 0x0300, value: 199 }], expect: [{ addr: 0x0300, value: 200 }] },
+];
+
+const c2Cases: ExerciseCase[] = [
+  { name: "200 ≥ 100 → 1", preset: [{ addr: 0x0300, value: 200 }], expect: [{ addr: 0x0301, value: 1 }] },
+  { name: "100 ≥ 100 → 1 (limite do >=)", preset: [{ addr: 0x0300, value: 100 }], expect: [{ addr: 0x0301, value: 1 }] },
+  { name: "99 < 100 → 0", preset: [{ addr: 0x0300, value: 99 }], expect: [{ addr: 0x0301, value: 0 }] },
+  { name: "0 < 100 → 0", preset: [{ addr: 0x0300, value: 0 }], expect: [{ addr: 0x0301, value: 0 }] },
+];
+
+const c3Cases: ExerciseCase[] = [
+  { name: "0 == 0 → classe 0", preset: [{ addr: 0x0300, value: 0 }], expect: [{ addr: 0x0301, value: 0 }] },
+  { name: "42 < 100 → classe 1", preset: [{ addr: 0x0300, value: 42 }], expect: [{ addr: 0x0301, value: 1 }] },
+  { name: "99 < 100 → classe 1 (limite do <)", preset: [{ addr: 0x0300, value: 99 }], expect: [{ addr: 0x0301, value: 1 }] },
+  { name: "100 ≥ 100 → classe 2", preset: [{ addr: 0x0300, value: 100 }], expect: [{ addr: 0x0301, value: 2 }] },
+  { name: "255 ≥ 100 → classe 2", preset: [{ addr: 0x0300, value: 255 }], expect: [{ addr: 0x0301, value: 2 }] },
+];
+
+const c4Cases: ExerciseCase[] = [
+  { name: "n=5 → soma 0..4 = 10", preset: [{ addr: 0x0300, value: 5 }], expect: [{ addr: 0x0030, value: 10 }] },
+  { name: "n=0 → while não roda: soma 0", preset: [{ addr: 0x0300, value: 0 }], expect: [{ addr: 0x0030, value: 0 }] },
+  { name: "n=1 → soma só do 0 = 0", preset: [{ addr: 0x0300, value: 1 }], expect: [{ addr: 0x0030, value: 0 }] },
+  { name: "n=10 → soma 0..9 = 45", preset: [{ addr: 0x0300, value: 10 }], expect: [{ addr: 0x0030, value: 45 }] },
+];
+
+const C_LOGICA: ExerciseDef[] = [
+  {
+    id: "c1-variaveis",
+    title: "variáveis: x = x + 1",
+    theory:
+      "No C, 'x = x + 1' parece uma equação, mas não é: significa 'calcule o lado direito e " +
+      "sobrescreva x'. A variável é um endereço de memória, e a atribuição é uma instrução de " +
+      "escrita — STA. A máquina separa a frase em três instruções: LDA lê a variável para A, " +
+      "ADD calcula em cima de A, STA grava o resultado de volta no MESMO endereço, apagando o " +
+      "valor antigo. Depois do STA, o valor anterior de x não existe mais.",
+    statement:
+      "A variável x está em $0300, com um valor de entrada. Implemente exatamente o 'x = x + 1' " +
+      "do C: leia x, some 1 e grave o resultado de volta em $0300, terminando com HLT. O valor " +
+      "antigo precisa sumir — o teste confere o próprio $0300 depois.",
+    cCode: "int x = entrada;   // x mora em $0300\nx = x + 1;        // lê, soma 1, sobrescreve",
+    template: c1Template,
+    solution: c1Solution,
+    hints: [
+      "Três instruções: LDA $0300 traz x para A; ADD #$01 soma 1 em A; STA $0300 grava de volta no mesmo endereço.",
+      "STA é o '=' do C: calcula o lado direito primeiro (LDA + ADD), e só depois grava. Inverter a ordem destrói o valor antes de somar.",
+      "O teste 255 → 0 mostra a volta de 8 bits: rode passo a passo e veja A passar por 255, voltar a 0 — é o overflow que o C de 8 bits também teria.",
+    ],
+    cases: c1Cases,
+  },
+  {
+    id: "c2-se",
+    title: "if / else: quem decide é a flag",
+    theory:
+      "No C, o if avalia uma condição e escolhe um bloco. No hardware, a comparação e a escolha " +
+      "são instruções separadas: CMP compara A com um valor sem mudar A e deixa o veredito nas " +
+      "flags — C=1 significa 'A >= operando' (não houve borrow), C=0 significa 'A < operando'. " +
+      "O desvio condicional lê a flag: JNC desvia quando C=0. Não existe 'o if': existe um fluxo " +
+      "que ou cai reto no bloco de baixo, ou desvia para um rótulo.",
+    statement:
+      "A variável x está em $0300. Implemente o if/else do trecho em C: se x >= 100, grave 1 em " +
+      "$0301; senão, grave 0 em $0301. Compare com CMP #$64 (100 em hexa) e decida com um desvio " +
+      "que lê C. O caso x = 100 decide o limite: >= cai no bloco do if.",
+    cCode:
+      "int classe;\nif (x >= 100) {\n    classe = 1;\n} else {\n    classe = 0;\n}\n// resultado em $0301",
+    template: c2Template,
+    solution: c2Solution,
+    hints: [
+      "LDA $0300 carrega x; CMP #$64 compara com 100 sem mexer em A; C=1 quando x >= 100.",
+      "JNC desvia quando C=0 — ou seja, para o else (x < 100). Quem NÃO desvia cai no bloco do if: LDA #$01, STA $0301, HLT.",
+      "Os dois blocos terminam em HLT: se o caminho do if esquecer o HLT, ele escorrega para dentro do bloco do else e grava por cima.",
+    ],
+    cases: c2Cases,
+  },
+  {
+    id: "c3-se-senao",
+    title: "cadeia else if",
+    theory:
+      "A cadeia else if do C é uma escada: cada degrau testa uma condição, e quem desvia em " +
+      "algum degrau escapa do resto. No assembly, cada degrau é um par (comparação, desvio) " +
+      "com um rótulo próprio. Igualdade usa a flag Z: LDA acende Z quando o valor é zero, " +
+      "então 'x == 0' vira JZ logo depois do LDA. Magnitude usa a flag C: CMP + JC. O bloco " +
+      "que sobra no fluxo reto, sem desviar em degrau nenhum, é o else final.",
+    statement:
+      "A variável x está em $0300. Implemente a cadeia do trecho em C: se x == 0, grave 0 em " +
+      "$0301; senão, se x < 100, grave 1; senão, grave 2. Três blocos, dois desvios — o " +
+      "else-if do meio é o caminho que sobra no meio do programa.",
+    cCode:
+      "int classe;\nif (x == 0) {\n    classe = 0;\n} else if (x < 100) {\n    classe = 1;\n} else {\n    classe = 2;\n}\n// resultado em $0301",
+    template: c3Template,
+    solution: c3Solution,
+    hints: [
+      "O primeiro if não precisa de CMP: LDA $0300 acende Z quando x é 0, e JZ zero logo em seguida desvia — é assim que 'x == 0' fica barato.",
+      "Depois do JZ (que não mexe nas flags), CMP #$64 compara x com 100; JC grande desvia quando x >= 100. O trecho que sobra no meio é o else-if: LDA #$01, STA $0301, HLT.",
+      "Cuide da ordem: o JZ tem que vir antes do CMP, senão ele leria as flags do CMP em vez do LDA — cada desvio lê a flag da instrução imediatamente anterior.",
+    ],
+    cases: c3Cases,
+  },
+  {
+    id: "c4-loop",
+    title: "while: teste no topo, corpo, e a volta",
+    theory:
+      "O while do C tem três partes que o assembly também tem, só que nomeadas: o teste no " +
+      "topo (ler o contador, comparar com a condição, desviar para fora), o corpo, e o JMP de " +
+      "volta ao teste. A condição 'i < n' vira CMP $0300 com i em A: C=1 significa 'i >= n', " +
+      "que é exatamente a hora de sair — JC para o fim. 'i = i + 1' nem precisa de A: INC " +
+      "incrementa o byte direto na memória. O teste no topo é o que garante o comportamento " +
+      "do C: com n = 0, o corpo nunca roda.",
+    statement:
+      "n está em $0300 (entrada). Implemente o while do trecho em C usando s em $0030 e i em " +
+      "$0031: enquanto i < n, faça s = s + i e i = i + 1. Quando o while termina, a resposta " +
+      "já está em $0030 — é lá que o teste vai conferir. Com n = 0, o corpo não pode rodar " +
+      "uma vez sequer.",
+    cCode:
+      "int s = 0;      // mora em $0030\nint i = 0;      // mora em $0031\nwhile (i < n) { // n mora em $0300\n    s = s + i;\n    i = i + 1;\n}",
+    template: c4Template,
+    solution: c4Solution,
+    hints: [
+      "Antes do loop, zere as duas variáveis: LDA #$00, STA $0030 (s) e STA $0031 (i) — o C inicializa os dois 'int' com 0.",
+      "O teste do while fica no topo do rótulo loop: LDA $0031 (i), CMP $0300 (n), JC fim — C=1 significa i >= n, exatamente a saída de while (i < n).",
+      "O corpo termina com JMP loop, sem ele o while roda uma vez só e vira if. Dentro do corpo: s = s + i (LDA $0030, ADD $0031, STA $0030) e INC $0031 para i = i + 1.",
+    ],
+    cases: c4Cases,
+  },
+];
+
+export const EXERCISES: ExerciseDef[] = [...HELLO, ...C_LOGICA];
+
+/**
  * Uma trilha é uma coleção ordenada de exercícios: os níveis se desbloqueiam em sequência
  * dentro dela. O exercício em si não sabe de trilha — o progresso segue por id, então o
  * mesmo exercício pode entrar em mais de uma trilha.
@@ -385,6 +532,13 @@ export const TRACKS: TrackDef[] = [
     title: "Hello World",
     description:
       "Do primeiro LDA/ADD/STA até Fibonacci: os sete exercícios de fixação, em ordem crescente de dificuldade.",
-    exercises: EXERCISES,
+    exercises: HELLO,
+  },
+  {
+    id: "c-para-asm",
+    title: "De C para assembly",
+    description:
+      "Como variáveis, if/else e loops do C se traduzem em endereços, flags e desvios: cada nível mostra a mesma lógica escrita nas duas linguagens.",
+    exercises: C_LOGICA,
   },
 ];

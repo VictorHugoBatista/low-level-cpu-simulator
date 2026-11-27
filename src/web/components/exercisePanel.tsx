@@ -62,6 +62,10 @@ export function ExercisePanel(props: { store: Store; onOpenExercises?: () => voi
           <details class="ex-statement">
             <summary>enunciado</summary>
             <p>{def().statement}</p>
+            <Show when={def().cCode !== undefined}>
+              <span class="ex-c-label">a mesma lógica em C</span>
+              <pre class="ex-c-code">{def().cCode}</pre>
+            </Show>
           </details>
           <div class="row ex-case-row">
             <span class="ex-case-label">caso de teste:</span>
