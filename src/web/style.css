@@ -847,7 +847,7 @@ button.run .glyph {
 }
 
 .ex-main h3 {
-  margin: 10px 0 4px;
+  margin: 10px 0 8px;
   color: var(--accent);
   font-size: 12px;
   text-transform: uppercase;
@@ -1164,16 +1164,14 @@ button.run .glyph {
 
 /* ===== Card de melhor performance (por exercício) ===== */
 
-.mp {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 4px 0;
-}
-
-.mp-label {
+/* Mesmo padrão dos títulos de seção do .ex-main: maiúsculas, cor de destaque —
+   e o mesmo estilo vale no ex-banner da aba máquina, onde não há h3 de seção. */
+.mp h3 {
+  margin: 10px 0 8px;
   color: var(--accent);
-  font-weight: bold;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .mp-valor {
@@ -1194,6 +1192,7 @@ button.run .glyph {
 
 .mp-caso {
   color: var(--dim);
+  margin-right: 10px;
 }
 
 .mp-vazio {
