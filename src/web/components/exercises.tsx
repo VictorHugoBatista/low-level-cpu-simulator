@@ -1,4 +1,4 @@
-import { For, Show, createEffect, createSignal } from "solid-js";
+import { For, Show } from "solid-js";
 import { Editor } from "./editor.js";
 import { ExerciseResults } from "./exercisePanel.js";
 import { Celebrate } from "./celebrate.js";
@@ -9,6 +9,8 @@ import type { ExerciseDef } from "../exerciseCatalog.js";
 import {
   activeExercise,
   activeTrack,
+  alternarSolucao,
+  caseIndex,
   selectTrack,
   openExercise,
   progress,
@@ -20,6 +22,7 @@ import {
   celebrate,
   results,
   verifiedId,
+  solucaoVisivel,
 } from "../exerciseState.js";
 
 /**
@@ -43,14 +46,6 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
   const s = props.store;
 
   const current = (): ExerciseDef | undefined => activeExercise();
-
-  /** A solução de referência fica oculta por padrão: revelar é uma decisão da pessoa,
-   * e trocar de nível esconde de novo. */
-  const [solucaoVisivel, setSolucaoVisivel] = createSignal(false);
-  createEffect(() => {
-    current()?.id; // trocou de nível, esconde de novo
-    setSolucaoVisivel(false);
-  });
   const hintCount = (def: ExerciseDef): number => progress().hints[def.id] ?? 0;
   const list = (): ExerciseDef[] => activeTrack().exercises;
   const solvedCount = (): number => list().filter((d) => isSolved(progress(), d)).length;
@@ -206,7 +201,7 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
                   <h2>solução de referência</h2>
                   <div class="row">
                     <button
-                      onClick={() => setSolucaoVisivel((v) => !v)}
+                      onClick={() => alternarSolucao()}
                       title="a solução de referência fica oculta; revele só quando quiser comparar com o seu programa"
                     >
                       {solucaoVisivel() ? "Ocultar solução" : "Mostrar solução"}

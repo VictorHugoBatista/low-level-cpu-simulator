@@ -72,6 +72,14 @@ const updateProgress = (fn: (p: ExerciseProgress) => ExerciseProgress): void => 
 /** O exercício aberto agora (em qualquer aba) — null quando nenhum. */
 const [activeId, setActiveId] = createSignal<string | null>(null);
 
+/** A solução de referência do nível aberto: oculta por padrão, e trocar de nível
+ * esconde de novo — revelar é uma decisão da pessoa, feita no botão do painel. */
+const [solucaoVisivel, setSolucaoVisivel] = createSignal(false);
+
+export const alternarSolucao = (): void => {
+  setSolucaoVisivel((v) => !v);
+};
+
 /** Índice do caso de teste cujas entradas estão gravadas na máquina visível. */
 const [caseIndex, setCaseIndex] = createSignal(0);
 
@@ -99,6 +107,7 @@ const isSolved = (def: ExerciseDef): boolean => progress().solved[def.id] !== un
  * as entradas do primeiro caso na RAM, prontas para rodar e inspecionar nos painéis. */
 export const openExercise = (def: ExerciseDef, s: Store): void => {
   setActiveId(def.id);
+  setSolucaoVisivel(false); // abrir outro nível esconde a solução que estivesse revelada
   const track = TRACKS.find((t) => t.exercises.includes(def));
   if (track === undefined) throw new Error(`exercício ${def.id} não pertence a nenhuma trilha`);
   setTrackId(track.id);
@@ -197,4 +206,4 @@ export const solveWithHelp = (def: ExerciseDef): void => {
   setCelebrate("Nível concluído com a solução de referência. Estude-a e siga adiante!");
 };
 
-export { progress, updateProgress, caseIndex, results, verifiedId, celebrate };
+export { progress, updateProgress, caseIndex, results, verifiedId, celebrate, solucaoVisivel };

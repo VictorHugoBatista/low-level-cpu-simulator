@@ -106,7 +106,7 @@ export const melhor = (exercicio: string): MarcaExercicio | undefined =>
  * total, só troca quando a marca guardada está sem detalhe (migrada do schema antigo,
  * que só tinha a soma) e a rodada nova trouxe o detalhe — preencher o card não pode
  * nunca custar ciclos. */
-export function deveTrocar(atual: MarcaExercicio | undefined, marca: MarcaExercicio): boolean {
+function deveTrocar(atual: MarcaExercicio | undefined, marca: MarcaExercicio): boolean {
   if (atual === undefined) return true;
   if (marca.total < atual.total) return true;
   return marca.total === atual.total && atual.casos.length === 0 && marca.casos.length > 0;
