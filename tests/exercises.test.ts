@@ -6,7 +6,7 @@ import {
   runExerciseCases,
 } from "../src/runtime/exercise.js";
 import { Machine } from "../src/runtime/machine.js";
-import { EXERCISES } from "../src/web/exerciseCatalog.js";
+import { EXERCISES, TRACKS } from "../src/web/exerciseCatalog.js";
 import type { ExerciseDef } from "../src/web/exerciseCatalog.js";
 import type { Store } from "../src/web/store.js";
 
@@ -160,6 +160,35 @@ describe("saveDraftActive — só fonte digitado vira rascunho do exercício", (
   });
 });
 
+describe("selectTrack — abre o primeiro nível não resolvido da trilha", () => {
+  it("pula os níveis já resolvidos e alinha a trilha ativa", async () => {
+    const mem = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => mem.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        mem.set(key, value);
+      },
+    });
+    try {
+      const es = await import("../src/web/exerciseState.js");
+      const store = {
+        loadAsm: () => {},
+        applyPresets: () => {},
+        sourceDirty: () => false,
+        source: () => "",
+      } as unknown as Store;
+      const track = TRACKS[0] as (typeof TRACKS)[number];
+      es.solveWithHelp(track.exercises[0] as ExerciseDef);
+
+      es.selectTrack(track, store);
+      expect(es.activeTrack()).toBe(track);
+      expect(es.activeExercise()).toBe(track.exercises[1]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
 describe("catálogo — toda solução passa nos próprios casos", () => {
   for (const def of EXERCISES) {
     it(`${def.id}: solução de referência passa em ${def.cases.length} casos`, () => {
@@ -202,5 +231,21 @@ describe("catálogo — integridade dos dados", () => {
 
   it("erros de montagem do aluno chegam como AsmError, não como crash", () => {
     expect(() => assemble("lda #$zz", "aluno.asm")).toThrow(AsmError);
+  });
+});
+
+describe("trilhas", () => {
+  it("ids de trilha são únicos e toda trilha tem exercícios do catálogo", () => {
+    expect(new Set(TRACKS.map((t) => t.id)).size).toBe(TRACKS.length);
+    for (const t of TRACKS) {
+      expect(t.exercises.length).toBeGreaterThan(0);
+      for (const d of t.exercises) expect(EXERCISES).toContain(d);
+    }
+  });
+
+  it("a trilha Hello World reúne os sete exercícios, em ordem", () => {
+    const hello = TRACKS.find((t) => t.id === "hello-world");
+    expect(hello?.exercises.map((d) => d.id)).toEqual(EXERCISES.map((d) => d.id));
+    expect(hello?.exercises).toHaveLength(7);
   });
 });
