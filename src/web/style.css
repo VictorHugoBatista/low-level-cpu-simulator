@@ -974,18 +974,41 @@ button.run .glyph {
   color: var(--dim);
 }
 
-/* Rodapé: barra de status do console — o botão pronto do github (widget
-   github-buttons, iframe do ghbtns.com) à esquerda, efeito CRT à direita.
-   Grudado no fundo da viewport (body em flex, main estica), mesmo com a aba
-   máquina curta; o select fica visível mesmo com o efeito desligado, para dar
-   para religar. O margin-top auto some quando o conteúdo é alto — a régua
-   garante um vão mínimo de 24px entre o conteúdo e a linha, sempre. */
+/* ===== Tela de opções ===== */
+
+/* As seções empilham com o mesmo respiro das colunas da aba máquina e da aba
+   exercícios; as preferências emfileiram e quebram quando o painel estreita.
+   Cada uma é um rótulo sobre o select — tela dedicada tem rótulo visível. */
+.opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.opcoes-prefs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
+.opcoes-prefs .opcao {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.opcoes-prefs .opcao span {
+  color: var(--dim);
+}
+
+/* Rodapé: barra de status do console — só o botão pronto do github (widget
+   github-buttons, iframe do ghbtns.com), centrado. As preferências de tema,
+   layout e CRT moram na aba opções. Grudado no fundo da viewport (body em
+   flex, main estica), mesmo com a aba máquina curta. O margin-top auto some
+   quando o conteúdo é alto — a régua garante um vão mínimo de 24px entre o
+   conteúdo e a linha, sempre. */
 .footer {
   position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
   margin-top: auto;
   padding-top: 34px; /* 24px de vão até a régua + 10px da régua à linha de controles */
 }
@@ -999,7 +1022,12 @@ button.run .glyph {
   border-top: 1px solid var(--line);
 }
 
+/* Centrado de verdade no footer: âncora no meio da barra, independente da largura
+   do select do CRT ao lado. */
 .footer .gh-btn {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   border: 0;
 }
 

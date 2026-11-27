@@ -9,6 +9,7 @@ import type { IndicatorKind } from "./components/indicatorPanel.js";
 import { ReferencePage } from "./components/reference.js";
 import { ExercisesPage } from "./components/exercises.js";
 import { ExercisePanel } from "./components/exercisePanel.js";
+import { OpcoesPage } from "./components/opcoes.js";
 import { BootScreen } from "./components/boot.js";
 import { FundoChuva } from "./components/fundo.js";
 import { restoreLast, saveDraftActive } from "./exerciseState.js";
@@ -59,12 +60,12 @@ const INITIAL_SLOTS: IndicatorKind[] = [
   "terminal",
 ];
 
-type Theme = "dark" | "light";
+export type Theme = "dark" | "light";
 
 /** Duplicada no script inline do index.html, que roda antes do build e não consegue importar daqui. */
 const THEME_KEY = "ak8-theme";
 
-type Crt = "on" | "off";
+export type Crt = "on" | "off";
 
 /** Duplicada no script inline do index.html, junto com THEME_KEY. */
 const CRT_KEY = "ak8-crt";
@@ -97,7 +98,7 @@ function deveBootar(): boolean {
   return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-type Layout = "colunas" | "lateral";
+export type Layout = "colunas" | "lateral";
 
 const LAYOUT_KEY = "ak8-layout";
 
@@ -131,7 +132,7 @@ export function App() {
   // A página carregada com um exercício: o último nível aberto volta com o rascunho no
   // editor e as entradas do caso gravadas na RAM — a pessoa continua de onde parou.
   restoreLast(store);
-  const [tab, setTab] = createSignal<"maquina" | "exercicios" | "referencia">("maquina");
+  const [tab, setTab] = createSignal<"maquina" | "exercicios" | "referencia" | "opcoes">("maquina");
   const [slots, setSlots] = createSignal<IndicatorKind[]>([...INITIAL_SLOTS]);
 
   /** Escolher um painel para um espaço troca com o espaço onde ele estava. */
@@ -210,6 +211,12 @@ export function App() {
           >
             referência
           </button>
+          <button
+            classList={{ active: tab() === "opcoes" }}
+            onClick={() => setTab("opcoes")}
+          >
+            opções
+          </button>
         </nav>
         <div class="status">
           {store.program() === null
@@ -222,22 +229,6 @@ export function App() {
           {" · "}
           {store.cycles()} ciclos
         </div>
-        <select
-          title="layout"
-          value={layout()}
-          onChange={(e) => setAndStoreLayout(e.currentTarget.value as Layout)}
-        >
-          <option value="colunas">editor cheio</option>
-          <option value="lateral">lateral</option>
-        </select>
-        <select
-          title="tema"
-          value={theme()}
-          onChange={(e) => setAndStoreTheme(e.currentTarget.value as Theme)}
-        >
-          <option value="dark">escuro</option>
-          <option value="light">claro</option>
-        </select>
       </header>
 
       <Show when={store.notice() !== null}>
@@ -329,6 +320,18 @@ export function App() {
         <ReferencePage examples={REF_EXAMPLES} />
       </Show>
 
+      <Show when={tab() === "opcoes"}>
+        <OpcoesPage
+          store={store}
+          theme={theme()}
+          setTheme={setAndStoreTheme}
+          layout={layout()}
+          setLayout={setAndStoreLayout}
+          crt={crt()}
+          setCrt={setAndStoreCrt}
+        />
+      </Show>
+
       <footer class="footer">
         <iframe
           class="gh-btn"
@@ -339,14 +342,6 @@ export function App() {
           width="170"
           height="20"
         />
-        <select
-          title="crt"
-          value={crt()}
-          onChange={(e) => setAndStoreCrt(e.currentTarget.value as Crt)}
-        >
-          <option value="on">crt ligado</option>
-          <option value="off">crt desligado</option>
-        </select>
       </footer>
     </main>
   );

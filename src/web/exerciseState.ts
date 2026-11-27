@@ -29,22 +29,35 @@ export interface ExerciseProgress {
 
 const STORAGE_KEY = "ak8-exercises";
 
+/** Shape guard: qualquer valor (JSON de localStorage ou de arquivo importado) vira um
+ * progresso válido, campo a campo — dado adulterado ou de versão futura volta ao
+ * default em vez de derrubar a página. Fonte única do que é um progresso válido. */
+export function normalizarProgresso(v: unknown): ExerciseProgress {
+  const p = (typeof v === "object" && v !== null && !Array.isArray(v) ? v : {}) as Partial<ExerciseProgress>;
+  const recFiltrado = (x: unknown, valorValido: (val: unknown) => boolean): Record<string, unknown> => {
+    const bruto =
+      typeof x === "object" && x !== null && !Array.isArray(x) ? (x as Record<string, unknown>) : {};
+    const limpo: Record<string, unknown> = {};
+    for (const [chave, val] of Object.entries(bruto)) {
+      if (valorValido(val)) limpo[chave] = val;
+    }
+    return limpo;
+  };
+  return {
+    solved: recFiltrado(p.solved, (val) => val === "full" || val === "help") as ExerciseProgress["solved"],
+    drafts: recFiltrado(p.drafts, (val) => typeof val === "string") as ExerciseProgress["drafts"],
+    hints: recFiltrado(
+      p.hints,
+      (val) => typeof val === "number" && Number.isFinite(val) && val >= 0,
+    ) as ExerciseProgress["hints"],
+    last: typeof p.last === "string" ? p.last : undefined,
+  };
+}
+
 function loadProgress(): ExerciseProgress {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw !== null) {
-      // Shape guard: JSON válido com estrutura inesperada (dado adulterado ou schema de
-      // versão futura) não pode derrubar a página — cada campo volta ao default.
-      const parsed = JSON.parse(raw) as Partial<ExerciseProgress>;
-      const rec = (v: unknown): Record<string, unknown> =>
-        typeof v === "object" && v !== null && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
-      return {
-        solved: rec(parsed.solved) as ExerciseProgress["solved"],
-        drafts: rec(parsed.drafts) as ExerciseProgress["drafts"],
-        hints: rec(parsed.hints) as ExerciseProgress["hints"],
-        last: typeof parsed.last === "string" ? parsed.last : undefined,
-      };
-    }
+    if (raw !== null) return normalizarProgresso(JSON.parse(raw));
   } catch {
     /* localStorage indisponível ou JSON inválido: progresso só vale para a sessão */
   }
@@ -68,6 +81,12 @@ const updateProgress = (fn: (p: ExerciseProgress) => ExerciseProgress): void => 
     return next;
   });
 };
+
+/** Substitui o progresso inteiro (restaurar de arquivo importado): troca o sinal e
+ * grava no localStorage. Quem chama valida antes — aqui não há guarda. */
+export function restaurarProgresso(p: ExerciseProgress): void {
+  updateProgress(() => p);
+}
 
 /** O exercício aberto agora (em qualquer aba) — null quando nenhum. */
 const [activeId, setActiveId] = createSignal<string | null>(null);
@@ -199,6 +218,21 @@ export const restoreLast = (s: Store): void => {
   const def = id === undefined ? undefined : findExercise(id);
   if (def !== undefined) openExercise(def, s);
 };
+
+/** Fecha o contexto do exercício ativo sem tocar no progresso: nenhum nível aberto,
+ * resultado de verificação e celebração limpos. Usado ao restaurar um progresso que
+ * não aponta para exercício conhecido — nada do contexto velho sobrevive à troca
+ * (o rascunho em edição, por exemplo, não vira rascunho do nível novo por engano:
+ * saveDraftActive só grava com exercício ativo). Ao visitar a aba exercícios, o
+ * próximo nível não resolvido abre sozinho a partir do progresso restaurado. */
+export function fecharContexto(): void {
+  setActiveId(null);
+  setSolucaoVisivel(false);
+  setCaseIndex(0);
+  setResults(null);
+  setVerifiedId(null);
+  setCelebrate(null);
+}
 
 /** Depois de todas as dicas: ver a solução avança o nível, marcado como "com ajuda". */
 export const solveWithHelp = (def: ExerciseDef): void => {
