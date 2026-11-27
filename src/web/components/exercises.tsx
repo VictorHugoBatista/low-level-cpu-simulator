@@ -152,22 +152,30 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
 
               <section class="panel">
                 <h2>dicas</h2>
-                <div class="row">
-                  <For each={def().hints}>
-                    {(_, i) => (
-                      <Show
-                        when={i() < hintCount(def())}
-                        fallback={
+                <Show when={hintCount(def()) > 0}>
+                  <div class="ex-hints">
+                    <For each={def().hints}>
+                      {(_, i) => (
+                        <Show when={i() < hintCount(def())}>
+                          <p class="hint">💡 {def().hints[i()]}</p>
+                        </Show>
+                      )}
+                    </For>
+                  </div>
+                </Show>
+                <Show when={hintCount(def()) < def().hints.length}>
+                  <div class="row">
+                    <For each={def().hints}>
+                      {(_, i) => (
+                        <Show when={i() >= hintCount(def())}>
                           <button onClick={() => revealHint(def())} disabled={i() !== hintCount(def())}>
                             dica {i() + 1}
                           </button>
-                        }
-                      >
-                        <p class="hint">💡 {def().hints[i()]}</p>
-                      </Show>
-                    )}
-                  </For>
-                </div>
+                        </Show>
+                      )}
+                    </For>
+                  </div>
+                </Show>
                 <Show when={hintCount(def()) >= def().hints.length && !isSolved(progress(), def())}>
                   <div class="row">
                     <button onClick={() => giveUp(def())}>
