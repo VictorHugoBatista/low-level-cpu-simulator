@@ -271,7 +271,6 @@ describe("verifyActive — captura a marca do marcador de melhores execuções",
         report: () => {},
       } as unknown as Store;
       es.openExercise(def, fake); // a UI abre o nível antes de submeter
-      es.verifyActive(fake);
       const resultados = es.verifyActive(fake);
       expect(resultados?.every((r) => r.passed)).toBe(true);
       const marca = md.melhor(def.id);

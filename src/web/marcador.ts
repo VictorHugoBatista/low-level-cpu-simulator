@@ -34,10 +34,13 @@ const STORAGE_KEY = "ak8-marcador";
 
 const limparMarca = (v: unknown): MarcaExercicio | null => {
   // Schema antigo, só a soma: migra para a marca nova, sem detalhe por caso.
-  if (typeof v === "number" && Number.isFinite(v) && v >= 0) return { total: v, casos: [] };
+  // Total 0 não existe em rodada real (cada caso roda ao menos o fetch) — é dado
+  // adulterado, e uma marca de 0 ciclos seria inbatível.
+  if (typeof v === "number" && Number.isFinite(v) && v > 0) return { total: v, casos: [] };
   if (typeof v !== "object" || v === null || Array.isArray(v)) return null;
   const m = v as Partial<MarcaExercicio>;
-  if (typeof m.total !== "number" || !Number.isFinite(m.total) || !Array.isArray(m.casos)) return null;
+  if (typeof m.total !== "number" || !Number.isFinite(m.total) || m.total <= 0) return null;
+  if (!Array.isArray(m.casos)) return null;
   const casos: CasoCiclos[] = [];
   for (const c of m.casos) {
     if (
@@ -125,7 +128,9 @@ export function registrarMelhor(
  * rodada foi melhor ou quando empata com uma marca antiga que só tinha a soma. Do
  * contrário, não mexe. Devolve true quando houve registro novo ou melhorado. */
 export function atualizarMelhor(exercicio: string, casos: readonly CasoCiclos[]): boolean {
+  if (casos.length === 0) return false; // exercício sem casos não tem rodada que valha
   const total = casos.reduce((soma, c) => soma + c.ciclos, 0);
+  if (!(total > 0)) return false;
   const marca: MarcaExercicio = { total, casos: [...casos] };
   if (!deveTrocar(marcador().marcas[exercicio], marca)) return false;
   updateMarcador((s) => registrarMelhor(s, exercicio, marca));

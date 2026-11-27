@@ -116,6 +116,31 @@ describe("card de melhor performance — atualizarMelhor", () => {
     }
   });
 
+  it("marca de total 0 (dado adulterado) é rejeitada: seria inbatível", async () => {
+    const mem = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => mem.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        mem.set(key, value);
+      },
+    });
+    try {
+      mem.set("ak8-marcador", JSON.stringify({ marcas: { "ex1-soma": 0 } }));
+      vi.resetModules();
+      const md = await import("../src/web/marcador.js");
+      expect(md.melhor("ex1-soma")).toBeUndefined();
+      // e a rodada real a seguir entra normalmente
+      expect(md.atualizarMelhor("ex1-soma", casos([18, 37]))).toBe(true);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("atualizarMelhor sem casos não registra rodada nenhuma", () => {
+    expect(atualizarMelhor("ex9-sem-casos", [])).toBe(false);
+    expect(melhor("ex9-sem-casos")).toBeUndefined();
+  });
+
   it("dado com estrutura inválida não derruba a leitura", async () => {
     const mem = new Map<string, string>();
     vi.stubGlobal("localStorage", {
