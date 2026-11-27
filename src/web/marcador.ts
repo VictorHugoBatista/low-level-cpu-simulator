@@ -1,20 +1,19 @@
 import { createSignal } from "solid-js";
 
 /**
- * O marcador de melhores execuções: cada pessoa guarda o menor número de ciclos já
- * alcançado em cada exercício. A execução é medida pela verificação — a soma dos ciclos
- * de todos os casos de teste, que só roda quando todos passam (resultado correto é
- * pré-condição, o conferente é o próprio verificador). Menos ciclos, melhor performance.
+ * O card de melhor performance: para cada exercício, a menor soma de ciclos de todos
+ * os casos de teste já verificada. A verificação roda os casos e o resultado só vale
+ * com todos passando (resultado correto é pré-condição, o conferente é o próprio
+ * verificador); a cada verificação com sucesso a marca é avaliada e atualizada se for
+ * melhor — menos ciclos, melhor performance.
  *
- * O placar fica em localStorage, no mesmo padrão do progresso de exercícios
- * (exerciseState.ts): chaves com prefixo "ak8-" e shape guard defensivo na leitura.
+ * Fica em localStorage, no mesmo padrão do progresso de exercícios (exerciseState.ts):
+ * chave com prefixo "ak8-" e shape guard defensivo na leitura.
  */
 
 export interface MarcadorState {
-  /** Apelido em uso neste navegador; vazio enquanto a pessoa não se identifica. */
-  jogador: string;
-  /** pessoa → exercício (id) → melhores ciclos. */
-  marcas: Record<string, Record<string, number>>;
+  /** exercício (id) → melhores ciclos. */
+  marcas: Record<string, number>;
 }
 
 const STORAGE_KEY = "ak8-marcador";
@@ -26,30 +25,20 @@ function loadMarcador(): MarcadorState {
       // Shape guard: JSON válido com estrutura inesperada (dado adulterado ou schema de
       // versão futura) não pode derrubar a página — cada campo volta ao default.
       const parsed = JSON.parse(raw) as Partial<MarcadorState>;
-      const limparPessoas = (v: unknown): Record<string, Record<string, number>> => {
-        if (typeof v !== "object" || v === null || Array.isArray(v)) return {};
-        const out: Record<string, Record<string, number>> = {};
-        for (const [pessoa, marcasPessoa] of Object.entries(v)) {
-          if (typeof marcasPessoa !== "object" || marcasPessoa === null || Array.isArray(marcasPessoa))
-            continue;
-          const limpas: Record<string, number> = {};
-          for (const [exercicio, ciclos] of Object.entries(marcasPessoa)) {
-            if (typeof ciclos === "number" && Number.isFinite(ciclos) && ciclos >= 0)
-              limpas[exercicio] = ciclos;
-          }
-          out[pessoa] = limpas;
-        }
-        return out;
-      };
-      return {
-        jogador: typeof parsed.jogador === "string" ? parsed.jogador : "",
-        marcas: limparPessoas(parsed.marcas),
-      };
+      const marcas = typeof parsed.marcas === "object" && parsed.marcas !== null && !Array.isArray(parsed.marcas)
+        ? parsed.marcas
+        : {};
+      const limpas: Record<string, number> = {};
+      for (const [exercicio, ciclos] of Object.entries(marcas)) {
+        if (typeof ciclos === "number" && Number.isFinite(ciclos) && ciclos >= 0)
+          limpas[exercicio] = ciclos;
+      }
+      return { marcas: limpas };
     }
   } catch {
     /* localStorage indisponível ou JSON inválido: placar só vale para a sessão */
   }
-  return { jogador: "", marcas: {} };
+  return { marcas: {} };
 }
 
 function saveMarcador(m: MarcadorState): void {
@@ -70,57 +59,27 @@ const updateMarcador = (fn: (m: MarcadorState) => MarcadorState): void => {
   });
 };
 
-/** O estado completo do placar (reativo). */
-export const estado = (): MarcadorState => marcador();
+/** A melhor performance registrada do exercício — undefined enquanto nada verificado. */
+export const melhor = (exercicio: string): number | undefined => marcador().marcas[exercicio];
 
-/** O apelido em uso agora — vazio enquanto a pessoa não se identifica. */
-export const jogador = (): string => marcador().jogador;
-
-/** Define o apelido em uso neste navegador. */
-export const setJogador = (nome: string): void => {
-  updateMarcador((m) => ({ ...m, jogador: nome }));
-};
-
-/** Registra (ou melhora) a marca de uma pessoa em um exercício. Puro: devolve o estado
- * novo sem tocar no atual — a marca só recua, nunca sobe. */
-export function registrarExecucao(
+/** Registra (ou melhora) a marca de um exercício. Puro: devolve o estado novo sem tocar
+ * no atual — a marca só recua, nunca sobe. */
+export function registrarMelhor(
   state: MarcadorState,
-  pessoa: string,
   exercicio: string,
   ciclos: number,
 ): MarcadorState {
-  const atual = state.marcas[pessoa]?.[exercicio];
+  const atual = state.marcas[exercicio];
   if (atual !== undefined && atual <= ciclos) return state;
-  const daPessoa = { ...(state.marcas[pessoa] ?? {}), [exercicio]: ciclos };
-  return { ...state, marcas: { ...state.marcas, [pessoa]: daPessoa } };
+  return { ...state, marcas: { ...state.marcas, [exercicio]: ciclos } };
 }
 
-export interface LinhaRanking {
-  jogador: string;
-  ciclos: number;
-}
-
-/** O placar de um exercício: quem tem marca nele, do menor número de ciclos para o
- * maior (empate em ordem alfabética). Puro. */
-export function rankingExercicio(state: MarcadorState, exercicio: string): LinhaRanking[] {
-  const linhas: LinhaRanking[] = [];
-  for (const [pessoa, marcasPessoa] of Object.entries(state.marcas)) {
-    const ciclos = marcasPessoa[exercicio];
-    if (pessoa !== "" && ciclos !== undefined) linhas.push({ jogador: pessoa, ciclos });
-  }
-  return linhas.sort(
-    (a, b) => a.ciclos - b.ciclos || a.jogador.localeCompare(b.jogador),
-  );
-}
-
-/** Captura o resultado de uma verificação: vale quando a pessoa já se identificou. O
- * chamador (verifyActive) só captura com todos os casos passando, e os ciclos são a
- * soma dos ciclos de todos os casos. Devolve true quando a captura criou ou melhorou
- * a marca da pessoa. */
-export function capturarExecucao(exercicio: string, ciclos: number): boolean {
-  const pessoa = jogador().trim();
-  if (pessoa === "") return false;
-  const anterior = estado().marcas[pessoa]?.[exercicio];
-  updateMarcador((s) => registrarExecucao(s, pessoa, exercicio, ciclos));
-  return anterior === undefined || ciclos < anterior;
+/** Atualiza o card a cada verificação com sucesso: registra quando é a primeira marca
+ * do exercício ou quando a rodada foi melhor (menos ciclos); do contrário, não mexe.
+ * Devolve true quando houve registro novo ou melhorado. */
+export function atualizarMelhor(exercicio: string, ciclos: number): boolean {
+  const atual = marcador().marcas[exercicio];
+  if (atual !== undefined && atual <= ciclos) return false;
+  updateMarcador((s) => registrarMelhor(s, exercicio, ciclos));
+  return true;
 }

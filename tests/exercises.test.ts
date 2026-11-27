@@ -262,7 +262,6 @@ describe("verifyActive — captura a marca do marcador de melhores execuções",
     try {
       const es = await import("../src/web/exerciseState.js");
       const md = await import("../src/web/marcador.js");
-      md.setJogador("tester");
       const def = EXERCISES[0] as ExerciseDef;
       const fake = {
         loadAsm: () => {},
@@ -273,8 +272,7 @@ describe("verifyActive — captura a marca do marcador de melhores execuções",
       } as unknown as Store;
       es.openExercise(def, fake); // a UI abre o nível antes de submeter
       es.verifyActive(fake);
-      const marca = md.estado().marcas.tester?.[def.id];
-      expect(typeof marca).toBe("number");
+      const marca = md.melhor(def.id);
       expect(marca).toBeGreaterThan(0);
 
       // Fonte que falha (o template) não altera a marca já feita.
@@ -285,7 +283,7 @@ describe("verifyActive — captura a marca do marcador de melhores execuções",
         sourceDirty: () => false,
         report: () => {},
       } as unknown as Store);
-      expect(md.estado().marcas.tester?.[def.id]).toBe(marca);
+      expect(md.melhor(def.id)).toBe(marca);
     } finally {
       vi.unstubAllGlobals();
     }

@@ -1162,10 +1162,13 @@ button.run .glyph {
 }
 
 
-/* ===== Melhor performance (marcador por exercício) ===== */
+/* ===== Card de melhor performance (por exercício) ===== */
 
-.mp-head {
-  align-items: center;
+.mp {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 4px 0;
 }
 
 .mp-label {
@@ -1174,43 +1177,13 @@ button.run .glyph {
   white-space: nowrap;
 }
 
-.mp-head input {
-  flex: 1;
-  min-width: 0;
-}
-
-/* Mesma tabela da página de referência: colunas certas, linha fina entre elas. */
-.mp table {
-  border-collapse: collapse;
-  width: 100%;
-  font-size: 12px;
-}
-
-.mp td {
-  padding: 7px 12px;
-  border-bottom: 1px solid var(--line);
-  text-align: left;
-}
-
-.mp td.num {
-  text-align: right;
-  white-space: nowrap;
+.mp-valor {
   color: var(--hot-text);
 }
 
-/* Quem está executando neste navegador se reconhece na tabela. */
-.mp tr.eu td {
-  background: var(--stripe);
-  color: var(--accent);
-  font-weight: bold;
+.mp-vazio {
+  color: var(--dim);
+  font-size: 11px;
 }
 
-@media (max-width: 900px) {
-  .mp table {
-    font-size: 10px;
-  }
-  .mp td {
-    padding: 5px 6px;
-  }
-}
 

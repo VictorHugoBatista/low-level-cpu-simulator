@@ -4,7 +4,7 @@ import { runExerciseCases } from "../runtime/exercise.js";
 import type { CaseResult } from "../runtime/exercise.js";
 import { TRACKS } from "./exerciseCatalog.js";
 import type { ExerciseDef, TrackDef } from "./exerciseCatalog.js";
-import { capturarExecucao } from "./marcador.js";
+import { atualizarMelhor } from "./marcador.js";
 import type { Store } from "./store.js";
 
 /**
@@ -169,10 +169,10 @@ export const verifyActive = (s: Store): CaseResult[] | null => {
   setVerifiedId(def.id);
   const allPassed = out.every((r) => r.passed);
   if (allPassed) {
-    // Marcador de melhores execuções: a marca é a soma dos ciclos de todos os casos,
-    // e só captura com tudo passando — resultado correto é pré-condição.
+    // Card de melhor performance: a marca é a soma dos ciclos de todos os casos, e só
+    // captura com tudo passando — resultado correto é pré-condição.
     const ciclos = out.reduce((total, r) => total + r.cycles, 0);
-    capturarExecucao(def.id, ciclos);
+    atualizarMelhor(def.id, ciclos);
     if (!isSolved(def)) {
       updateProgress((p) => ({ ...p, solved: { ...p.solved, [def.id]: "full" } }));
       setCelebrate("Nível concluído! O próximo desbloqueou — continue a sequência.");
