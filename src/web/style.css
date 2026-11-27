@@ -974,8 +974,29 @@ button.run .glyph {
   color: var(--dim);
 }
 
+/* ===== Tela de opções ===== */
+
+/* As preferências empilham quando o painel estreita; cada uma é um rótulo sobre
+   o select — a tela é dedicada, então os controles ganham rótulos visíveis
+   (nos dropdowns do header/footer, o title basta). */
+.opcoes-prefs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
+.opcoes-prefs .opcao {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.opcoes-prefs .opcao span {
+  color: var(--dim);
+}
+
 /* Rodapé: barra de status do console — o botão pronto do github (widget
-   github-buttons, iframe do ghbtns.com) à esquerda, efeito CRT à direita.
+   github-buttons, iframe do ghbtns.com) no CENTRO, efeito CRT à direita.
    Grudado no fundo da viewport (body em flex, main estica), mesmo com a aba
    máquina curta; o select fica visível mesmo com o efeito desligado, para dar
    para religar. O margin-top auto some quando o conteúdo é alto — a régua
@@ -983,7 +1004,7 @@ button.run .glyph {
 .footer {
   position: relative;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   gap: 8px;
   margin-top: auto;
@@ -999,7 +1020,12 @@ button.run .glyph {
   border-top: 1px solid var(--line);
 }
 
+/* Centrado de verdade no footer: âncora no meio da barra, independente da largura
+   do select do CRT ao lado. */
 .footer .gh-btn {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   border: 0;
 }
 
