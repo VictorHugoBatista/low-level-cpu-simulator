@@ -91,8 +91,8 @@ export function OpcoesPage(props: {
       <section class="panel">
         <h2>aparência</h2>
         <p class="hint">
-          os mesmos controles do cabeçalho e do rodapé — de lá eles continuam até serem
-          removidos.
+          valem para todas as abas e ficam guardados neste navegador. Desligar o CRT
+          também desliga a chuva de fundo e a tela de boot.
         </p>
         <div class="opcoes-prefs">
           <label class="opcao">

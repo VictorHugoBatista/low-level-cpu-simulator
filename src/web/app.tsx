@@ -229,22 +229,6 @@ export function App() {
           {" · "}
           {store.cycles()} ciclos
         </div>
-        <select
-          title="layout"
-          value={layout()}
-          onChange={(e) => setAndStoreLayout(e.currentTarget.value as Layout)}
-        >
-          <option value="colunas">editor cheio</option>
-          <option value="lateral">lateral</option>
-        </select>
-        <select
-          title="tema"
-          value={theme()}
-          onChange={(e) => setAndStoreTheme(e.currentTarget.value as Theme)}
-        >
-          <option value="dark">escuro</option>
-          <option value="light">claro</option>
-        </select>
       </header>
 
       <Show when={store.notice() !== null}>
@@ -358,14 +342,6 @@ export function App() {
           width="170"
           height="20"
         />
-        <select
-          title="crt"
-          value={crt()}
-          onChange={(e) => setAndStoreCrt(e.currentTarget.value as Crt)}
-        >
-          <option value="on">crt ligado</option>
-          <option value="off">crt desligado</option>
-        </select>
       </footer>
     </main>
   );

@@ -976,9 +976,15 @@ button.run .glyph {
 
 /* ===== Tela de opções ===== */
 
-/* As preferências empilham quando o painel estreita; cada uma é um rótulo sobre
-   o select — a tela é dedicada, então os controles ganham rótulos visíveis
-   (nos dropdowns do header/footer, o title basta). */
+/* As seções empilham com o mesmo respiro das colunas da aba máquina e da aba
+   exercícios; as preferências emfileiram e quebram quando o painel estreita.
+   Cada uma é um rótulo sobre o select — tela dedicada tem rótulo visível. */
+.opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .opcoes-prefs {
   display: flex;
   flex-wrap: wrap;
@@ -995,18 +1001,14 @@ button.run .glyph {
   color: var(--dim);
 }
 
-/* Rodapé: barra de status do console — o botão pronto do github (widget
-   github-buttons, iframe do ghbtns.com) no CENTRO, efeito CRT à direita.
-   Grudado no fundo da viewport (body em flex, main estica), mesmo com a aba
-   máquina curta; o select fica visível mesmo com o efeito desligado, para dar
-   para religar. O margin-top auto some quando o conteúdo é alto — a régua
-   garante um vão mínimo de 24px entre o conteúdo e a linha, sempre. */
+/* Rodapé: barra de status do console — só o botão pronto do github (widget
+   github-buttons, iframe do ghbtns.com), centrado. As preferências de tema,
+   layout e CRT moram na aba opções. Grudado no fundo da viewport (body em
+   flex, main estica), mesmo com a aba máquina curta. O margin-top auto some
+   quando o conteúdo é alto — a régua garante um vão mínimo de 24px entre o
+   conteúdo e a linha, sempre. */
 .footer {
   position: relative;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 8px;
   margin-top: auto;
   padding-top: 34px; /* 24px de vão até a régua + 10px da régua à linha de controles */
 }
