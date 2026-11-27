@@ -366,3 +366,25 @@ export const EXERCISES: ExerciseDef[] = [
     cases: ex7Cases,
   },
 ];
+
+/**
+ * Uma trilha é uma coleção ordenada de exercícios: os níveis se desbloqueiam em sequência
+ * dentro dela. O exercício em si não sabe de trilha — o progresso segue por id, então o
+ * mesmo exercício pode entrar em mais de uma trilha.
+ */
+export interface TrackDef {
+  id: string;
+  title: string;
+  description: string;
+  exercises: ExerciseDef[];
+}
+
+export const TRACKS: TrackDef[] = [
+  {
+    id: "hello-world",
+    title: "Hello World",
+    description:
+      "Do primeiro LDA/ADD/STA até Fibonacci: os sete exercícios de fixação, em ordem crescente de dificuldade.",
+    exercises: EXERCISES,
+  },
+];

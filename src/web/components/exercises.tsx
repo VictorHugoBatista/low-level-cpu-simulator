@@ -3,10 +3,12 @@ import { Editor } from "./editor.js";
 import { ExerciseResults } from "./exercisePanel.js";
 import { Celebrate } from "./celebrate.js";
 import type { Store } from "../store.js";
-import { EXERCISES } from "../exerciseCatalog.js";
+import { TRACKS } from "../exerciseCatalog.js";
 import type { ExerciseDef } from "../exerciseCatalog.js";
 import {
   activeExercise,
+  activeTrack,
+  selectTrack,
   openExercise,
   progress,
   selectExercise,
@@ -32,16 +34,17 @@ import {
 const isSolved = (p: { solved: Record<string, unknown> }, def: ExerciseDef): boolean =>
   p.solved[def.id] !== undefined;
 
-/** O próximo nível só abre quando o anterior foi concluído. */
-const isUnlocked = (index: number, p: { solved: Record<string, unknown> }): boolean =>
-  index === 0 || isSolved(p, EXERCISES[index - 1]);
+/** O próximo nível da trilha só abre quando o anterior foi concluído. */
+const isUnlocked = (list: ExerciseDef[], index: number, p: { solved: Record<string, unknown> }): boolean =>
+  index === 0 || isSolved(p, list[index - 1]);
 
 export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void }) {
   const s = props.store;
 
   const current = (): ExerciseDef | undefined => activeExercise();
   const hintCount = (def: ExerciseDef): number => progress().hints[def.id] ?? 0;
-  const solvedCount = (): number => EXERCISES.filter((d) => isSolved(progress(), d)).length;
+  const list = (): ExerciseDef[] => activeTrack().exercises;
+  const solvedCount = (): number => list().filter((d) => isSolved(progress(), d)).length;
 
   const revealHint = (def: ExerciseDef): void => {
     updateProgress((p) => {
@@ -59,23 +62,30 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
   /** Ao montar a aba, se nenhum exercício está ativo (primeira visita), abre o próximo
    * nível não resolvido — o contexto (editor + entradas do caso) já fica na máquina. */
   if (current() === undefined) {
-    const firstOpen = Math.max(0, EXERCISES.findIndex((def) => !isSolved(progress(), def)));
-    const initial = EXERCISES[firstOpen] ?? EXERCISES[0];
+    const firstOpen = Math.max(0, list().findIndex((def) => !isSolved(progress(), def)));
+    const initial = list()[firstOpen] ?? list()[0];
     if (initial !== undefined) openExercise(initial, s);
   }
 
   return (
     <div class="ex">
       <aside class="panel ex-levels">
-        <h2>exercícios</h2>
+        <h2>trilha</h2>
+        <select
+          value={activeTrack().id}
+          onChange={(e) => selectTrack(TRACKS.find((t) => t.id === e.currentTarget.value) ?? activeTrack(), s)}
+        >
+          <For each={TRACKS}>{(t) => <option value={t.id}>{t.title}</option>}</For>
+        </select>
+        <p class="hint">{activeTrack().description}</p>
         <div class="ex-progress">
           <div class="ex-bar">
-            <div class="ex-bar-fill" style={{ width: `${(solvedCount() / EXERCISES.length) * 100}%` }} />
+            <div class="ex-bar-fill" style={{ width: `${(solvedCount() / list().length) * 100}%` }} />
           </div>
-          <span class="ex-count">{solvedCount()}/{EXERCISES.length} níveis</span>
+          <span class="ex-count">{solvedCount()}/{list().length} níveis</span>
         </div>
         <ol>
-          <For each={EXERCISES}>
+          <For each={list()}>
             {(def, i) => (
               <li>
                 <button
@@ -83,12 +93,12 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
                     "ex-lvl": true,
                     done: isSolved(progress(), def),
                     current: def.id === current()?.id,
-                    locked: !isUnlocked(i(), progress()),
+                    locked: !isUnlocked(list(), i(), progress()),
                   }}
-                  disabled={!isUnlocked(i(), progress())}
+                  disabled={!isUnlocked(list(), i(), progress())}
                   onClick={() => selectExercise(def, s)}
                   title={
-                    isUnlocked(i(), progress())
+                    isUnlocked(list(), i(), progress())
                       ? def.title
                       : "conclua o nível anterior para desbloquear"
                   }
@@ -98,7 +108,7 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
                       ? progress().solved[def.id] === "help"
                         ? "☆"
                         : "★"
-                      : isUnlocked(i(), progress())
+                      : isUnlocked(list(), i(), progress())
                         ? "▶"
                         : "🔒"}
                   </span>
@@ -117,7 +127,7 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
           {(def) => (
             <>
               <section class="panel">
-                <h2>nível {EXERCISES.indexOf(def()) + 1} — {def().title}</h2>
+                <h2>nível {list().indexOf(def()) + 1} — {def().title}</h2>
                 <h3>base teórica</h3>
                 <p>{def().theory}</p>
                 <h3>o problema</h3>

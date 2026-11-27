@@ -1,9 +1,9 @@
 import { For, Show } from "solid-js";
 import type { Store } from "../store.js";
-import { EXERCISES } from "../exerciseCatalog.js";
 import { Celebrate } from "./celebrate.js";
 import {
   activeExercise,
+  activeTrack,
   applyActiveCase,
   caseIndex,
   celebrate,
@@ -56,7 +56,7 @@ export function ExercisePanel(props: { store: Store; onOpenExercises?: () => voi
       {(def) => (
         <section class="panel ex-banner">
           <h2>
-            exercício {EXERCISES.indexOf(def()) + 1} — {def().title}
+            exercício {activeTrack().exercises.indexOf(def()) + 1} — {def().title}
           </h2>
           <details class="ex-statement">
             <summary>enunciado</summary>

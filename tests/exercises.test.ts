@@ -6,7 +6,7 @@ import {
   runExerciseCases,
 } from "../src/runtime/exercise.js";
 import { Machine } from "../src/runtime/machine.js";
-import { EXERCISES } from "../src/web/exerciseCatalog.js";
+import { EXERCISES, TRACKS } from "../src/web/exerciseCatalog.js";
 import type { ExerciseDef } from "../src/web/exerciseCatalog.js";
 import type { Store } from "../src/web/store.js";
 
@@ -202,5 +202,21 @@ describe("catálogo — integridade dos dados", () => {
 
   it("erros de montagem do aluno chegam como AsmError, não como crash", () => {
     expect(() => assemble("lda #$zz", "aluno.asm")).toThrow(AsmError);
+  });
+});
+
+describe("trilhas", () => {
+  it("ids de trilha são únicos e toda trilha tem exercícios do catálogo", () => {
+    expect(new Set(TRACKS.map((t) => t.id)).size).toBe(TRACKS.length);
+    for (const t of TRACKS) {
+      expect(t.exercises.length).toBeGreaterThan(0);
+      for (const d of t.exercises) expect(EXERCISES).toContain(d);
+    }
+  });
+
+  it("a trilha Hello World reúne os sete exercícios, em ordem", () => {
+    const hello = TRACKS.find((t) => t.id === "hello-world");
+    expect(hello?.exercises.map((d) => d.id)).toEqual(EXERCISES.map((d) => d.id));
+    expect(hello?.exercises).toHaveLength(7);
   });
 });
