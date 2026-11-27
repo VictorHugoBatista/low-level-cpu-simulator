@@ -285,21 +285,37 @@ export function App() {
         >
           <div class="layout-side">
             <div class="hero">
-              <ExercisePanel store={store} onOpenExercises={() => setTab("exercicios")} />
-              <Controls store={store} examples={EXAMPLES} />
+              <div class="col">
+                <ExercisePanel store={store} onOpenExercises={() => setTab("exercicios")} />
+                <Controls store={store} examples={EXAMPLES} />
+              </div>
               <Editor store={store} onBlur={() => saveDraftActive(store)} />
             </div>
-            <div class="col">
-              <For each={slots()}>
-                {(kind, i) => (
-                  <IndicatorPanel
-                    kind={kind}
-                    index={i()}
-                    store={store}
-                    onPick={pickSlot}
-                  />
-                )}
-              </For>
+            <div class="grid">
+              <div class="col">
+                <For each={slots().slice(0, 2)}>
+                  {(kind, i) => (
+                    <IndicatorPanel
+                      kind={kind}
+                      index={i()}
+                      store={store}
+                      onPick={pickSlot}
+                    />
+                  )}
+                </For>
+              </div>
+              <div class="col">
+                <For each={slots().slice(2)}>
+                  {(kind, i) => (
+                    <IndicatorPanel
+                      kind={kind}
+                      index={i() + 2}
+                      store={store}
+                      onPick={pickSlot}
+                    />
+                  )}
+                </For>
+              </div>
             </div>
           </div>
         </Show>

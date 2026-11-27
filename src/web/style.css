@@ -304,16 +304,30 @@ h1 {
   min-width: 0;
 }
 
-/* Layout lateral: controles e fonte em ~40% à esquerda, painéis em ~60% à direita. */
+/* Layout lateral: mesma estrutura do editor cheio — destaque no topo, painéis
+   indicadores em duas colunas abaixo — com o topo dividido ao meio: exercício e
+   controles à esquerda, fonte à direita. */
 .layout-side {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   align-items: start;
 }
 
 .layout-side .hero {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   margin-bottom: 0;
+}
+
+/* O card da fonte (hero-src) estica até a altura da coluna esquerda: o campo de
+   edição preenche o card inteiro em vez de deixar espaço morto embaixo. */
+.layout-side .hero > .hero-src {
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-side .hero > .hero-src .editor {
+  flex: 1;
 }
 
 /* No layout editor cheio: controles e fonte no topo, em largura cheia, e os painéis
@@ -1138,6 +1152,10 @@ button.run .glyph {
 @media (max-width: 900px) {
   .ex {
     grid-template-columns: 1fr;
+  }
+  /* Lateral: sem espaço para as metades lado a lado, empilha como o editor cheio. */
+  .layout-side .hero {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
