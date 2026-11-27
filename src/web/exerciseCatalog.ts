@@ -1447,7 +1447,7 @@ const s4Cases: ExerciseCase[] = [
     ],
   },
   {
-    name: "fonte de 19 bytes: trunca em 7 e preserva o canário",
+    name: "fonte de 12 bytes: trunca em 7 e preserva o canário",
     preset: [
       { addr: 0x0400, value: 0x41 },
       { addr: 0x0401, value: 0x54 },
@@ -1638,7 +1638,8 @@ const SEGURANCA: ExerciseDef[] = [
       "Passou: sub #$1a devolve a soma ao alfabeto — 'Z' + 1 é $5b, e $5b − 26 é $41, " +
       "o 'A'. As duas rotas terminam no mesmo sta $0500,x.",
       "Cuidado com a ordem das instruções: o cmp #$5b tem que vir DEPOIS do add (ele lê " +
-      "a soma) e o jnc ANTES do sub — inverta e o 'A' vira '$2B' no meio do texto.",
+      "a soma) e o jnc ANTES do sub — quem subtrai 26 sem testar corrompe letras que " +
+      "não precisavam de volta: 'A' + 0, com a chave 0, viraria $27 na saída.",
     ],
     cases: s3Cases,
   },

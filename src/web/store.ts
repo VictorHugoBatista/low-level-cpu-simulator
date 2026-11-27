@@ -5,7 +5,6 @@ import { AsmError, assemble } from "../asm/assembler.js";
 import { DiskImage, SECTOR_SIZE } from "../storage/diskImage.js";
 import { applyCasePresets } from "../runtime/exercise.js";
 import type { ExerciseCase } from "../runtime/exercise.js";
-import type { MemExpect } from "../runtime/exercise.js";
 import type { ListingLine } from "../asm/emitter.js";
 
 export interface LoadedProgram {
