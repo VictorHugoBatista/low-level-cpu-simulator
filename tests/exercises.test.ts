@@ -242,8 +242,8 @@ describe("catálogo — nenhum template passa sem trabalho", () => {
 });
 
 describe("catálogo — integridade dos dados", () => {
-  it("a série tem os 7 níveis em ordem, com teoria, enunciado, dicas e ≥ 2 casos", () => {
-    expect(EXERCISES.length).toBe(7);
+  it("a série tem os 15 níveis, com teoria, enunciado, dicas e ≥ 2 casos", () => {
+    expect(EXERCISES.length).toBe(15);
     for (const def of EXERCISES) {
       expect(def.theory.length).toBeGreaterThan(40);
       expect(def.statement.length).toBeGreaterThan(40);
@@ -274,10 +274,35 @@ describe("trilhas", () => {
     }
   });
 
-  it("a trilha Hello World reúne os sete exercícios, em ordem", () => {
+  it("a trilha Hello World reúne os sete exercícios da série original, em ordem", () => {
     const hello = TRACKS.find((t) => t.id === "hello-world");
-    expect(hello?.exercises.map((d) => d.id)).toEqual(EXERCISES.map((d) => d.id));
+    expect(hello?.exercises.map((d) => d.id)).toEqual([
+      "ex1-soma",
+      "ex2-paridade",
+      "ex3-maior",
+      "ex4-multiplica",
+      "ex5-dobra",
+      "ex6-string",
+      "ex7-fib",
+    ]);
     expect(hello?.exercises).toHaveLength(7);
+  });
+
+  it("a trilha De C para assembly traz os oito níveis de construções do C, cada um com o trecho em C", () => {
+    const c = TRACKS.find((t) => t.id === "c-para-asm");
+    expect(c?.exercises.map((d) => d.id)).toEqual([
+      "c1-variaveis",
+      "c2-se",
+      "c3-se-senao",
+      "c4-loop",
+      "c5-string",
+      "c6-array",
+      "c7-struct",
+      "c8-funcao",
+    ]);
+    for (const d of c?.exercises ?? []) {
+      expect(d.cCode).toBeDefined();
+    }
   });
 });
 

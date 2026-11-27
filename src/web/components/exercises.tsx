@@ -134,6 +134,10 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
                 <h2>nível {list().indexOf(def()) + 1} — {def().title}</h2>
                 <h3>base teórica</h3>
                 <p>{def().theory}</p>
+                <Show when={def().cCode !== undefined}>
+                  <h3>a mesma lógica em C</h3>
+                  <pre class="ex-c-code">{def().cCode}</pre>
+                </Show>
                 <h3>o problema</h3>
                 <p>{def().statement}</p>
                 <div class="row">
