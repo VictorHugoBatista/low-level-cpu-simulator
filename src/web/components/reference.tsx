@@ -371,7 +371,7 @@ export function ReferencePage(props: {
       </section>
 
       <section class="panel">
-        <h2>instruções → opcodes</h2>
+        <h2>instruções → opcodes e exemplos de uso</h2>
         <div class="hint">
           cada célula: opcode em hexa · ciclos. células apagadas estão congeladas na ISA mas o
           núcleo ainda não as executa (M5). fonte da verdade: docs/ISA.md, espelhada em
