@@ -1164,15 +1164,8 @@ button.run .glyph {
 
 /* ===== Card de melhor performance (por exercício) ===== */
 
-/* Mesmo padrão dos títulos de seção do .ex-main: maiúsculas, cor de destaque —
-   e o mesmo estilo vale no ex-banner da aba máquina, onde não há h3 de seção. */
-.mp h3 {
-  margin: 10px 0 8px;
-  color: var(--accent);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+/* O título é h2 de painel: herda o padrão do .panel h2 (maiúsculas, cor neutra,
+   régua), tanto no .ex-main quanto no ex-banner da aba máquina. */
 
 .mp-valor {
   color: var(--hot-text);

@@ -12,7 +12,7 @@ export function MelhorPerformance(props: { exercicioId: string }) {
   const marca = () => melhor(props.exercicioId);
   return (
     <div class="mp">
-      <h3>melhor performance</h3>
+      <h2>melhor performance</h2>
       <Show
         when={marca() !== undefined}
         fallback={

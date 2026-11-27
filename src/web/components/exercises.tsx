@@ -144,7 +144,7 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
               </section>
 
               <section class="panel">
-                <h3>dicas</h3>
+                <h2>dicas</h2>
                 <div class="row">
                   <For each={def().hints}>
                     {(_, i) => (
@@ -171,7 +171,7 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
               </section>
 
               <section class="panel">
-                <h3>verificação</h3>
+                <h2>verificação</h2>
                 <div class="row">
                   <button class="run" onClick={() => verifyActive(s)}>
                     Verificar (roda {def().cases.length} casos de teste)
@@ -195,7 +195,7 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
 
               <Show when={isSolved(progress(), def())}>
                 <section class="panel">
-                  <h3>solução de referência</h3>
+                  <h2>solução de referência</h2>
                   <pre class="ex-solution">{def().solution}</pre>
                 </section>
               </Show>
