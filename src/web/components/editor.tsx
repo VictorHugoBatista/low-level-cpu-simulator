@@ -90,7 +90,7 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
   });
 
   return (
-    <section class="panel">
+    <section class="panel hero-src">
       <h2>fonte</h2>
       <div class="row">
         <button class="run" onClick={() => s.assembleCurrent()}>

@@ -319,14 +319,14 @@ h1 {
   margin-bottom: 0;
 }
 
-/* O grid estica o card da fonte até a altura da coluna esquerda: o campo de
+/* O card da fonte (hero-src) estica até a altura da coluna esquerda: o campo de
    edição preenche o card inteiro em vez de deixar espaço morto embaixo. */
-.layout-side .hero > .panel {
+.layout-side .hero > .hero-src {
   display: flex;
   flex-direction: column;
 }
 
-.layout-side .hero > .panel .editor {
+.layout-side .hero > .hero-src .editor {
   flex: 1;
 }
 
