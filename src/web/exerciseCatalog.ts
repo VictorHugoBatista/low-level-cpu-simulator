@@ -20,6 +20,14 @@ import c3Template from "../../exercises/c3-se-senao.template.asm?raw";
 import c3Solution from "../../exercises/c3-se-senao.solucao.asm?raw";
 import c4Template from "../../exercises/c4-loop.template.asm?raw";
 import c4Solution from "../../exercises/c4-loop.solucao.asm?raw";
+import c5Template from "../../exercises/c5-string.template.asm?raw";
+import c5Solution from "../../exercises/c5-string.solucao.asm?raw";
+import c6Template from "../../exercises/c6-array.template.asm?raw";
+import c6Solution from "../../exercises/c6-array.solucao.asm?raw";
+import c7Template from "../../exercises/c7-struct.template.asm?raw";
+import c7Solution from "../../exercises/c7-struct.solucao.asm?raw";
+import c8Template from "../../exercises/c8-funcao.template.asm?raw";
+import c8Solution from "../../exercises/c8-funcao.solucao.asm?raw";
 import type { ExerciseCase } from "../runtime/exercise.js";
 
 /**
@@ -412,6 +420,210 @@ const c4Cases: ExerciseCase[] = [
   { name: "n=10 → soma 0..9 = 45", preset: [{ addr: 0x0300, value: 10 }], expect: [{ addr: 0x0030, value: 45 }] },
 ];
 
+const c5Cases: ExerciseCase[] = [
+  {
+    name: 'string "banana" tem 3 a',
+    preset: [
+      { addr: 0x0400, value: 0x62 }, // b
+      { addr: 0x0401, value: 0x61 }, // a
+      { addr: 0x0402, value: 0x6e }, // n
+      { addr: 0x0403, value: 0x61 }, // a
+      { addr: 0x0404, value: 0x6e }, // n
+      { addr: 0x0405, value: 0x61 }, // a
+      { addr: 0x0406, value: 0x00 },
+    ],
+    expect: [{ addr: 0x0032, value: 3 }],
+  },
+  {
+    name: 'string "xyz" tem 0 a',
+    preset: [
+      { addr: 0x0400, value: 0x78 },
+      { addr: 0x0401, value: 0x79 },
+      { addr: 0x0402, value: 0x7a },
+      { addr: 0x0403, value: 0x00 },
+    ],
+    expect: [{ addr: 0x0032, value: 0 }],
+  },
+  {
+    name: 'string "a" tem 1 a',
+    preset: [
+      { addr: 0x0400, value: 0x61 },
+      { addr: 0x0401, value: 0x00 },
+    ],
+    expect: [{ addr: 0x0032, value: 1 }],
+  },
+  {
+    name: 'string "abracadabra" tem 5 a',
+    preset: [
+      { addr: 0x0400, value: 0x61 }, // a
+      { addr: 0x0401, value: 0x62 }, // b
+      { addr: 0x0402, value: 0x72 }, // r
+      { addr: 0x0403, value: 0x61 }, // a
+      { addr: 0x0404, value: 0x63 }, // c
+      { addr: 0x0405, value: 0x61 }, // a
+      { addr: 0x0406, value: 0x64 }, // d
+      { addr: 0x0407, value: 0x61 }, // a
+      { addr: 0x0408, value: 0x62 }, // b
+      { addr: 0x0409, value: 0x72 }, // r
+      { addr: 0x040a, value: 0x61 }, // a
+      { addr: 0x040b, value: 0x00 },
+    ],
+    expect: [{ addr: 0x0032, value: 5 }],
+  },
+];
+
+const c6Cases: ExerciseCase[] = [
+  {
+    name: "1..8 soma 36",
+    preset: [
+      { addr: 0x0400, value: 1 },
+      { addr: 0x0401, value: 2 },
+      { addr: 0x0402, value: 3 },
+      { addr: 0x0403, value: 4 },
+      { addr: 0x0404, value: 5 },
+      { addr: 0x0405, value: 6 },
+      { addr: 0x0406, value: 7 },
+      { addr: 0x0407, value: 8 },
+    ],
+    expect: [{ addr: 0x0030, value: 36 }],
+  },
+  {
+    name: "só o primeiro elemento: 10",
+    preset: [
+      { addr: 0x0400, value: 10 },
+      { addr: 0x0401, value: 0 },
+      { addr: 0x0402, value: 0 },
+      { addr: 0x0403, value: 0 },
+      { addr: 0x0404, value: 0 },
+      { addr: 0x0405, value: 0 },
+      { addr: 0x0406, value: 0 },
+      { addr: 0x0407, value: 0 },
+    ],
+    expect: [{ addr: 0x0030, value: 10 }],
+  },
+  {
+    name: "200 + 100 = 44 (a volta de 8 bits)",
+    preset: [
+      { addr: 0x0400, value: 200 },
+      { addr: 0x0401, value: 100 },
+      { addr: 0x0402, value: 0 },
+      { addr: 0x0403, value: 0 },
+      { addr: 0x0404, value: 0 },
+      { addr: 0x0405, value: 0 },
+      { addr: 0x0406, value: 0 },
+      { addr: 0x0407, value: 0 },
+    ],
+    expect: [{ addr: 0x0030, value: 44 }],
+  },
+  {
+    name: "4×255 = 1020 → 252",
+    preset: [
+      { addr: 0x0400, value: 255 },
+      { addr: 0x0401, value: 255 },
+      { addr: 0x0402, value: 255 },
+      { addr: 0x0403, value: 255 },
+      { addr: 0x0404, value: 0 },
+      { addr: 0x0405, value: 0 },
+      { addr: 0x0406, value: 0 },
+      { addr: 0x0407, value: 0 },
+    ],
+    expect: [{ addr: 0x0030, value: 252 }],
+  },
+];
+
+const c7Cases: ExerciseCase[] = [
+  {
+    name: "p[0]=(10,20) → 30 e p[1]=(1,2) → 3",
+    preset: [
+      { addr: 0x0400, value: 10 }, // p[0].x
+      { addr: 0x0401, value: 20 }, // p[0].y
+      { addr: 0x0403, value: 1 },  // p[1].x
+      { addr: 0x0404, value: 2 },  // p[1].y
+    ],
+    expect: [
+      { addr: 0x0402, value: 30 }, // p[0].soma
+      { addr: 0x0405, value: 3 },  // p[1].soma
+    ],
+  },
+  {
+    name: "p[0]=(200,100) → 44 (volta de 8 bits) e p[1]=(0,0) → 0",
+    preset: [
+      { addr: 0x0400, value: 200 },
+      { addr: 0x0401, value: 100 },
+      { addr: 0x0403, value: 0 },
+      { addr: 0x0404, value: 0 },
+    ],
+    expect: [
+      { addr: 0x0402, value: 44 },
+      { addr: 0x0405, value: 0 },
+    ],
+  },
+  {
+    name: "p[0]=(5,5) → 10 e p[1]=(255,1) → 0",
+    preset: [
+      { addr: 0x0400, value: 5 },
+      { addr: 0x0401, value: 5 },
+      { addr: 0x0403, value: 255 },
+      { addr: 0x0404, value: 1 },
+    ],
+    expect: [
+      { addr: 0x0402, value: 10 },
+      { addr: 0x0405, value: 0 },
+    ],
+  },
+];
+
+const c8Cases: ExerciseCase[] = [
+  {
+    name: "n=0 → soma 0 (o while não roda)",
+    preset: [
+      { addr: 0x0030, value: 0x00 }, // ponteiro = $0400 (baixo)
+      { addr: 0x0031, value: 0x04 }, // ponteiro = $0400 (alto)
+      { addr: 0x0032, value: 0 },    // n = 0
+    ],
+    expect: [{ addr: 0x0350, value: 0 }],
+  },
+  {
+    name: "n=1, nota 10 (peso ignorado) → 10",
+    preset: [
+      { addr: 0x0030, value: 0x00 },
+      { addr: 0x0031, value: 0x04 },
+      { addr: 0x0032, value: 1 },
+      { addr: 0x0400, value: 10 }, // v[0].nota
+      { addr: 0x0401, value: 255 }, // v[0].peso
+    ],
+    expect: [{ addr: 0x0350, value: 10 }],
+  },
+  {
+    name: "n=3, notas 5+200+50 = 255",
+    preset: [
+      { addr: 0x0030, value: 0x00 },
+      { addr: 0x0031, value: 0x04 },
+      { addr: 0x0032, value: 3 },
+      { addr: 0x0400, value: 5 },
+      { addr: 0x0401, value: 1 },
+      { addr: 0x0402, value: 200 },
+      { addr: 0x0403, value: 2 },
+      { addr: 0x0404, value: 50 },
+      { addr: 0x0405, value: 3 },
+    ],
+    expect: [{ addr: 0x0350, value: 255 }],
+  },
+  {
+    name: "n=2, notas 200+100 = 300 → 44 (8 bits)",
+    preset: [
+      { addr: 0x0030, value: 0x00 },
+      { addr: 0x0031, value: 0x04 },
+      { addr: 0x0032, value: 2 },
+      { addr: 0x0400, value: 200 },
+      { addr: 0x0401, value: 9 },
+      { addr: 0x0402, value: 100 },
+      { addr: 0x0403, value: 9 },
+    ],
+    expect: [{ addr: 0x0350, value: 44 }],
+  },
+];
+
 const C_LOGICA: ExerciseDef[] = [
   {
     id: "c1-variaveis",
@@ -510,6 +722,109 @@ const C_LOGICA: ExerciseDef[] = [
     ],
     cases: c4Cases,
   },
+  {
+    id: "c5-string",
+    title: "string: contar caracteres",
+    theory:
+      "Uma string em C é um array de chars com um terminador '\\0' no fim. Na máquina, é um " +
+      "bloco de bytes com um $00 marcando o fim — e é ele quem decide quando o while para: " +
+      "não há contador, há terminador. '*p' é ler o byte apontado: lda (ptr),y. '*p == " +
+      "caractere' é um CMP com o código ASCII e um JNZ: igualdade usa a flag Z. E 'p++' é um " +
+      "INC no ponteiro — em TODA volta do laço, contando ou não, senão o programa fica preso " +
+      "no mesmo byte.",
+    statement:
+      "Há uma string terminada em $00 em $0400 (o teste troca a string). Conte quantos " +
+      "caracteres 'a' ($61) ela tem e grave o total em $0032 — não em $0030/$0031, que são " +
+      "o ponteiro da string (baixo e alto). O programa já prepara o ponteiro, o Y e o " +
+      "contador — falta o laço. A string 'banana' tem 3; 'xyz' tem 0.",
+    cCode:
+      "int count = 0;      // mora em $0032\nchar *p = s;        // mora em $30/$31\nwhile (*p != '\\0') {\n    if (*p == 'a') count++;\n    p++;\n}",
+    template: c5Template,
+    solution: c5Solution,
+    hints: [
+      "O corpo do laço: lda (ptr),y → jz fim (o $00 liga Z e encerra) → cmp #$61 ('a' em hexa) → jnz avanca (não é 'a', não conta) → inc $0032 → avanca: inc ptr, jmp loop.",
+      "O inc ptr fica DEPOIS do desvio de contagem, no rótulo avanca — ele roda em toda volta, com 'a' ou sem. Se ficar só dentro do if, a string nunca anda.",
+      "Cuidado com a página zero: $0030 e $0031 já são o ponteiro (baixo e alto). O contador tem que morar em outro byte — $0032. Duas variáveis, endereços diferentes: é assim que colisão de dados aparece.",
+    ],
+    cases: c5Cases,
+  },
+  {
+    id: "c6-array",
+    title: "array: a[i] é um endereço calculado",
+    theory:
+      "Um array em C é um bloco de elementos do mesmo tamanho lado a lado na memória — aqui " +
+      "com sizeof(int) = 1 byte. 'a[i]' significa 'o byte em base + i', e a MOS-6502 tem uma " +
+      "instrução que faz essa conta sozinha: o modo indexado $hhhh,X, cujo endereço efetivo é " +
+      "base + X. Você põe o índice em X com TAX (A→X) e escreve lda $0400,x — o X entra na " +
+      "conta do endereço, não no dado. O while continua o mesmo do c4: teste no topo, corpo, " +
+      "e a volta.",
+    statement:
+      "Há um array de 8 bytes em $0400..$0407 (o teste troca os valores). Some todos os " +
+      "elementos e grave o total em $0030, com s em $0030 e i em $0031. O teste da parada " +
+      "é fixo: while (i < 8). A soma dá a volta em módulo 256 — 200 + 100 = 44.",
+    cCode:
+      "int a[8];    // mora em $0400..$0407\nint s = 0;   // mora em $0030\nint i = 0;   // mora em $0031\nwhile (i < 8) {\n    s = s + a[i];\n    i = i + 1;\n}",
+    template: c6Template,
+    solution: c6Solution,
+    hints: [
+      "Antes do laço, zere as duas variáveis (LDA #$00, STA $0030 e $0031). No topo do loop: lda $0031 (i), cmp #$08, jc fim — C=1 significa i >= 8.",
+      "No corpo: tax põe i em X; lda $0030 (s), add $0400,x soma o elemento a[i] — o endereço é $0400 + X; sta $0030 grava s de volta; inc $0031 incrementa i.",
+      "O CMP não mexe em A: depois de comparar i com 8, A ainda é i — é por isso que o TAX vem logo depois do JC, sem recarregar.",
+    ],
+    cases: c6Cases,
+  },
+  {
+    id: "c7-struct",
+    title: "struct: campo é base + offset",
+    theory:
+      "Um struct em C é um bloco de bytes com layout fixo: cada campo mora em 'base + " +
+      "offset', e os offsets nunca mudam — x é sempre base + 0, y é sempre base + 1, soma " +
+      "é sempre base + 2. O que muda entre um struct e outro é só a base: p[1] começa em " +
+      "$0400 + 3, porque o struct inteiro ocupa 3 bytes. Acessar um campo, então, é ler ou " +
+      "escrever um endereço absoluto que você calcula na cabeça: base + offset.",
+    statement:
+      "Há dois structs Ponto na RAM: p[0] em $0400 e p[1] em $0403 — em cada um, x no " +
+      "primeiro byte, y no segundo e soma no terceiro (o teste troca os valores). Para cada " +
+      "struct, calcule soma = x + y e grave no próprio campo soma: $0402 e $0405. São as " +
+      "mesmas três instruções, com a base deslocada.",
+    cCode:
+      "struct Ponto {\n    int x;      // base + 0\n    int y;      // base + 1\n    int soma;   // base + 2\n};\n\nstruct Ponto p[2];  // p[0] em $0400, p[1] em $0403\n\np[0].soma = p[0].x + p[0].y;\np[1].soma = p[1].x + p[1].y;",
+    template: c7Template,
+    solution: c7Solution,
+    hints: [
+      "O primeiro struct: lda $0400 (x), add $0401 (y), sta $0402 (soma). O segundo é o mesmo padrão com todos os endereços +3: $0403, $0404, $0405.",
+      "Não existe 'p[0]' nem 'p[1]' na máquina — existe o endereço. Para o compilador, escrever p[1].y é somar base + sizeof(struct) + offset antes de gerar o código.",
+      "Confira no painel de memória: os três bytes de cada struct ficam lado a lado, e a soma sobrescreve o terceiro byte do próprio struct.",
+    ],
+    cases: c7Cases,
+  },
+  {
+    id: "c8-funcao",
+    title: "desafio final: a função completa",
+    theory:
+      "A função completa junta tudo o que a trilha ensinou: JSR/RTS com contrato de dados " +
+      "(ex5), while com teste no topo (c4), ponteiro indireto com deslocamento (ex6) e " +
+      "struct acessada por base + offset (c7). O endereço de v[i].nota é base + 2*i, porque " +
+      "cada struct ocupa 2 bytes — e 2*i na máquina é um SHL (deslocar um bit à esquerda " +
+      "multiplica por 2), seguido de TAY para virar índice do lda ($30),y. O resultado volta " +
+      "em A, como o contrato combinou, e quem guarda é quem chamou.",
+    statement:
+      "Há um ponteiro para o array em $30/$31 e n em $0032; o array tem n structs Aluno em " +
+      "$0400, cada um com nota (base + 0) e peso (base + 1). Escreva a função somanotas: " +
+      "ela percorre o array, soma as notas (ignore o peso) e devolve o total em A, " +
+      "terminando com RTS. O programa principal já chama e grava o retorno em $0350. Use " +
+      "$0033 para s e $0034 para i. Com n = 0, devolva 0 sem percorrer nada.",
+    cCode:
+      "struct Aluno {\n    int nota;    // base + 0\n    int peso;    // base + 1\n};\n\n// contrato: ponteiro v em $30/$31, n em $0032, retorno em A\nint soma_notas(struct Aluno *v, int n) {\n    int s = 0;   // rascunho em $0033\n    int i = 0;   // rascunho em $0034\n    while (i < n) {\n        s = s + v[i].nota;   // base + 2*i\n        i = i + 1;\n    }\n    return s;\n}",
+    template: c8Template,
+    solution: c8Solution,
+    hints: [
+      "Comece a função zerando os rascunhos: LDA #$00, STA $0033 (s) e STA $0034 (i). No topo do loop: lda $0034 (i), cmp $0032 (n), jc fora — C=1 significa i >= n.",
+      "O endereço de v[i].nota é base + 2*i: depois do JC, A ainda é i — shl dobra (A = 2*i), tay copia para Y, e lda ($30),y lê o byte em ponteiro + Y.",
+      "Feche o corpo com add $0033, sta $0033 (s = s + nota), inc $0034 e jmp loop. No rótulo fora, devolva: lda $0033 e rts — o RTS desempilha o endereço que o JSR gravou.",
+    ],
+    cases: c8Cases,
+  },
 ];
 
 export const EXERCISES: ExerciseDef[] = [...HELLO, ...C_LOGICA];
@@ -538,7 +853,7 @@ export const TRACKS: TrackDef[] = [
     id: "c-para-asm",
     title: "De C para assembly",
     description:
-      "Como variáveis, if/else e loops do C se traduzem em endereços, flags e desvios: cada nível mostra a mesma lógica escrita nas duas linguagens.",
+      "Como as construções do C — variáveis, if/else, loops, strings, arrays, structs e uma função completa — se traduzem em endereços, flags e desvios: cada nível mostra a mesma lógica escrita nas duas linguagens.",
     exercises: C_LOGICA,
   },
 ];

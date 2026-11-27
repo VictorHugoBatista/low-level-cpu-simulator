@@ -242,8 +242,8 @@ describe("catálogo — nenhum template passa sem trabalho", () => {
 });
 
 describe("catálogo — integridade dos dados", () => {
-  it("a série tem os 11 níveis, com teoria, enunciado, dicas e ≥ 2 casos", () => {
-    expect(EXERCISES.length).toBe(11);
+  it("a série tem os 15 níveis, com teoria, enunciado, dicas e ≥ 2 casos", () => {
+    expect(EXERCISES.length).toBe(15);
     for (const def of EXERCISES) {
       expect(def.theory.length).toBeGreaterThan(40);
       expect(def.statement.length).toBeGreaterThan(40);
@@ -288,13 +288,17 @@ describe("trilhas", () => {
     expect(hello?.exercises).toHaveLength(7);
   });
 
-  it("a trilha De C para assembly traz os quatro níveis de construções do C, cada um com o trecho em C", () => {
+  it("a trilha De C para assembly traz os oito níveis de construções do C, cada um com o trecho em C", () => {
     const c = TRACKS.find((t) => t.id === "c-para-asm");
     expect(c?.exercises.map((d) => d.id)).toEqual([
       "c1-variaveis",
       "c2-se",
       "c3-se-senao",
       "c4-loop",
+      "c5-string",
+      "c6-array",
+      "c7-struct",
+      "c8-funcao",
     ]);
     for (const d of c?.exercises ?? []) {
       expect(d.cCode).toBeDefined();
