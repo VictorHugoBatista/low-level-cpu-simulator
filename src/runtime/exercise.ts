@@ -16,11 +16,20 @@ export interface MemExpect {
   value: number;
 }
 
+export interface DiskSectorPreset {
+  /** Número do setor (LBA) a ser preenchido na imagem do disco. */
+  sector: number;
+  /** Bytes gravados no início do setor; o restante do setor fica $00. */
+  data: readonly number[];
+}
+
 export interface ExerciseCase {
   /** Nome do caso, exibido no painel de resultado — descreve os valores de entrada. */
   name: string;
   /** Bytes gravados na RAM antes do reset: os valores de origem do problema. */
   preset?: MemExpect[];
+  /** Setores gravados na imagem do disco antes do reset — o disco é I/O programado em $F000. */
+  presetDisk?: DiskSectorPreset[];
   /** Bytes que os endereços de destino devem ter depois de HLT. */
   expect?: MemExpect[];
   /** Quando definido, o texto acumulado no terminal deve ser exatamente este. */
@@ -55,6 +64,7 @@ export function runExerciseCase(
   const machine = new Machine();
   machine.loadProgram(program.bytes, program.origin);
   for (const p of testCase.preset ?? []) machine.ram.write(p.addr, p.value);
+  for (const d of testCase.presetDisk ?? []) machine.writeDiskSector(d.sector, d.data);
   machine.reset();
   machine.run(maxCycles);
 
@@ -98,12 +108,13 @@ export function runExerciseCases(
 }
 
 /** Prepara a máquina VISÍVEL do dashboard para desenvolver um caso à mão: grava os
- * valores de entrada do caso na RAM, limpa o terminal (uma máquina fresca do
- * verificador começa sem texto) e reseta — o mesmo preparo do runExerciseCase, mas
- * na máquina cujos painéis a pessoa está olhando. loadProgram/reset não limpam a
- * RAM, então remontar o programa preserva as entradas. */
-export function applyCasePresets(machine: Machine, preset: readonly MemExpect[]): void {
-  for (const p of preset) machine.ram.write(p.addr, p.value);
+ * valores de entrada do caso na RAM (e seus setores no disco), limpa o terminal (uma
+ * máquina fresca do verificador começa sem texto) e reseta — o mesmo preparo do
+ * runExerciseCase, mas na máquina cujos painéis a pessoa está olhando. loadProgram/reset
+ * não limpam a RAM, então remontar o programa preserva as entradas. */
+export function applyCasePresets(machine: Machine, testCase: ExerciseCase): void {
+  for (const p of testCase.preset ?? []) machine.ram.write(p.addr, p.value);
+  for (const d of testCase.presetDisk ?? []) machine.writeDiskSector(d.sector, d.data);
   machine.terminal.clear();
   machine.reset();
 }

@@ -28,7 +28,27 @@ import c7Template from "../../exercises/c7-struct.template.asm?raw";
 import c7Solution from "../../exercises/c7-struct.solucao.asm?raw";
 import c8Template from "../../exercises/c8-funcao.template.asm?raw";
 import c8Solution from "../../exercises/c8-funcao.solucao.asm?raw";
-import type { ExerciseCase } from "../runtime/exercise.js";
+import d1Template from "../../exercises/d1-fila.template.asm?raw";
+import d1Solution from "../../exercises/d1-fila.solucao.asm?raw";
+import d2Template from "../../exercises/d2-pilha.template.asm?raw";
+import d2Solution from "../../exercises/d2-pilha.solucao.asm?raw";
+import d3Template from "../../exercises/d3-arvore.template.asm?raw";
+import d3Solution from "../../exercises/d3-arvore.solucao.asm?raw";
+import d4Template from "../../exercises/d4-grafo.template.asm?raw";
+import d4Solution from "../../exercises/d4-grafo.solucao.asm?raw";
+import s1Template from "../../exercises/s1-checksum.template.asm?raw";
+import s1Solution from "../../exercises/s1-checksum.solucao.asm?raw";
+import s2Template from "../../exercises/s2-cifra-xor.template.asm?raw";
+import s2Solution from "../../exercises/s2-cifra-xor.solucao.asm?raw";
+import s3Template from "../../exercises/s3-cesar.template.asm?raw";
+import s3Solution from "../../exercises/s3-cesar.solucao.asm?raw";
+import s4Template from "../../exercises/s4-overflow.template.asm?raw";
+import s4Solution from "../../exercises/s4-overflow.solucao.asm?raw";
+import s5Template from "../../exercises/s5-senha.template.asm?raw";
+import s5Solution from "../../exercises/s5-senha.solucao.asm?raw";
+import s6Template from "../../exercises/s6-disco.template.asm?raw";
+import s6Solution from "../../exercises/s6-disco.solucao.asm?raw";
+import type { DiskSectorPreset, ExerciseCase, MemExpect } from "../runtime/exercise.js";
 
 /**
  * A série de exercícios de fixação, em ordem. Cada nível tem uma base teórica breve, um
@@ -52,8 +72,8 @@ export interface ExerciseDef {
   solution: string;
   hints: string[];
   cases: ExerciseCase[];
-  /** A mesma lógica do nível escrita em C — presente nos níveis da trilha "De C para
-   * assembly", onde o ponto é ver a frase do C desmontada em instruções. */
+  /** A mesma lógica do nível escrita em C — presente nos níveis que mostram a lógica
+   * nas duas linguagens (as trilhas "De C para assembly" e "Segurança da informação"). */
   cCode?: string;
 }
 
@@ -827,7 +847,931 @@ const C_LOGICA: ExerciseDef[] = [
   },
 ];
 
-export const EXERCISES: ExerciseDef[] = [...HELLO, ...C_LOGICA];
+/**
+ * A trilha "Estruturas de dados": cada nível constrói uma estrutura clássica em cima do
+ * que a máquina oferece — memória, endereços e fluxo. A fila e a pilha mostram que
+ * "estrutura" é uma convenção de acesso em cima de um array (a fila com head/tail que
+ * dá a volta no buffer; a pilha com o SP manual, espelho da stack do hardware); a
+ * árvore segue ponteiros de 1 byte pela aritmética de base + 3×i; e o grafo fecha
+ * juntando fila + matriz de adjacência em uma BFS.
+ */
+const d1Cases: ExerciseCase[] = [
+  {
+    name: "fila 10,20,30,40 sai na ordem FIFO",
+    preset: [
+      { addr: 0x0030, value: 0 }, // head
+      { addr: 0x0031, value: 4 }, // tail
+      { addr: 0x0500, value: 10 },
+      { addr: 0x0501, value: 20 },
+      { addr: 0x0502, value: 30 },
+      { addr: 0x0503, value: 40 },
+    ],
+    expect: [
+      { addr: 0x0400, value: 10 },
+      { addr: 0x0401, value: 20 },
+      { addr: 0x0402, value: 30 },
+      { addr: 0x0403, value: 40 },
+    ],
+  },
+  {
+    name: "fila que deu a volta no buffer: 77,88,11,22",
+    preset: [
+      { addr: 0x0030, value: 6 }, // head
+      { addr: 0x0031, value: 2 }, // tail
+      { addr: 0x0506, value: 77 },
+      { addr: 0x0507, value: 88 },
+      { addr: 0x0500, value: 11 },
+      { addr: 0x0501, value: 22 },
+    ],
+    expect: [
+      { addr: 0x0400, value: 77 },
+      { addr: 0x0401, value: 88 },
+      { addr: 0x0402, value: 11 },
+      { addr: 0x0403, value: 22 },
+    ],
+  },
+  {
+    name: "fila vazia (head == tail): nada sai",
+    preset: [
+      { addr: 0x0030, value: 3 },
+      { addr: 0x0031, value: 3 },
+    ],
+    expect: [{ addr: 0x0400, value: 0 }],
+  },
+  {
+    name: "um elemento só: 99",
+    preset: [
+      { addr: 0x0030, value: 5 },
+      { addr: 0x0031, value: 6 },
+      { addr: 0x0505, value: 99 },
+    ],
+    expect: [{ addr: 0x0400, value: 99 }],
+  },
+];
+
+const d2Cases: ExerciseCase[] = [
+  {
+    name: "1,2,3,4 invertidos → 4,3,2,1",
+    preset: [
+      { addr: 0x0400, value: 1 },
+      { addr: 0x0401, value: 2 },
+      { addr: 0x0402, value: 3 },
+      { addr: 0x0403, value: 4 },
+    ],
+    expect: [
+      { addr: 0x0400, value: 4 },
+      { addr: 0x0401, value: 3 },
+      { addr: 0x0402, value: 2 },
+      { addr: 0x0403, value: 1 },
+    ],
+  },
+  {
+    name: "200,0,5,255 invertidos → 255,5,0,200",
+    preset: [
+      { addr: 0x0400, value: 200 },
+      { addr: 0x0401, value: 0 },
+      { addr: 0x0402, value: 5 },
+      { addr: 0x0403, value: 255 },
+    ],
+    expect: [
+      { addr: 0x0400, value: 255 },
+      { addr: 0x0401, value: 5 },
+      { addr: 0x0402, value: 0 },
+      { addr: 0x0403, value: 200 },
+    ],
+  },
+  {
+    name: "todos iguais: 7,7,7,7 → 7,7,7,7",
+    preset: [
+      { addr: 0x0400, value: 7 },
+      { addr: 0x0401, value: 7 },
+      { addr: 0x0402, value: 7 },
+      { addr: 0x0403, value: 7 },
+    ],
+    expect: [
+      { addr: 0x0400, value: 7 },
+      { addr: 0x0401, value: 7 },
+      { addr: 0x0402, value: 7 },
+      { addr: 0x0403, value: 7 },
+    ],
+  },
+  {
+    name: "10,20,0,0 invertidos → 0,0,20,10",
+    preset: [
+      { addr: 0x0400, value: 10 },
+      { addr: 0x0401, value: 20 },
+      { addr: 0x0402, value: 0 },
+      { addr: 0x0403, value: 0 },
+    ],
+    expect: [
+      { addr: 0x0400, value: 0 },
+      { addr: 0x0401, value: 0 },
+      { addr: 0x0402, value: 20 },
+      { addr: 0x0403, value: 10 },
+    ],
+  },
+];
+
+/**
+ * A árvore de busca do d3, fixa em todos os casos (só o alvo muda):
+ *
+ *            50          ← nó 0 (raiz)
+ *           /  \
+ *         30    70        ← nós 1 e 2
+ *        /  \   /  \
+ *      20   40 60   80    ← nós 3, 4, 5 e 6
+ *
+ * Cada nó são 3 bytes em $0400 + 3×i: valor, índice do filho esquerdo e do direito
+ * ($FF = não existe).
+ */
+const NOS_BST: Array<[number, number, number]> = [
+  [50, 1, 2],
+  [30, 3, 4],
+  [70, 5, 6],
+  [20, 0xff, 0xff],
+  [40, 0xff, 0xff],
+  [60, 0xff, 0xff],
+  [80, 0xff, 0xff],
+];
+
+const nosBst = (): MemExpect[] =>
+  NOS_BST.flatMap(([valor, esq, dir], i) => [
+    { addr: 0x0400 + 3 * i, value: valor },
+    { addr: 0x0401 + 3 * i, value: esq },
+    { addr: 0x0402 + 3 * i, value: dir },
+  ]);
+
+const buscaBst = (nome: string, alvo: number, resultado: number, raiz = 0): ExerciseCase => ({
+  name: nome,
+  preset: [...nosBst(), { addr: 0x0030, value: raiz }, { addr: 0x0031, value: alvo }],
+  expect: [{ addr: 0x0032, value: resultado }],
+});
+
+const d3Cases: ExerciseCase[] = [
+  buscaBst("alvo 60: desce 50 → 70 → 60, achou", 60, 1),
+  buscaBst("alvo 50: a própria raiz, na primeira comparação", 50, 1),
+  buscaBst("alvo 55: não está — desce 50 → 70 → 60 e o caminho acaba", 55, 0),
+  buscaBst("alvo 20: o canto extremo esquerdo, achou", 20, 1),
+  buscaBst("árvore vazia (raiz $FF): não tem onde procurar", 50, 0, 0xff),
+];
+
+/**
+ * O grafo do d4, fixo em todos os casos (só a origem muda): 8 nós, com um ciclo
+ * (4→1) e um segundo componente desconexo (5→6→7) — a busca tem que parar nele.
+ */
+const ARESTAS_BFS: Array<[number, number]> = [
+  [0, 1],
+  [0, 2],
+  [1, 3],
+  [2, 3],
+  [3, 4],
+  [4, 1],
+  [5, 6],
+  [6, 7],
+];
+
+const matrizBfs = (): MemExpect[] =>
+  ARESTAS_BFS.map(([de, para]) => ({ addr: 0x0400 + de * 8 + para, value: 1 }));
+
+const bfsCase = (origem: number, visitados: number[]): ExerciseCase => ({
+  name: `BFS a partir do nó ${origem}`,
+  preset: [...matrizBfs(), { addr: 0x0030, value: origem }],
+  expect: visitados.map((value, i) => ({ addr: 0x0500 + i, value })),
+});
+
+const d4Cases: ExerciseCase[] = [
+  bfsCase(0, [1, 1, 1, 1, 1, 0, 0, 0]),
+  bfsCase(5, [0, 0, 0, 0, 0, 1, 1, 1]),
+  bfsCase(7, [0, 0, 0, 0, 0, 0, 0, 1]),
+  bfsCase(6, [0, 0, 0, 0, 0, 0, 1, 1]),
+];
+
+const ESTRUTURAS: ExerciseDef[] = [
+  {
+    id: "d1-fila",
+    title: "fila circular: desenfileirar tudo",
+    theory:
+      "Fila é FIFO — quem chega primeiro sai primeiro. Na máquina não existe 'fila': " +
+      "existe um array e dois índices que seguem uma convenção — head aponta para a " +
+      "frente (de onde os bytes saem) e tail fica atrás do último (onde entram). A fila " +
+      "circular reusa as posições liberadas: os índices andam para frente e voltam a 0 " +
+      "ao passar do fim do buffer, como um relógio de módulo 8. A convenção do vazio é " +
+      "head == tail — os dois índices se encontraram. Toda fila de impressão, buffer de " +
+      "teclado e agendador de processos é isto: array + head + tail + a volta do módulo.",
+    statement:
+      "Há um buffer circular de 8 posições em $0500..$0507, com head em $0030 e tail em " +
+      "$0031 (índices de 0 a 7). Desenfileire todos os elementos, na ordem FIFO, gravando " +
+      "cada um em $0400 em diante — use $0032 como contador da saída. head == tail " +
+      "significa fila vazia. Um dos testes tem uma fila que deu a volta no buffer " +
+      "(head = 6, tail = 2): ela sai na ordem 77, 88, 11, 22.",
+    cCode:
+      "// q em $0500 (8 posições), head em $0030, tail em $0031, saída em $0400\n" +
+      "while (head != tail) {\n" +
+      "    out[n++] = q[head];        // sai da frente\n" +
+      "    head = (head + 1) % 8;     // a volta do buffer circular\n" +
+      "}",
+    template: d1Template,
+    solution: d1Solution,
+    hints: [
+      "No topo do laço: lda $0030, cmp $0031, jz fim — na fila circular, head == tail é " +
+      "exatamente vazio (head >= tail não funciona: a fila pode ter dado a volta).",
+      "Desenfileirar: X = head e lda $0500,x traz o byte da frente; depois X = contador " +
+      "e sta $0400,x grava na saída; inc $0032 e inc $0030 fecham a operação.",
+      "A volta do buffer: depois do inc $0030, cmp #$08 mostra se head chegou ao fim do " +
+      "buffer — se chegou, ele volta a 0 com lda #$00, sta $0030, e o laço recomeça.",
+    ],
+    cases: d1Cases,
+  },
+  {
+    id: "d2-pilha",
+    title: "pilha manual: inverter um array",
+    theory:
+      "Pilha é LIFO — o último a entrar é o primeiro a sair. A stack do hardware (PHA/PLA, " +
+      "página $01, SP começando em $FF) é exatamente isto: uma convenção sobre memória — " +
+      "push grava no topo e faz SP−−, pop faz SP++ e lê o topo. Nada no hardware é " +
+      "exclusivo dela: o programa pode ter outra pilha em outra página, com um SP próprio " +
+      "na página zero, e as mesmas duas operações escritas à mão. É a estrutura por trás " +
+      "de chamadas de função, expressões com parênteses e desfazer/refazer — e inverter " +
+      "uma sequência é o seu truque mais direto.",
+    statement:
+      "Há 4 bytes em $0400..$0403. Inverta a ordem deles usando uma pilha sua na página " +
+      "$05, com o SP em $0030 começando em $FF — a mesma convenção do hardware: push " +
+      "grava em $0500+SP e decrementa SP; pop incrementa SP e lê de $0500+SP. Ao final, " +
+      "$0400..$0403 deve conter os mesmos bytes ao contrário. Use $0031 como índice do " +
+      "array e observe no painel de memória: sua pilha cresce de $05FF para baixo, como " +
+      "a stack cresce de $01FF.",
+    cCode:
+      "int sp = 0xff;                  // o topo da página $05\n" +
+      "for (int i = 0; i < 4; i++) {   // push: grava e desce\n" +
+      "    pilha[sp] = a[i];\n" +
+      "    sp = sp - 1;\n" +
+      "}\n" +
+      "for (int i = 0; i < 4; i++) {   // pop: sobe e lê\n" +
+      "    sp = sp + 1;\n" +
+      "    a[i] = pilha[sp];\n" +
+      "}",
+    template: d2Template,
+    solution: d2Solution,
+    hints: [
+      "São duas passadas: primeiro empurre a[0..3] para a pilha, depois pop de volta para " +
+      "$0400.. — quem entrou por último (a[3]) volta como primeiro.",
+      "O push: X = i e lda $0400,x traz o byte; X = SP (ldx $0030) e sta $0500,x grava no " +
+      "topo; dec $0030 desce o SP. O pop é o espelho: inc $0030, ldx $0030, lda $0500,x e " +
+      "grava de volta com X = i.",
+      "Compare com o hardware: PHA escreve M[$0100+SP] e decrementa; seu push escreve " +
+      "M[$0500+SP] e decrementa — a stack do hardware é este mesmo par de operações.",
+    ],
+    cases: d2Cases,
+  },
+  {
+    id: "d3-arvore",
+    title: "árvore binária: busca descendo da raiz",
+    theory:
+      "Uma árvore binária de busca é uma coleção de nós espalhados na memória, costurados " +
+      "por ponteiros: cada nó guarda um valor, o índice do filho esquerdo e o do filho " +
+      "direito ($FF = não existe). A propriedade que dá nome a ela: tudo à esquerda é " +
+      "menor, tudo à direita é maior — então procurar é DESCER: compara com o nó e escolhe " +
+      "um só dos dois caminhos, sem nunca olhar o resto da árvore. É o salto em relação ao " +
+      "array do c6, onde a busca varre todos os elementos: aqui, cada comparação corta metade " +
+      "do que sobrou. Seguir ponteiro é aritmética: o nó i começa em $0400 + 3×i, e 3×i é " +
+      "i + 2×i, com o 2×i saindo de um SHL.",
+    statement:
+      "A árvore mora em $0400, 3 bytes por nó: valor, filho esquerdo, filho direito ($FF = " +
+      "nenhum). O índice do nó raiz está em $0030 e o valor procurado em $0031. Grave 1 em " +
+      "$0032 se o valor existe na árvore, ou 0 se o caminho acabou sem encontrá-lo. Desça " +
+      "da raiz: alvo menor desce à esquerda, maior desce à direita.",
+    cCode:
+      "struct No { int valor; int esq; int dir; };  // nó i em $0400 + 3*i\n" +
+      "\n" +
+      "int atual = raiz;\n" +
+      "int achou = 0;\n" +
+      "while (atual != 0xff && !achou) {\n" +
+      "    if (alvo == no[atual].valor) {\n" +
+      "        achou = 1;\n" +
+      "    } else if (alvo < no[atual].valor) {\n" +
+      "        atual = no[atual].esq;   // menor: desce à esquerda\n" +
+      "    } else {\n" +
+      "        atual = no[atual].dir;   // maior: desce à direita\n" +
+      "    }\n" +
+      "}",
+    template: d3Template,
+    solution: d3Solution,
+    hints: [
+      "O laço: lda $0030 (o nó corrente), cmp #$ff — $FF significa 'não existe': se o " +
+      "caminho acabou, o valor não está na árvore.",
+      "O endereço do nó é $0400 + 3×nó: shl dobra A (2×nó), add $0030 soma o nó de volta " +
+      "(3×nó), tax — e daí lda $0400,x é o valor, lda $0401,x o filho esquerdo, lda " +
+      "$0402,x o direito.",
+      "A decisão: cmp $0400,x compara o alvo com o valor do nó — jz achou; jc desvia " +
+      "quando alvo > valor (desce à direita); o que sobra (alvo < valor) desce à esquerda. " +
+      "Em qualquer dos dois, o filho vira o nó corrente e o laço recomeça.",
+    ],
+    cases: d3Cases,
+  },
+  {
+    id: "d4-grafo",
+    title: "desafio: BFS — a onda que marca alcançáveis",
+    theory:
+      "O grafo é a estrutura mais geral de todas: nós e arestas, sem hierarquia nenhuma — " +
+      "a árvore é o caso em que cada nó tem um pai. Na memória, a matriz de adjacência 8×8 " +
+      "mora em $0400: a linha u começa em $0400 + 8×u (o mesmo 8×u do c6, agora com três " +
+      "SHL), e matriz[u][v] vale 1 quando existe aresta u→v. O BFS (busca em largura) " +
+      "responde 'o que é alcançável a partir daqui?' — e quem orquestra a visita é a fila " +
+      "do primeiro nível: tira um nó da fila, marca os vizinhos ainda não visitados e os " +
+      "enfileira. A onda avança em anéis, na ordem certa, porque a fila devolve os nós " +
+      "na ordem em que foram descobertos.",
+    statement:
+      "O grafo de 8 nós (0..7) está na matriz de adjacência em $0400 — 8 bytes por linha, " +
+      "matriz[u][v] em $0400 + 8×u + v. O nó de partida está em $0030. Marque em " +
+      "$0500..$0507 os nós alcançáveis: visited[origem] = 1 e visited[v] = 1 para todo v " +
+      "alcançável a partir da origem. Use a fila em $0508..$050F com head em $0031 e tail " +
+      "em $0032, e $0033/$0034 como rascunhos (v e u). Cada nó entra na fila no máximo uma " +
+      "vez — o visited marca antes de enfileirar —, então as 8 posições bastam e os " +
+      "índices nunca dão a volta.",
+    cCode:
+      "// matriz[u][v] em $0400 + 8*u + v; visited em $0500; fila em $0508\n" +
+      "head = tail = 0;\n" +
+      "visited[origem] = 1;\n" +
+      "fila[tail++] = origem;\n" +
+      "while (head != tail) {              // enquanto a fila tiver gente\n" +
+      "    int u = fila[head++];           // a onda avança em anéis\n" +
+      "    for (int v = 0; v < 8; v++) {\n" +
+      "        if (matriz[u][v] == 1 && !visited[v]) {\n" +
+      "            visited[v] = 1;\n" +
+      "            fila[tail++] = v;\n" +
+      "        }\n" +
+      "    }\n" +
+      "}",
+    template: d4Template,
+    solution: d4Solution,
+    hints: [
+      "Comece fora do laço: zere visited ($0500..$0507) com um laço de índice em X; depois " +
+      "visited[origem] = 1 e a origem entra na fila (fila[tail] = origem, inc tail).",
+      "O laço principal: head == tail esvaziou a fila (fim); senão u = fila[head], inc " +
+      "head. Para cada v em 0..7: X = 8×u + v (três SHL dão 8×u; add v soma o índice) e " +
+      "lda $0400,x é matriz[u][v] — se 0, não há aresta, passe ao próximo v.",
+      "Tem aresta? Consulte visited[v] (X = v): se ainda é 0, escreva 1 lá mesmo e " +
+      "enfileire v (fila[tail] = v, inc tail). Marcando antes de enfileirar, ninguém " +
+      "entra duas vezes — e é isso que garante que a fila não estoura.",
+    ],
+    cases: d4Cases,
+  },
+];
+
+/**
+ * A trilha "Segurança da informação": os pilares da área — integridade, confidencialidade,
+ * autenticidade e disponibilidade — materializados em operações de 8 bits. O checksum e a
+ * cifra mostram que redundância e segredo são aritmética; a cópia com limite e a comparação
+ * de senha mostram que o invasor controla as entradas; e o desafio final usa o disco real
+ * da máquina para amarrar: dados só entram no sistema depois de verificados.
+ */
+const s1Cases: ExerciseCase[] = [
+  {
+    name: "bytes 1..8 → checksum 8",
+    preset: [
+      { addr: 0x0400, value: 1 },
+      { addr: 0x0401, value: 2 },
+      { addr: 0x0402, value: 3 },
+      { addr: 0x0403, value: 4 },
+      { addr: 0x0404, value: 5 },
+      { addr: 0x0405, value: 6 },
+      { addr: 0x0406, value: 7 },
+      { addr: 0x0407, value: 8 },
+    ],
+    expect: [{ addr: 0x0030, value: 8 }],
+  },
+  {
+    name: "pares iguais se cancelam: 7,7,7,7 → 0",
+    preset: [
+      { addr: 0x0400, value: 7 },
+      { addr: 0x0401, value: 7 },
+      { addr: 0x0402, value: 7 },
+      { addr: 0x0403, value: 7 },
+      { addr: 0x0404, value: 0 },
+      { addr: 0x0405, value: 0 },
+      { addr: 0x0406, value: 0 },
+      { addr: 0x0407, value: 0 },
+    ],
+    expect: [{ addr: 0x0030, value: 0 }],
+  },
+  {
+    name: "170 e 85 → 255 (todos os bits acesos)",
+    preset: [
+      { addr: 0x0400, value: 170 },
+      { addr: 0x0401, value: 85 },
+      { addr: 0x0402, value: 0 },
+      { addr: 0x0403, value: 0 },
+      { addr: 0x0404, value: 0 },
+      { addr: 0x0405, value: 0 },
+      { addr: 0x0406, value: 0 },
+      { addr: 0x0407, value: 0 },
+    ],
+    expect: [{ addr: 0x0030, value: 255 }],
+  },
+  {
+    name: "bloco todo zero → 0",
+    preset: [
+      { addr: 0x0400, value: 0 },
+      { addr: 0x0401, value: 0 },
+      { addr: 0x0402, value: 0 },
+      { addr: 0x0403, value: 0 },
+      { addr: 0x0404, value: 0 },
+      { addr: 0x0405, value: 0 },
+      { addr: 0x0406, value: 0 },
+      { addr: 0x0407, value: 0 },
+    ],
+    expect: [{ addr: 0x0030, value: 0 }],
+  },
+];
+
+const s2Cases: ExerciseCase[] = [
+  {
+    name: 'chave $5A cifra "ATAQUE" (6 bytes)',
+    preset: [
+      { addr: 0x0030, value: 0x5a },
+      { addr: 0x0031, value: 6 },
+      { addr: 0x0400, value: 0x41 },
+      { addr: 0x0401, value: 0x54 },
+      { addr: 0x0402, value: 0x41 },
+      { addr: 0x0403, value: 0x51 },
+      { addr: 0x0404, value: 0x55 },
+      { addr: 0x0405, value: 0x45 },
+    ],
+    expect: [
+      { addr: 0x0500, value: 0x1b },
+      { addr: 0x0501, value: 0x0e },
+      { addr: 0x0502, value: 0x1b },
+      { addr: 0x0503, value: 0x0b },
+      { addr: 0x0504, value: 0x0f },
+      { addr: 0x0505, value: 0x1f },
+      { addr: 0x0506, value: 0x00 },
+    ],
+  },
+  {
+    name: 'chave $FF cifra "AB"',
+    preset: [
+      { addr: 0x0030, value: 0xff },
+      { addr: 0x0031, value: 2 },
+      { addr: 0x0400, value: 0x41 },
+      { addr: 0x0401, value: 0x42 },
+    ],
+    expect: [
+      { addr: 0x0500, value: 0xbe },
+      { addr: 0x0501, value: 0xbd },
+      { addr: 0x0502, value: 0x00 },
+    ],
+  },
+  {
+    name: "mensagem vazia (n=0): só o terminador",
+    preset: [
+      { addr: 0x0030, value: 0x5a },
+      { addr: 0x0031, value: 0 },
+      { addr: 0x0400, value: 0x00 },
+    ],
+    expect: [{ addr: 0x0500, value: 0x00 }],
+  },
+];
+
+const s3Cases: ExerciseCase[] = [
+  {
+    name: 'chave 3: "HELLO" → "KHOOR"',
+    preset: [
+      { addr: 0x0030, value: 3 },
+      { addr: 0x0031, value: 5 },
+      { addr: 0x0400, value: 0x48 },
+      { addr: 0x0401, value: 0x45 },
+      { addr: 0x0402, value: 0x4c },
+      { addr: 0x0403, value: 0x4c },
+      { addr: 0x0404, value: 0x4f },
+    ],
+    expect: [
+      { addr: 0x0500, value: 0x4b },
+      { addr: 0x0501, value: 0x48 },
+      { addr: 0x0502, value: 0x4f },
+      { addr: 0x0503, value: 0x4f },
+      { addr: 0x0504, value: 0x52 },
+      { addr: 0x0505, value: 0x00 },
+    ],
+  },
+  {
+    name: 'a volta do alfabeto: "XYZ" + 3 → "ABC"',
+    preset: [
+      { addr: 0x0030, value: 3 },
+      { addr: 0x0031, value: 3 },
+      { addr: 0x0400, value: 0x58 },
+      { addr: 0x0401, value: 0x59 },
+      { addr: 0x0402, value: 0x5a },
+    ],
+    expect: [
+      { addr: 0x0500, value: 0x41 },
+      { addr: 0x0501, value: 0x42 },
+      { addr: 0x0502, value: 0x43 },
+      { addr: 0x0503, value: 0x00 },
+    ],
+  },
+  {
+    name: 'chave 0: "DADOS" sai igual (a identidade é uma chave)',
+    preset: [
+      { addr: 0x0030, value: 0 },
+      { addr: 0x0031, value: 5 },
+      { addr: 0x0400, value: 0x44 },
+      { addr: 0x0401, value: 0x41 },
+      { addr: 0x0402, value: 0x44 },
+      { addr: 0x0403, value: 0x4f },
+      { addr: 0x0404, value: 0x53 },
+    ],
+    expect: [
+      { addr: 0x0500, value: 0x44 },
+      { addr: 0x0501, value: 0x41 },
+      { addr: 0x0502, value: 0x44 },
+      { addr: 0x0503, value: 0x4f },
+      { addr: 0x0504, value: 0x53 },
+      { addr: 0x0505, value: 0x00 },
+    ],
+  },
+  {
+    name: 'a última chave: "AB" + 25 → "ZA"',
+    preset: [
+      { addr: 0x0030, value: 25 },
+      { addr: 0x0031, value: 2 },
+      { addr: 0x0400, value: 0x41 },
+      { addr: 0x0401, value: 0x42 },
+    ],
+    expect: [
+      { addr: 0x0500, value: 0x5a },
+      { addr: 0x0501, value: 0x41 },
+      { addr: 0x0502, value: 0x00 },
+    ],
+  },
+];
+
+const s4Cases: ExerciseCase[] = [
+  {
+    name: '"OI" cabe: copia e termina',
+    preset: [
+      { addr: 0x0400, value: 0x4f },
+      { addr: 0x0401, value: 0x49 },
+      { addr: 0x0402, value: 0x00 },
+      { addr: 0x0508, value: 0x42 }, // o canário logo depois do buffer
+    ],
+    expect: [
+      { addr: 0x0500, value: 0x4f },
+      { addr: 0x0501, value: 0x49 },
+      { addr: 0x0502, value: 0x00 },
+      { addr: 0x0508, value: 0x42 }, // o canário sobrevive
+    ],
+  },
+  {
+    name: '"ABCDEFG" enche o buffer com precisão',
+    preset: [
+      { addr: 0x0400, value: 0x41 },
+      { addr: 0x0401, value: 0x42 },
+      { addr: 0x0402, value: 0x43 },
+      { addr: 0x0403, value: 0x44 },
+      { addr: 0x0404, value: 0x45 },
+      { addr: 0x0405, value: 0x46 },
+      { addr: 0x0406, value: 0x47 },
+      { addr: 0x0407, value: 0x00 },
+      { addr: 0x0508, value: 0x42 },
+    ],
+    expect: [
+      { addr: 0x0500, value: 0x41 },
+      { addr: 0x0501, value: 0x42 },
+      { addr: 0x0502, value: 0x43 },
+      { addr: 0x0503, value: 0x44 },
+      { addr: 0x0504, value: 0x45 },
+      { addr: 0x0505, value: 0x46 },
+      { addr: 0x0506, value: 0x47 },
+      { addr: 0x0507, value: 0x00 },
+      { addr: 0x0508, value: 0x42 },
+    ],
+  },
+  {
+    name: "fonte de 12 bytes: trunca em 7 e preserva o canário",
+    preset: [
+      { addr: 0x0400, value: 0x41 },
+      { addr: 0x0401, value: 0x54 },
+      { addr: 0x0402, value: 0x41 },
+      { addr: 0x0403, value: 0x43 },
+      { addr: 0x0404, value: 0x41 },
+      { addr: 0x0405, value: 0x4e },
+      { addr: 0x0406, value: 0x54 },
+      { addr: 0x0407, value: 0x45 },
+      { addr: 0x0408, value: 0x5f },
+      { addr: 0x0409, value: 0x41 },
+      { addr: 0x040a, value: 0x54 },
+      { addr: 0x040b, value: 0x45 },
+      { addr: 0x040c, value: 0x00 },
+      { addr: 0x0508, value: 0x42 },
+    ],
+    expect: [
+      { addr: 0x0500, value: 0x41 },
+      { addr: 0x0501, value: 0x54 },
+      { addr: 0x0502, value: 0x41 },
+      { addr: 0x0503, value: 0x43 },
+      { addr: 0x0504, value: 0x41 },
+      { addr: 0x0505, value: 0x4e },
+      { addr: 0x0506, value: 0x54 },
+      { addr: 0x0507, value: 0x00 },
+      { addr: 0x0508, value: 0x42 }, // quem escreveu além do buffer o pisou
+    ],
+  },
+  {
+    name: "fonte vazia: só o terminador",
+    preset: [
+      { addr: 0x0400, value: 0x00 },
+      { addr: 0x0508, value: 0x42 },
+    ],
+    expect: [
+      { addr: 0x0500, value: 0x00 },
+      { addr: 0x0508, value: 0x42 },
+    ],
+  },
+];
+
+/** A senha armazenada dos casos do s5 — os mesmos 8 bytes em toda comparação. */
+const SENHA_S5 = [1, 2, 3, 4, 5, 6, 7, 8];
+
+const senhaCase = (nome: string, tentativa: number[], resultado: number): ExerciseCase => ({
+  name: nome,
+  preset: [
+    ...SENHA_S5.map((value, i) => ({ addr: 0x0400 + i, value })),
+    ...tentativa.map((value, i) => ({ addr: 0x0410 + i, value })),
+  ],
+  expect: [{ addr: 0x0030, value: resultado }],
+});
+
+const s5Cases: ExerciseCase[] = [
+  senhaCase("tentativa igual à senha → 1", SENHA_S5, 1),
+  senhaCase("só o primeiro byte errado → 0", [9, 2, 3, 4, 5, 6, 7, 8], 0),
+  senhaCase("só o último byte errado → 0", [1, 2, 3, 4, 5, 6, 7, 9], 0),
+  senhaCase("tudo errado → 0", [0, 0, 0, 0, 0, 0, 0, 0], 0),
+];
+
+/** Os dados do setor do s6 e o checksum que viaja junto (soma mod 256). */
+const DADOS_S6 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+const VOLTA_S6 = [200, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // 300 mod 256 = 44
+
+const somaMod256 = (dados: readonly number[]): number =>
+  dados.reduce((s, b) => (s + b) & 0xff, 0);
+
+const setorS6 = (dados: readonly number[], checksum?: number): DiskSectorPreset => ({
+  sector: 1,
+  data: [...dados, checksum ?? somaMod256(dados)],
+});
+
+const casoS6 = (nome: string, dados: readonly number[], resultado: number, checksum?: number): ExerciseCase => ({
+  name: nome,
+  presetDisk: [setorS6(dados, checksum)],
+  expect:
+    resultado === 1
+      ? [
+          { addr: 0x0030, value: 1 },
+          ...dados.map((value, i) => ({ addr: 0x0500 + i, value })),
+        ]
+      : [
+          { addr: 0x0030, value: 0 },
+          { addr: 0x0500, value: 0 }, // nada foi copiado
+        ],
+});
+
+const s6Cases: ExerciseCase[] = [
+  casoS6("dados 1..16 com a soma 136 gravada no setor → usa", DADOS_S6, 1),
+  casoS6("dados corrompidos: o checksum de 137 não bate → rejeita", DADOS_S6, 0, 137),
+  casoS6("a soma dá a volta (300 → 44) e o checksum acompanha → usa", VOLTA_S6, 1),
+];
+
+const SEGURANCA: ExerciseDef[] = [
+  {
+    id: "s1-checksum",
+    title: "checksum XOR: detecte um byte fora do lugar",
+    theory:
+      "Integridade é saber que o dado não mudou no caminho — e a redundância é o único " +
+      "jeito: algo que viaja junto com o dado e denuncia a alteração. O checksum XOR é " +
+      "a mais barata das redundâncias: o XOR de todos os bytes do bloco. Qualquer byte " +
+      "que mudar muda o resultado, porque cada bit aceso do checksum marca uma posição " +
+      "com número ímpar de uns. Duas propriedades do XOR fazem a mágica: x XOR x = 0 " +
+      "(pares iguais se cancelam) e x XOR 0 = x (nada sobrevive ileso). Memória com " +
+      "paridade, RAID e pacotes de rede vivem desta ideia.",
+    statement:
+      "Há um bloco de 8 bytes em $0400..$0407. Calcule o checksum do bloco — o XOR de " +
+      "todos os bytes, um a um — e grave em $0030. Os testes incluem um bloco todo de " +
+      "zeros (o checksum também vale 0) e bytes repetidos, que se cancelam dois a dois.",
+    cCode:
+      "unsigned char checksum = 0;\n" +
+      "for (int i = 0; i < 8; i++) {\n" +
+      "    checksum = checksum ^ bloco[i];\n" +
+      "}",
+    template: s1Template,
+    solution: s1Solution,
+    hints: [
+      "É o laço do c6 com outra operação dentro: zere o checksum ($0030) e o contador " +
+      "($0031), e no corpo faça lda $0400,x seguido de xor $0030 e sta $0030.",
+      "O XOR não mexe em X — o tax do topo sobrevive a ele, e o sta $0030 atualiza o " +
+      "acumulador em toda volta, com byte igual ou diferente.",
+      "Teste à mão o caso 170, 85: em binário são 10101010 e 01010101 — o XOR acende " +
+      "todos os oito bits, e o resultado em $0030 é $FF.",
+    ],
+    cases: s1Cases,
+  },
+  {
+    id: "s2-cifra-xor",
+    title: "cifra XOR: esconda a mensagem",
+    theory:
+      "Confidencialidade é que só quem tem a chave leia — e o XOR é a cifra mais direta " +
+      "que existe: claro XOR chave = cifrado, e cifrado XOR chave = claro. A MESMA " +
+      "operação faz os dois lados, porque o XOR se desfaz a si mesmo (é involutivo). " +
+      "Um detalhe que o exercício obriga a ver: o $00 da mensagem, passado pelo XOR, " +
+      "vira a própria chave — não há terminador confiável no cifrado. O tamanho da " +
+      "mensagem viaja junto, separado. Em rede, protocolo real faz exatamente isto: " +
+      "cifra os bytes e carrega o comprimento no cabeçalho.",
+    statement:
+      "Há a chave de 1 byte em $0030 e uma mensagem de n bytes em $0400 — o n está em " +
+      "$0031. Cifre com XOR: cada byte claro XOR a chave, gravando em $0500 em diante, " +
+      "e escreva um $00 terminador logo depois do último byte cifrado. O caso n=0 deve " +
+      "gravar só o terminador.",
+    cCode:
+      "for (int i = 0; i < n; i++) {\n" +
+      "    cifrado[i] = claro[i] ^ chave;\n" +
+      "}\n" +
+      "cifrado[n] = '\\0';",
+    template: s2Template,
+    solution: s2Solution,
+    hints: [
+      "O laço é o do s1 com dois destinos: lda $0400,x traz o claro, xor $0030 esconde, " +
+      "sta $0500,x grava — e o teste de parada compara i com n ($0031), não com 8.",
+      "O terminador: acabou o laço, X ainda vale i — ldx $0032 garante, lda #$00 e " +
+      "sta $0500,x gravam o $00 logo depois do último cifrado.",
+      "Confira no painel de memória: o $00 da mensagem NÃO virou $00 no cifrado — virou " +
+      "a chave. Prova de que o cifrado não preserva estrutura.",
+    ],
+    cases: s2Cases,
+  },
+  {
+    id: "s3-cesar",
+    title: "cifra de César: o espaço de chaves importa",
+    theory:
+      "A cifra de César desloca cada letra do alfabeto: 'A' + 3 é 'D'. Na máquina, o " +
+      "alfabeto é uma faixa de bytes — 'A' é $41, 'Z' é $5A — e a soma que passa de 'Z' " +
+      "precisa dar a volta: subtrair 26 volta ao começo, porque o alfabeto é módulo 26. " +
+      "É a aritmética modular de qualquer cifra. Mas a lição de segurança é outra: com " +
+      "apenas 25 chaves possíveis (a chave 0 não esconde nada), um invasor testa todas " +
+      "num piscar de olhos — força bruta. O que sustenta uma cifra não é o segredo do " +
+      "método (o deslocamento é público há dois mil anos), é o tamanho do espaço de " +
+      "chaves. Por isso ninguém usa César — e por isso chaves modernas têm 128 bits ou mais.",
+    statement:
+      "Há a chave (o deslocamento, 0 a 25) em $0030 e uma mensagem de n bytes em $0400 — " +
+      "só MAIÚSCULAS de A a Z, com n em $0031. Cifre para $0500 em diante, com o $00 " +
+      "terminador no fim. 'Z' + 1 volta para 'A': o teste inclui 'XYZ' + 3 → 'ABC' e " +
+      "a última chave possível, 25.",
+    cCode:
+      "int c = claro[i] + chave;    // 'A' é $41, 'Z' é $5a\n" +
+      "if (c > 'Z') {\n" +
+      "    c = c - 26;              // a volta ao alfabeto\n" +
+      "}\n" +
+      "cifrado[i] = c;",
+    template: s3Template,
+    solution: s3Solution,
+    hints: [
+      "O corpo: lda $0400,x, add $0030 (a chave), e daí o teste da volta — cmp #$5b " +
+      "deixa C=1 quando a soma passou de 'Z' ($5a); jnc desvia quando NÃO passou.",
+      "Passou: sub #$1a devolve a soma ao alfabeto — 'Z' + 1 é $5b, e $5b − 26 é $41, " +
+      "o 'A'. As duas rotas terminam no mesmo sta $0500,x.",
+      "Cuidado com a ordem das instruções: o cmp #$5b tem que vir DEPOIS do add (ele lê " +
+      "a soma) e o jnc ANTES do sub — quem subtrai 26 sem testar corrompe letras que " +
+      "não precisavam de volta: 'A' + 0, com a chave 0, viraria $27 na saída.",
+    ],
+    cases: s3Cases,
+  },
+  {
+    id: "s4-overflow",
+    title: "buffer overflow: copie respeitando o limite",
+    theory:
+      "O estouro de buffer é o bug mais lucrativo da história: a cópia confia no tamanho " +
+      "que vem de fora — o terminador da string, o campo do pacote — e escreve além do " +
+      "buffer, corrompendo o que o vizinho guardava (no PC real, o endereço de retorno " +
+      "na stack). A defesa é uma linha no topo do laço: teste o LIMITE antes de cada " +
+      "escrita. O canário do exercício é a técnica que a segurança de memória real usa " +
+      "(stack canaries): um valor conhecido plantado ao lado do buffer — mexeu nele, " +
+      "houve estouro. O invasor controla as entradas: valide tudo que chega de fora.",
+    statement:
+      "Há uma string terminada em $00 em $0400 (pode ser mais longa do que o destino!) " +
+      "e um canário $42 em $0508 — o primeiro byte depois do buffer de destino, que é " +
+      "$0500..$0507 (7 posições úteis + terminador). Copie a string para o buffer, no " +
+      "máximo 7 bytes + o $00 final: se a fonte for maior, trunque. O teste confere o " +
+      "buffer E o canário — quem escreveu além do buffer o pisou e falha.",
+    cCode:
+      "char destino[8];                    // 7 úteis + terminador\n" +
+      "int i = 0;\n" +
+      "while (fonte[i] != '\\0' && i < 7) { // o teste do LIMITE no topo\n" +
+      "    destino[i] = fonte[i];\n" +
+      "    i = i + 1;\n" +
+      "}\n" +
+      "destino[i] = '\\0';",
+    template: s4Template,
+    solution: s4Solution,
+    hints: [
+      "O laço tem DOIS testes no topo: o limite (lda $0030, cmp #$07, jc encheu) e o " +
+      "terminador da fonte (lda $0400,x, jz termina) — o limite primeiro: nem leia a " +
+      "fonte quando o buffer já encheu.",
+      "No termina, A já é $00 (o byte da fonte que ligou o Z) e X ainda é i — o sta " +
+      "$0500,x grava o terminador sem mais nada. No encheu, o terminador vai fixo em " +
+      "$0507, a última posição.",
+      "Vazio o buffer de $0508 em diante fica como estava? O teste do canário responde: " +
+      "ele precisa continuar $42 depois do HLT — inclusive nos casos em que a fonte cabe.",
+    ],
+    cases: s4Cases,
+  },
+  {
+    id: "s5-senha",
+    title: "autenticação: compare sem vazar",
+    theory:
+      "Autenticar é verificar que quem chega conhece o segredo — e comparações de bytes " +
+      "têm um efeito colateral traiçoeiro: TEMPO. O loop que sai no primeiro byte " +
+      "diferente roda menos ciclos quanto mais no começo está o erro; quem medir o " +
+      "tempo adivinha a senha byte a byte (é um timing attack, e há servidores reais " +
+      "que já caíram nele). A defesa: acumule as diferenças sem desviar — dif = dif OR " +
+      "(senha[i] XOR tentativa[i]) — e só decida no fim. O loop faz sempre o mesmo " +
+      "número de voltas: não tem nada para vazar. E note: autentica-se o HASH da senha, " +
+      "nunca a senha em claro — o s1 calculou o hash.",
+    statement:
+      "A senha armazenada são 8 bytes em $0400..$0407; a tentativa, 8 bytes em " +
+      "$0410..$0417. Grave 1 em $0030 se a tentativa é igual à senha, byte a byte, ou 0 " +
+      "se algum byte difere. Compare TODOS os 8 bytes em toda execução — o laço que sai " +
+      "no primeiro erro pode passar nos casos, mas roda em tempo diferente conforme a " +
+      "posição do erro, e é justamente isso que não pode vazar (o marcador de ciclos do " +
+      "painel de desempenho mostra a diferença).",
+    cCode:
+      "unsigned char dif = 0;\n" +
+      "for (int i = 0; i < 8; i++) {\n" +
+      "    dif = dif | (senha[i] ^ tentativa[i]);   // acumula, sem desviar\n" +
+      "}\n" +
+      "resultado = (dif == 0);   // só decide no FIM",
+    template: s5Template,
+    solution: s5Solution,
+    hints: [
+      "O acumulador de diferenças ($0031) começa em 0 e só cresce: lda $0400,x traz o " +
+      "byte da senha, xor $0410,x zera quando os bytes batem, ora $0031 e sta $0031 " +
+      "acumulam — uma diferença em qualquer byte sobrevive ao OR.",
+      "A decisão fica FORA do laço: acabou as 8 voltas, lda $0031 lê o acumulador — " +
+      "jnz desvia quando sobrou diferença (o Z do próprio LDA já sabe), e os dois " +
+      "ramos gravam seu valor em $0030 e terminam em HLT.",
+      "Prova do vazamento: escreva a versão com jz fim dentro do laço e compare o total " +
+      "de ciclos do marcador entre o caso 'primeiro byte errado' e 'último byte errado' " +
+      "— a versão com early-exit expõe a posição do erro; a sua não.",
+    ],
+    cases: s5Cases,
+  },
+  {
+    id: "s6-disco",
+    title: "desafio: confie no setor só depois de verificar",
+    theory:
+      "Disponibilidade fecha a trindade: o sistema sobrevive a dados corrompidos " +
+      "rejeitando-os — detectar (integridade) e não usar. O disco da máquina é I/O " +
+      "programado em $F000: o programa configura LBA ($F001) e o endereço da RAM " +
+      "($F002/$F003), e dispara escrevendo em CMD ($F000) — o controlador copia o setor " +
+      "inteiro pelo barramento, byte a byte, visível no trace. O checksum viaja junto " +
+      "com os dados no próprio setor: a soma mod 256 dos 16 primeiros bytes. Nota de " +
+      "honestidade: soma mod 256 pega erro acidental, mas um atacante que conhece o " +
+      "esquema ajusta dados e checksum juntos — para adversário ativo existe checksum " +
+      "com chave (MAC, o s5 é a ideia) e hash criptográfico.",
+    statement:
+      "O setor 1 do disco tem 16 bytes de dados nos offsets 0..15 e um byte de checksum " +
+      "no offset 16 — a soma dos dados, que dá a volta em módulo 256. Seu programa lê o " +
+      "setor 1 para $0400 (LBA=1 em $F001, endereço $0400 em $F002/$F003, dispara com 1 " +
+      "em $F000), soma os 16 primeiros bytes e compara com o byte em $0410: bater, grava " +
+      "1 em $0030 e copia os 16 dados para $0500..$050F; NÃO bater, grava 0 em $0030 e " +
+      "não copia nada — dados corrompidos não entram no sistema.",
+    cCode:
+      "// o controlador em $F000: LBA, endereço, e o comando que copia o setor\n" +
+      "unsigned char soma = 0;\n" +
+      "for (int i = 0; i < 16; i++) {\n" +
+      "    soma = soma + dados[i];      // a volta de 8 bits é o módulo 256\n" +
+      "}\n" +
+      "if (soma == checksum_do_setor) {\n" +
+      "    resultado = 1;\n" +
+      "    copiar(dados, destino, 16);\n" +
+      "} else {\n" +
+      "    resultado = 0;               // detectou: rejeita e segue de pé\n" +
+      "}",
+    template: s6Template,
+    solution: s6Solution,
+    hints: [
+      "A leitura do setor: lda #$01, sta $f001 (LBA); lda #$00, sta $f002 e lda #$04, " +
+      "sta $f003 (o endereço $0400); lda #$01, sta $f000 dispara — o controlador copia " +
+      "os 256 bytes de uma vez, e o trace do barramento mostra cada um.",
+      "A soma é o laço do s1 com ADD no lugar do XOR — e a volta de 8 bits é de graça: " +
+      "a soma de 200 + 100 sai 44, exatamente o módulo 256 do desafio.",
+      "A decisão: lda $0410 (o checksum do setor), cmp $0031 (a soma) — jz valida desvia " +
+      "quando são iguais; o caminho do NÃO grava 0 em $0030 e termina em HLT sem tocar " +
+      "em $0500. No valida, a cópia é o laço do s2 com dois índices: lda $0400,x e " +
+      "sta $0500,x.",
+    ],
+    cases: s6Cases,
+  },
+];
+
+export const EXERCISES: ExerciseDef[] = [...HELLO, ...C_LOGICA, ...ESTRUTURAS, ...SEGURANCA];
 
 /**
  * Uma trilha é uma coleção ordenada de exercícios: os níveis se desbloqueiam em sequência
@@ -855,5 +1799,19 @@ export const TRACKS: TrackDef[] = [
     description:
       "Como as construções do C — variáveis, if/else, loops, strings, arrays, structs e uma função completa — se traduzem em endereços, flags e desvios: cada nível mostra a mesma lógica escrita nas duas linguagens.",
     exercises: C_LOGICA,
+  },
+  {
+    id: "estruturas-de-dados",
+    title: "Estruturas de dados",
+    description:
+      "Fila circular, pilha manual, busca em árvore binária e BFS em grafo — cada estrutura clássica montada à mão em cima do que a máquina tem: um array, ponteiros de 1 byte e uma convenção de acesso.",
+    exercises: ESTRUTURAS,
+  },
+  {
+    id: "seguranca",
+    title: "Segurança da informação",
+    description:
+      "Os pilares da segurança em 8 bits: checksum e cifra (integridade e confidencialidade), cópia com limite e comparação de senha (o invasor controla as entradas) e, no desafio final, setor do disco que só entra no sistema depois de verificado.",
+    exercises: SEGURANCA,
   },
 ];

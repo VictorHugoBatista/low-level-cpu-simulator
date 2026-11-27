@@ -137,7 +137,7 @@ export const openExercise = (def: ExerciseDef, s: Store): void => {
   const draft = progress().drafts[def.id];
   s.loadAsm(draft ?? def.template, `${def.id}.asm`);
   const first = def.cases[0];
-  if (first !== undefined) s.applyPresets(first.preset ?? []);
+  if (first !== undefined) s.applyPresets(first);
   updateProgress((p) => ({ ...p, last: def.id }));
 };
 
@@ -172,7 +172,7 @@ export const applyActiveCase = (s: Store, index: number): void => {
   const testCase = def?.cases[index];
   if (testCase === undefined) return;
   setCaseIndex(index);
-  s.applyPresets(testCase.preset ?? []);
+  s.applyPresets(testCase);
 };
 
 /** Submete o fonte corrente: monta e roda todos os casos numa máquina fresca cada,

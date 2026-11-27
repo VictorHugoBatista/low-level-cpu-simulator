@@ -924,6 +924,19 @@ button.run .glyph {
   color: var(--dim);
 }
 
+/* As dicas já reveladas empilham em coluna, com respiro próprio; os botões
+   "dica n" ficam numa linha própria abaixo delas, um ao lado do outro. */
+.ex-hints {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.ex-hints .hint {
+  margin: 0;
+}
+
 /* Exercício ativo na aba máquina */
 
 .ex-banner h2 {

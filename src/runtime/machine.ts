@@ -7,7 +7,7 @@ import { MemoryMap } from "../memory/memoryMap.js";
 import { Ram } from "../memory/ram.js";
 import { Terminal } from "../memory/terminal.js";
 import { DiskController } from "../memory/diskController.js";
-import { DiskImage } from "../storage/diskImage.js";
+import { DiskImage, SECTOR_SIZE } from "../storage/diskImage.js";
 import { Cpu } from "../cpu/cpu.js";
 
 /**
@@ -40,6 +40,14 @@ export class Machine {
   /** Troca a imagem de disco (o controlador já ligado é mantido). */
   insertDisk(disk: DiskImage): void {
     this.diskController.disk = disk;
+  }
+
+  /** Grava bytes crus no início de um setor; o restante do setor volta a $00 — o mesmo
+   * preparo que o preset de disco de um exercício faz, aqui na máquina visível. */
+  writeDiskSector(lba: number, data: readonly number[]): void {
+    const sector = new Uint8Array(SECTOR_SIZE);
+    sector.set(Uint8Array.from(data).subarray(0, SECTOR_SIZE));
+    this.diskController.disk.writeSector(lba, sector);
   }
 
   /**
