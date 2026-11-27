@@ -1004,13 +1004,15 @@ button.run .glyph {
 /* Rodapé: barra de status do console — só o botão pronto do github (widget
    github-buttons, iframe do ghbtns.com), centrado. As preferências de tema,
    layout e CRT moram na aba opções. Grudado no fundo da viewport (body em
-   flex, main estica), mesmo com a aba máquina curta. O margin-top auto some
-   quando o conteúdo é alto — a régua garante um vão mínimo de 24px entre o
-   conteúdo e a linha, sempre. */
+   flex, main estica), mesmo com a aba máquina curta. Espaço simétrico em
+ cima e embaixo do widget. O margin-top auto some quando o conteúdo é
+   alto — a régua garante um vão mínimo de 24px entre o conteúdo e a linha,
+   sempre. */
 .footer {
   position: relative;
   margin-top: auto;
   padding-top: 34px; /* 24px de vão até a régua + 10px da régua à linha de controles */
+  padding-bottom: 34px; /* o mesmo vão de cima — o widget não encosta na borda */
 }
 
 .footer::before {
