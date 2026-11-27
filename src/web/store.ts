@@ -4,6 +4,7 @@ import type { BusTransaction } from "../bus/bus.js";
 import { AsmError, assemble } from "../asm/assembler.js";
 import { DiskImage, SECTOR_SIZE } from "../storage/diskImage.js";
 import { applyCasePresets } from "../runtime/exercise.js";
+import type { ExerciseCase } from "../runtime/exercise.js";
 import type { MemExpect } from "../runtime/exercise.js";
 import type { ListingLine } from "../asm/emitter.js";
 
@@ -198,12 +199,13 @@ export function createStore(initial?: { source: string; name: string }) {
     sync();
   };
 
-  /** Grava os valores de entrada de um caso de exercício na RAM e reseta — as entradas
-   * ficam na máquina visível para o caso ser desenvolvido e rodado à mão. O terminal
-   * também é limpo (applyCasePresets), igual a uma máquina fresca do verificador. */
-  const applyPresets = (preset: readonly MemExpect[]): void => {
+  /** Grava os valores de entrada de um caso de exercício na RAM (e seus setores no
+   * disco) e reseta — as entradas ficam na máquina visível para o caso ser desenvolvido
+   * e rodado à mão. O terminal também é limpo (applyCasePresets), igual a uma máquina
+   * fresca do verificador. */
+  const applyPresets = (caso: ExerciseCase): void => {
     setRunning(false);
-    applyCasePresets(machine, preset);
+    applyCasePresets(machine, caso);
     sync();
   };
 

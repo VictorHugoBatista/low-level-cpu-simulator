@@ -95,10 +95,13 @@ describe("applyCasePresets — o caso desenvolvido na máquina visível do dashb
     const m = new Machine();
     const r = assemble("lda $0300\nadd $0301\nsta $0302\nhlt", "dev.asm");
     m.loadProgram(r.bytes, r.origin);
-    applyCasePresets(m, [
-      { addr: 0x0300, value: 10 },
-      { addr: 0x0301, value: 32 },
-    ]);
+    applyCasePresets(m, {
+      name: "soma",
+      preset: [
+        { addr: 0x0300, value: 10 },
+        { addr: 0x0301, value: 32 },
+      ],
+    });
     m.run();
     expect(m.isHalted).toBe(true);
     expect(m.ram.read(0x0302)).toBe(42);
@@ -106,10 +109,13 @@ describe("applyCasePresets — o caso desenvolvido na máquina visível do dashb
 
   it("remontar o programa depois do preset preserva as entradas: a RAM não é zerada", () => {
     const m = new Machine();
-    applyCasePresets(m, [
-      { addr: 0x0300, value: 200 },
-      { addr: 0x0301, value: 55 },
-    ]);
+    applyCasePresets(m, {
+      name: "soma",
+      preset: [
+        { addr: 0x0300, value: 200 },
+        { addr: 0x0301, value: 55 },
+      ],
+    });
     const r = assemble("lda $0300\nadd $0301\nsta $0302\nhlt", "dev.asm");
     m.loadProgram(r.bytes, r.origin);
     m.run();
@@ -119,8 +125,28 @@ describe("applyCasePresets — o caso desenvolvido na máquina visível do dashb
   it("limpa o terminal: um caso novo começa sem o texto do caso anterior", () => {
     const m = new Machine();
     m.terminal.busWrite(0xe800, 0x41); // "A" impresso pelo caso anterior
-    applyCasePresets(m, [{ addr: 0x0300, value: 10 }]);
+    applyCasePresets(m, { name: "soma", preset: [{ addr: 0x0300, value: 10 }] });
     expect(m.terminal.text).toBe("");
+  });
+
+  it("grava o preset de disco: a leitura do controlador traz o setor para a RAM", () => {
+    const m = new Machine();
+    const r = assemble(
+      "lda #$01\nsta $f001\nlda #$00\nsta $f002\nlda #$04\nsta $f003\nlda #$01\nsta $f000\nhlt",
+      "disco.asm",
+    );
+    m.loadProgram(r.bytes, r.origin);
+    applyCasePresets(m, {
+      name: "setor 1 → $0400",
+      presetDisk: [{ sector: 1, data: [1, 2, 3] }],
+    });
+    m.run();
+    expect(m.isHalted).toBe(true);
+    expect(m.ram.read(0x0400)).toBe(1);
+    expect(m.ram.read(0x0401)).toBe(2);
+    expect(m.ram.read(0x0402)).toBe(3);
+    // o restante do setor chega zerado — o preset não vaza lixo do caso anterior
+    expect(m.ram.read(0x0403)).toBe(0);
   });
 });
 
@@ -242,8 +268,8 @@ describe("catálogo — nenhum template passa sem trabalho", () => {
 });
 
 describe("catálogo — integridade dos dados", () => {
-  it("a série tem os 19 níveis, com teoria, enunciado, dicas e ≥ 2 casos", () => {
-    expect(EXERCISES.length).toBe(19);
+  it("a série tem os 25 níveis, com teoria, enunciado, dicas e ≥ 2 casos", () => {
+    expect(EXERCISES.length).toBe(25);
     for (const def of EXERCISES) {
       expect(def.theory.length).toBeGreaterThan(40);
       expect(def.statement.length).toBeGreaterThan(40);
@@ -312,6 +338,18 @@ describe("trilhas", () => {
       "d2-pilha",
       "d3-arvore",
       "d4-grafo",
+    ]);
+  });
+
+  it("a trilha Segurança da informação traz os seis níveis dos pilares, nessa ordem", () => {
+    const s = TRACKS.find((t) => t.id === "seguranca");
+    expect(s?.exercises.map((e) => e.id)).toEqual([
+      "s1-checksum",
+      "s2-cifra-xor",
+      "s3-cesar",
+      "s4-overflow",
+      "s5-senha",
+      "s6-disco",
     ]);
   });
 });

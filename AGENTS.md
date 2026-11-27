@@ -31,7 +31,7 @@ inclusive do dono do projeto.
 
 ```
 npm install          # Node 18+
-npm test             # vitest (185 testes no momento)
+npm test             # vitest (199 testes no momento)
 npm run typecheck    # tsc --noEmit
 npm run build        # CLI → dist-cli/
 npm run build:web    # site → dist/ (Vite)
