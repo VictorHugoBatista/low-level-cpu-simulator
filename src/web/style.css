@@ -847,7 +847,7 @@ button.run .glyph {
 }
 
 .ex-main h3 {
-  margin: 10px 0 4px;
+  margin: 10px 0 8px;
   color: var(--accent);
   font-size: 12px;
   text-transform: uppercase;
@@ -1160,4 +1160,38 @@ button.run .glyph {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+
+/* ===== Card de melhor performance (por exercício) ===== */
+
+/* O título é h2 de painel: herda o padrão do .panel h2 (maiúsculas, cor neutra,
+   régua), tanto no .ex-main quanto no ex-banner da aba máquina. */
+
+.mp-valor {
+  color: var(--hot-text);
+}
+
+/* Detalhe por caso de teste da melhor rodada. */
+.mp-casos {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 11px;
+}
+
+.mp-casos li {
+  margin: 1px 0;
+  line-height: 1.4;
+}
+
+.mp-caso {
+  color: var(--dim);
+  margin-right: 10px;
+}
+
+.mp-vazio {
+  color: var(--dim);
+  font-size: 11px;
+}
+
+
 

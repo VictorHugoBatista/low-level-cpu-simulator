@@ -4,6 +4,7 @@ import { runExerciseCases } from "../runtime/exercise.js";
 import type { CaseResult } from "../runtime/exercise.js";
 import { TRACKS } from "./exerciseCatalog.js";
 import type { ExerciseDef, TrackDef } from "./exerciseCatalog.js";
+import { atualizarMelhor } from "./marcador.js";
 import type { Store } from "./store.js";
 
 /**
@@ -71,6 +72,14 @@ const updateProgress = (fn: (p: ExerciseProgress) => ExerciseProgress): void => 
 /** O exercício aberto agora (em qualquer aba) — null quando nenhum. */
 const [activeId, setActiveId] = createSignal<string | null>(null);
 
+/** A solução de referência do nível aberto: oculta por padrão, e trocar de nível
+ * esconde de novo — revelar é uma decisão da pessoa, feita no botão do painel. */
+const [solucaoVisivel, setSolucaoVisivel] = createSignal(false);
+
+export const alternarSolucao = (): void => {
+  setSolucaoVisivel((v) => !v);
+};
+
 /** Índice do caso de teste cujas entradas estão gravadas na máquina visível. */
 const [caseIndex, setCaseIndex] = createSignal(0);
 
@@ -98,6 +107,7 @@ const isSolved = (def: ExerciseDef): boolean => progress().solved[def.id] !== un
  * as entradas do primeiro caso na RAM, prontas para rodar e inspecionar nos painéis. */
 export const openExercise = (def: ExerciseDef, s: Store): void => {
   setActiveId(def.id);
+  setSolucaoVisivel(false); // abrir outro nível esconde a solução que estivesse revelada
   const track = TRACKS.find((t) => t.exercises.includes(def));
   if (track === undefined) throw new Error(`exercício ${def.id} não pertence a nenhuma trilha`);
   setTrackId(track.id);
@@ -167,11 +177,17 @@ export const verifyActive = (s: Store): CaseResult[] | null => {
   setResults(out);
   setVerifiedId(def.id);
   const allPassed = out.every((r) => r.passed);
-  if (allPassed && !isSolved(def)) {
-    updateProgress((p) => ({ ...p, solved: { ...p.solved, [def.id]: "full" } }));
-    setCelebrate("Nível concluído! O próximo desbloqueou — continue a sequência.");
-  } else if (allPassed) {
-    setCelebrate("Ainda passando — pode revisar ou seguir adiante.");
+  if (allPassed) {
+    // Card de melhor performance: os ciclos de cada caso somam no total que decide a
+    // melhor rodada, e o card guarda também o detalhe por caso.
+    const casos = out.map((r) => ({ name: r.name, ciclos: r.cycles }));
+    atualizarMelhor(def.id, casos);
+    if (!isSolved(def)) {
+      updateProgress((p) => ({ ...p, solved: { ...p.solved, [def.id]: "full" } }));
+      setCelebrate("Nível concluído! O próximo desbloqueou — continue a sequência.");
+    } else {
+      setCelebrate("Ainda passando — pode revisar ou seguir adiante.");
+    }
   }
   return out;
 };
@@ -190,4 +206,4 @@ export const solveWithHelp = (def: ExerciseDef): void => {
   setCelebrate("Nível concluído com a solução de referência. Estude-a e siga adiante!");
 };
 
-export { progress, updateProgress, caseIndex, results, verifiedId, celebrate };
+export { progress, updateProgress, caseIndex, results, verifiedId, celebrate, solucaoVisivel };

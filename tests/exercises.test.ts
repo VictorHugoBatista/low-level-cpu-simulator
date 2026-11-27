@@ -160,8 +160,39 @@ describe("saveDraftActive — só fonte digitado vira rascunho do exercício", (
   });
 });
 
-describe("selectTrack — abre o primeiro nível não resolvido da trilha", () => {
-  it("pula os níveis já resolvidos e alinha a trilha ativa", async () => {
+describe("solução de referência — oculta por padrão, e abrir nível esconde de novo", () => {
+  it("alternar revela e esconde; openExercise reseta mesmo com a solução aberta", async () => {
+    const mem = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => mem.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        mem.set(key, value);
+      },
+    });
+    try {
+      const es = await import("../src/web/exerciseState.js");
+      const def = EXERCISES[0] as ExerciseDef;
+      const fake = {
+        loadAsm: () => {},
+        applyPresets: () => {},
+        sourceDirty: () => false,
+        source: () => "",
+      } as unknown as Store;
+
+      expect(es.solucaoVisivel()).toBe(false);
+      es.alternarSolucao();
+      expect(es.solucaoVisivel()).toBe(true);
+
+      // Abrir outro nível (ou reabrir o mesmo) esconde a solução que estava revelada.
+      es.openExercise(def, fake);
+      expect(es.solucaoVisivel()).toBe(false);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
+describe("selectTrack — abre o primeiro nível não resolvido da trilha", () => {  it("pula os níveis já resolvidos e alinha a trilha ativa", async () => {
     const mem = new Map<string, string>();
     vi.stubGlobal("localStorage", {
       getItem: (key: string) => mem.get(key) ?? null,
@@ -247,5 +278,49 @@ describe("trilhas", () => {
     const hello = TRACKS.find((t) => t.id === "hello-world");
     expect(hello?.exercises.map((d) => d.id)).toEqual(EXERCISES.map((d) => d.id));
     expect(hello?.exercises).toHaveLength(7);
+  });
+});
+
+describe("verifyActive — captura a marca do marcador de melhores execuções", () => {
+  it("verificação que passa grava os ciclos; fonte que falha não mexe na marca", async () => {
+    const mem = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => mem.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        mem.set(key, value);
+      },
+    });
+    try {
+      const es = await import("../src/web/exerciseState.js");
+      const md = await import("../src/web/marcador.js");
+      const def = EXERCISES[0] as ExerciseDef;
+      const fake = {
+        loadAsm: () => {},
+        applyPresets: () => {},
+        source: () => def.solution,
+        sourceDirty: () => false,
+        report: () => {},
+      } as unknown as Store;
+      es.openExercise(def, fake); // a UI abre o nível antes de submeter
+      const resultados = es.verifyActive(fake);
+      expect(resultados?.every((r) => r.passed)).toBe(true);
+      const marca = md.melhor(def.id);
+      expect(marca?.total).toBe(resultados?.reduce((s, r) => s + r.cycles, 0));
+      // e o card guarda o detalhe: um caso da verificação por entrada
+      expect(marca?.casos.map((c) => c.name)).toEqual(resultados?.map((r) => r.name));
+      expect(marca?.casos.map((c) => c.ciclos)).toEqual(resultados?.map((r) => r.cycles));
+
+      // Fonte que falha (o template) não altera a marca já feita.
+      es.verifyActive({
+        loadAsm: () => {},
+        applyPresets: () => {},
+        source: () => def.template,
+        sourceDirty: () => false,
+        report: () => {},
+      } as unknown as Store);
+      expect(md.melhor(def.id)).toBe(marca);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

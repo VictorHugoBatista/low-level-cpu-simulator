@@ -2,12 +2,15 @@ import { For, Show } from "solid-js";
 import { Editor } from "./editor.js";
 import { ExerciseResults } from "./exercisePanel.js";
 import { Celebrate } from "./celebrate.js";
+import { MelhorPerformance } from "./desempenho.js";
 import type { Store } from "../store.js";
 import { TRACKS } from "../exerciseCatalog.js";
 import type { ExerciseDef } from "../exerciseCatalog.js";
 import {
   activeExercise,
   activeTrack,
+  alternarSolucao,
+  caseIndex,
   selectTrack,
   openExercise,
   progress,
@@ -19,6 +22,7 @@ import {
   celebrate,
   results,
   verifiedId,
+  solucaoVisivel,
 } from "../exerciseState.js";
 
 /**
@@ -143,7 +147,7 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
               </section>
 
               <section class="panel">
-                <h3>dicas</h3>
+                <h2>dicas</h2>
                 <div class="row">
                   <For each={def().hints}>
                     {(_, i) => (
@@ -170,7 +174,7 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
               </section>
 
               <section class="panel">
-                <h3>verificação</h3>
+                <h2>verificação</h2>
                 <div class="row">
                   <button class="run" onClick={() => verifyActive(s)}>
                     Verificar (roda {def().cases.length} casos de teste)
@@ -188,10 +192,24 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
                 </Show>
               </section>
 
+              <section class="panel">
+                <MelhorPerformance exercicioId={def().id} />
+              </section>
+
               <Show when={isSolved(progress(), def())}>
                 <section class="panel">
-                  <h3>solução de referência</h3>
-                  <pre class="ex-solution">{def().solution}</pre>
+                  <h2>solução de referência</h2>
+                  <div class="row">
+                    <button
+                      onClick={() => alternarSolucao()}
+                      title="a solução de referência fica oculta; revele só quando quiser comparar com o seu programa"
+                    >
+                      {solucaoVisivel() ? "Ocultar solução" : "Mostrar solução"}
+                    </button>
+                  </div>
+                  <Show when={solucaoVisivel()}>
+                    <pre class="ex-solution">{def().solution}</pre>
+                  </Show>
                 </section>
               </Show>
             </>
