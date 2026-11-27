@@ -160,6 +160,35 @@ describe("saveDraftActive — só fonte digitado vira rascunho do exercício", (
   });
 });
 
+describe("selectTrack — abre o primeiro nível não resolvido da trilha", () => {
+  it("pula os níveis já resolvidos e alinha a trilha ativa", async () => {
+    const mem = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => mem.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        mem.set(key, value);
+      },
+    });
+    try {
+      const es = await import("../src/web/exerciseState.js");
+      const store = {
+        loadAsm: () => {},
+        applyPresets: () => {},
+        sourceDirty: () => false,
+        source: () => "",
+      } as unknown as Store;
+      const track = TRACKS[0] as (typeof TRACKS)[number];
+      es.solveWithHelp(track.exercises[0] as ExerciseDef);
+
+      es.selectTrack(track, store);
+      expect(es.activeTrack()).toBe(track);
+      expect(es.activeExercise()).toBe(track.exercises[1]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
 describe("catálogo — toda solução passa nos próprios casos", () => {
   for (const def of EXERCISES) {
     it(`${def.id}: solução de referência passa em ${def.cases.length} casos`, () => {
