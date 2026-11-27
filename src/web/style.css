@@ -319,6 +319,17 @@ h1 {
   margin-bottom: 0;
 }
 
+/* O grid estica o card da fonte até a altura da coluna esquerda: o campo de
+   edição preenche o card inteiro em vez de deixar espaço morto embaixo. */
+.layout-side .hero > .panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-side .hero > .panel .editor {
+  flex: 1;
+}
+
 /* No layout editor cheio: controles e fonte no topo, em largura cheia, e os painéis
    indicadores abaixo, em duas colunas — todos os cards com a altura do conteúdo
    (as áreas roláveis usam os tetos padrão do tema). A página rola quando não cabe. */
