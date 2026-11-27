@@ -396,7 +396,9 @@ export function ReferencePage(props: {
                   class="instr"
                   classList={{ aberta: abertas().has(instr.mnemonic) }}
                   tabIndex={0}
-                  title="ver exemplo de uso"
+                  title={abertas().has(instr.mnemonic)
+                    ? "fechar exemplo de uso"
+                    : "ver exemplo de uso"}
                   onClick={() => alternar(instr.mnemonic)}
                   onKeyDown={(e: KeyboardEvent) => teclou(e, instr.mnemonic)}
                 >

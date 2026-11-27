@@ -174,8 +174,9 @@ table.ref tr.instr {
   outline: none;
 }
 
-table.ref tr.instr:hover td,
-table.ref tr.instr:focus td {
+/* :not(.nomode) preserva o hachurado das células "sem modo" no hover/focus. */
+table.ref tr.instr:hover td:not(.nomode),
+table.ref tr.instr:focus td:not(.nomode) {
   background: var(--stripe);
 }
 
