@@ -1162,56 +1162,55 @@ button.run .glyph {
 }
 
 
-/* ===== Marcador de melhores execuções ===== */
+/* ===== Melhor performance (marcador por exercício) ===== */
 
-div.marcador {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.mp-head {
+  align-items: center;
+}
+
+.mp-label {
+  color: var(--accent);
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.mp-head input {
+  flex: 1;
+  min-width: 0;
 }
 
 /* Mesma tabela da página de referência: colunas certas, linha fina entre elas. */
-.marcador table {
+.mp table {
   border-collapse: collapse;
   width: 100%;
   font-size: 12px;
 }
 
-.marcador td,
-.marcador th {
+.mp td {
   padding: 7px 12px;
   border-bottom: 1px solid var(--line);
   text-align: left;
 }
 
-.marcador td.num,
-.marcador th.num {
+.mp td.num {
   text-align: right;
   white-space: nowrap;
-}
-
-/* Exemplo ainda não rodado pela pessoa: na soma dele não entra. */
-.marcador td.falta {
-  opacity: 0.45;
+  color: var(--hot-text);
 }
 
 /* Quem está executando neste navegador se reconhece na tabela. */
-.marcador tr.eu td {
+.mp tr.eu td {
   background: var(--stripe);
-}
-
-/* O total só existe para quem rodou os três: é a marca em disputa. */
-.marcador td.total {
   color: var(--accent);
   font-weight: bold;
 }
 
 @media (max-width: 900px) {
-  .marcador table {
+  .mp table {
     font-size: 10px;
   }
-  .marcador td,
-  .marcador th {
+  .mp td {
     padding: 5px 6px;
   }
 }
+

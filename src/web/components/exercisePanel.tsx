@@ -1,6 +1,7 @@
 import { For, Show } from "solid-js";
 import type { Store } from "../store.js";
 import { Celebrate } from "./celebrate.js";
+import { MelhorPerformance } from "./desempenho.js";
 import {
   activeExercise,
   activeTrack,
@@ -95,6 +96,7 @@ export function ExercisePanel(props: { store: Store; onOpenExercises?: () => voi
           <Show when={results() !== null && verifiedId() === def().id}>
             <ExerciseResults results={results()!} />
           </Show>
+          <MelhorPerformance exercicioId={def().id} />
         </section>
       )}
     </Show>

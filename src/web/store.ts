@@ -58,9 +58,7 @@ const HISTORY_VISIBLE = 512;
  * A ponte entre o núcleo e a UI: envolve a Machine em signals do Solid. O núcleo continua
  * isomórfico — nada aqui vaza para dentro dele.
  */
-export function createStore(
-  initial?: { source: string; name: string; onHalt?: () => void },
-) {
+export function createStore(initial?: { source: string; name: string }) {
   const machine = new Machine();
   const [regs, setRegs] = createSignal<RegSnapshot>(snapshot(machine));
   const [transactions, setTransactions] = createSignal<BusTransaction[]>([]);
@@ -97,9 +95,6 @@ export function createStore(
   };
 
   let raf = 0;
-  /** Estado de HLT da sync anterior: a virada false→true é "o programa parou" —
-   * é quando o marcador de melhores execuções avalia a rodada (onHalt). */
-  let wasHalted = machine.isHalted;
 
   onCleanup(() => {
     setRunning(false);
@@ -115,9 +110,6 @@ export function createStore(
     setHalted(machine.isHalted);
     setTerminal(machine.terminal.text);
     setMemVersion((v) => v + 1);
-    const parado = machine.isHalted;
-    if (parado && !wasHalted) initial?.onHalt?.();
-    wasHalted = parado;
   };
 
   const rawTick = (): boolean => {

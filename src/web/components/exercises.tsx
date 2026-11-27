@@ -2,6 +2,7 @@ import { For, Show } from "solid-js";
 import { Editor } from "./editor.js";
 import { ExerciseResults } from "./exercisePanel.js";
 import { Celebrate } from "./celebrate.js";
+import { MelhorPerformance } from "./desempenho.js";
 import type { Store } from "../store.js";
 import { TRACKS } from "../exerciseCatalog.js";
 import type { ExerciseDef } from "../exerciseCatalog.js";
@@ -186,6 +187,10 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
                 <Show when={results() !== null && verifiedId() === def().id}>
                   <ExerciseResults results={results()!} />
                 </Show>
+              </section>
+
+              <section class="panel">
+                <MelhorPerformance exercicioId={def().id} />
               </section>
 
               <Show when={isSolved(progress(), def())}>

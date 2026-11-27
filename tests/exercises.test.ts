@@ -249,3 +249,45 @@ describe("trilhas", () => {
     expect(hello?.exercises).toHaveLength(7);
   });
 });
+
+describe("verifyActive — captura a marca do marcador de melhores execuções", () => {
+  it("verificação que passa grava os ciclos; fonte que falha não mexe na marca", async () => {
+    const mem = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => mem.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        mem.set(key, value);
+      },
+    });
+    try {
+      const es = await import("../src/web/exerciseState.js");
+      const md = await import("../src/web/marcador.js");
+      md.setJogador("tester");
+      const def = EXERCISES[0] as ExerciseDef;
+      const fake = {
+        loadAsm: () => {},
+        applyPresets: () => {},
+        source: () => def.solution,
+        sourceDirty: () => false,
+        report: () => {},
+      } as unknown as Store;
+      es.openExercise(def, fake); // a UI abre o nível antes de submeter
+      es.verifyActive(fake);
+      const marca = md.estado().marcas.tester?.[def.id];
+      expect(typeof marca).toBe("number");
+      expect(marca).toBeGreaterThan(0);
+
+      // Fonte que falha (o template) não altera a marca já feita.
+      es.verifyActive({
+        loadAsm: () => {},
+        applyPresets: () => {},
+        source: () => def.template,
+        sourceDirty: () => false,
+        report: () => {},
+      } as unknown as Store);
+      expect(md.estado().marcas.tester?.[def.id]).toBe(marca);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
