@@ -167,6 +167,42 @@ table.ref td.todo {
   opacity: 0.45;
 }
 
+/* Linha de instrução expansível: clique (ou Enter/Espaço) abre o exemplo de uso
+   na linha seguinte. O marcador ▸/▾ acompanha o estado. */
+table.ref tr.instr {
+  cursor: pointer;
+  outline: none;
+}
+
+/* :not(.nomode) preserva o hachurado das células "sem modo" no hover/focus. */
+table.ref tr.instr:hover td:not(.nomode),
+table.ref tr.instr:focus td:not(.nomode) {
+  background: var(--stripe);
+}
+
+table.ref tr.instr .tw {
+  color: var(--dim);
+  font-size: 9px;
+  margin-left: 8px;
+}
+
+table.ref tr.uso td {
+  border-bottom: 1px solid var(--line);
+  padding: 8px 12px 10px;
+}
+
+table.ref tr.uso pre {
+  background: var(--sunken);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 8px;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+  color: var(--hot-text);
+}
+
 .ref .credit p {
   margin: 0;
   line-height: 1.6;
