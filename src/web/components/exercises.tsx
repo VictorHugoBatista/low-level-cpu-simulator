@@ -7,6 +7,13 @@ import type { Store } from "../store.js";
 import { TRACKS } from "../exerciseCatalog.js";
 import type { ExerciseDef } from "../exerciseCatalog.js";
 import {
+  aplicarProgresso,
+  coletarProgresso,
+  nomeArquivoProgresso,
+  parseProgresso,
+  serializarProgresso,
+} from "../progressoArquivo.js";
+import {
   activeExercise,
   activeTrack,
   alternarSolucao,
@@ -50,6 +57,36 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
   const list = (): ExerciseDef[] => activeTrack().exercises;
   const solvedCount = (): number => list().filter((d) => isSolved(progress(), d)).length;
 
+  /** Baixa o progresso inteiro (níveis, rascunhos, dicas, marcas) como arquivo .json —
+   * o mesmo caminho do download de .asm do editor. */
+  const salvarProgresso = (): void => {
+    const blob = new Blob([serializarProgresso(coletarProgresso())], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = nomeArquivoProgresso();
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  /** Lê o arquivo escolhido, valida e restaura — substituindo o progresso corrente.
+   * Erro (arquivo estranho, de outro app, de versão futura) vira aviso, não exceção. */
+  const carregarProgresso = async (file: File): Promise<void> => {
+    try {
+      const p = parseProgresso(await file.text());
+      aplicarProgresso(p, s);
+      const quando = p.savedAt === "" ? "" : ` (salvo em ${p.savedAt.slice(0, 10)})`;
+      s.report(`progresso restaurado de ${file.name}${quando}`);
+    } catch (e) {
+      s.report(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  const revelarArquivo = (): void => {
+    inputArquivo?.click();
+  };
+
+  let inputArquivo: HTMLInputElement | undefined;
+
   const revealHint = (def: ExerciseDef): void => {
     updateProgress((p) => {
       const used = p.hints[def.id] ?? 0;
@@ -87,6 +124,25 @@ export function ExercisesPage(props: { store: Store; onOpenMachine?: () => void 
             <div class="ex-bar-fill" style={{ width: `${(solvedCount() / Math.max(1, list().length)) * 100}%` }} />
           </div>
           <span class="ex-count">{solvedCount()}/{list().length} níveis</span>
+        </div>
+        <div class="row">
+          <button onClick={salvarProgresso} title="baixa um .json com níveis, rascunhos, dicas e marcas de ciclos">
+            Salvar progresso
+          </button>
+          <button onClick={revelarArquivo} title="restaura o progresso de um .json salvo antes — substitui o atual">
+            Carregar progresso
+          </button>
+          <input
+            type="file"
+            accept=".json,application/json"
+            hidden
+            ref={inputArquivo}
+            onChange={(e) => {
+              const file = e.currentTarget.files?.[0];
+              if (file !== undefined) void carregarProgresso(file);
+              e.currentTarget.value = ""; // escolher o mesmo arquivo de novo precisa reabrir o diálogo
+            }}
+          />
         </div>
         <ol>
           <For each={list()}>

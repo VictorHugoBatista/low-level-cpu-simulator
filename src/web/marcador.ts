@@ -59,21 +59,7 @@ const limparMarca = (v: unknown): MarcaExercicio | null => {
 function loadMarcador(): MarcadorState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw !== null) {
-      // Shape guard: JSON válido com estrutura inesperada (dado adulterado ou schema de
-      // versão futura) não pode derrubar a página — cada campo volta ao default.
-      const parsed = JSON.parse(raw) as Partial<MarcadorState>;
-      const marcas =
-        typeof parsed.marcas === "object" && parsed.marcas !== null && !Array.isArray(parsed.marcas)
-          ? parsed.marcas
-          : {};
-      const limpas: Record<string, MarcaExercicio> = {};
-      for (const [exercicio, marca] of Object.entries(marcas)) {
-        const limpa = limparMarca(marca);
-        if (limpa !== null) limpas[exercicio] = limpa;
-      }
-      return { marcas: limpas };
-    }
+    if (raw !== null) return normalizarMarcador(JSON.parse(raw));
   } catch {
     /* localStorage indisponível ou JSON inválido: placar só vale para a sessão */
   }
@@ -96,6 +82,33 @@ const updateMarcador = (fn: (m: MarcadorState) => MarcadorState): void => {
     saveMarcador(next);
     return next;
   });
+};
+
+/** Shape guard: qualquer valor (JSON de localStorage ou de arquivo importado) vira um
+ * placar válido — dado adulterado ou de versão futura volta ao default em vez de
+ * derrubar a página. Fonte única do que é um placar válido. */
+export function normalizarMarcador(v: unknown): MarcadorState {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) return { marcas: {} };
+  const parsed = v as Partial<MarcadorState>;
+  const marcas =
+    typeof parsed.marcas === "object" && parsed.marcas !== null && !Array.isArray(parsed.marcas)
+      ? parsed.marcas
+      : {};
+  const limpas: Record<string, MarcaExercicio> = {};
+  for (const [exercicio, marca] of Object.entries(marcas)) {
+    const limpa = limparMarca(marca);
+    if (limpa !== null) limpas[exercicio] = limpa;
+  }
+  return { marcas: limpas };
+}
+
+/** O placar inteiro (para exportar o progresso em arquivo). */
+export const marcadorAtual = (): MarcadorState => marcador();
+
+/** Substitui o placar inteiro (restaurar de arquivo importado): troca o sinal e grava
+ * no localStorage. Quem chama valida antes — aqui não há guarda. */
+export function restaurarMarcador(m: MarcadorState): void {
+  updateMarcador(() => m);
 };
 
 /** A melhor rodada registrada do exercício — undefined enquanto nada verificado. */
