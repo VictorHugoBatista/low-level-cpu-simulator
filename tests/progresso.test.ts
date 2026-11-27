@@ -145,4 +145,48 @@ describe("aplicarProgresso", () => {
       vi.unstubAllGlobals();
     }
   });
+
+  it("arquivo sem último exercício conhecido fecha o contexto velho: nada da sessão anterior sobrevive", async () => {
+    const mem = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => mem.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        mem.set(key, value);
+      },
+    });
+    try {
+      vi.resetModules();
+      const { aplicarProgresso } = await import("../src/web/progressoArquivo.js");
+      const { openExercise, activeExercise, celebrate } = await import("../src/web/exerciseState.js");
+      const { TRACKS } = await import("../src/web/exerciseCatalog.js");
+      const fakeStore = {
+        loadAsm: () => {},
+        applyPresets: () => {},
+        report: () => {},
+      } as unknown as Store;
+
+      // uma sessão em andamento: um exercício aberto, com contexto aí
+      const primeiro = TRACKS[0]!.exercises[0]!;
+      openExercise(primeiro, fakeStore);
+
+      // o arquivo restaurado não aponta para exercício conhecido
+      aplicarProgresso(
+        parseProgresso(
+          JSON.stringify(
+            arquivo({
+              exercises: { solved: { "ex1-soma": "full" }, drafts: {}, hints: {}, last: "nivel-que-nao-existe" },
+            }),
+          ),
+        ),
+        fakeStore,
+      );
+
+      expect(activeExercise()).toBeUndefined();
+      expect(celebrate()).toBeNull();
+      // o progresso do arquivo ficou gravado mesmo assim
+      expect(JSON.parse(mem.get("ak8-exercises") as string).solved).toEqual({ "ex1-soma": "full" });
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
 });

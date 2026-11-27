@@ -1,4 +1,5 @@
 import {
+  fecharContexto,
   normalizarProgresso,
   progress,
   restaurarProgresso,
@@ -96,11 +97,13 @@ export function coletarProgresso(): ProgressoSalvo {
 
 /** Restaura o progresso de um arquivo: níveis, rascunhos, dicas e marcas passam a ser
  * os do arquivo, e o último exercício aberto reabre no editor com o rascunho salvo —
- * a pessoa continua de onde parou, mesmo em outra máquina. */
+ * a pessoa continua de onde parou, mesmo em outra máquina. Sem último exercício
+ * conhecido, o contexto velho fecha: nada da sessão anterior sobrevive à troca. */
 export function aplicarProgresso(p: ProgressoSalvo, s: Store): void {
   restaurarProgresso(p.exercises);
   restaurarMarcador(p.marcador);
   const id = p.exercises.last;
   const def = id === undefined ? undefined : TRACKS.flatMap((t) => t.exercises).find((d) => d.id === id);
   if (def !== undefined) openExercise(def, s);
+  else fecharContexto();
 }

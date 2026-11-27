@@ -109,7 +109,7 @@ export const marcadorAtual = (): MarcadorState => marcador();
  * no localStorage. Quem chama valida antes — aqui não há guarda. */
 export function restaurarMarcador(m: MarcadorState): void {
   updateMarcador(() => m);
-};
+}
 
 /** A melhor rodada registrada do exercício — undefined enquanto nada verificado. */
 export const melhor = (exercicio: string): MarcaExercicio | undefined =>

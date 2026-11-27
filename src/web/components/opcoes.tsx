@@ -13,8 +13,8 @@ import {
  *
  * - **progresso** — salvar e carregar em arquivo (o que vivia na lateral dos
  *   exercícios: aqui é o lugar definitivo, junto do que governa).
- * - **aparência** — tema, layout e CRT, hoje também nos dropdowns do header e do
- *   rodapé; os dropdowns continuam lá e saem quando forem removidos de vez.
+ * - **aparência** — tema, layout e CRT: a única casa dessas preferências desde que os
+ *   dropdowns do header e do rodapé saíram.
  */
 export function OpcoesPage(props: {
   store: Store;

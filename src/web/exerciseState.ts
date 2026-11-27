@@ -86,7 +86,7 @@ const updateProgress = (fn: (p: ExerciseProgress) => ExerciseProgress): void => 
  * grava no localStorage. Quem chama valida antes — aqui não há guarda. */
 export function restaurarProgresso(p: ExerciseProgress): void {
   updateProgress(() => p);
-};
+}
 
 /** O exercício aberto agora (em qualquer aba) — null quando nenhum. */
 const [activeId, setActiveId] = createSignal<string | null>(null);
@@ -218,6 +218,21 @@ export const restoreLast = (s: Store): void => {
   const def = id === undefined ? undefined : findExercise(id);
   if (def !== undefined) openExercise(def, s);
 };
+
+/** Fecha o contexto do exercício ativo sem tocar no progresso: nenhum nível aberto,
+ * resultado de verificação e celebração limpos. Usado ao restaurar um progresso que
+ * não aponta para exercício conhecido — nada do contexto velho sobrevive à troca
+ * (o rascunho em edição, por exemplo, não vira rascunho do nível novo por engano:
+ * saveDraftActive só grava com exercício ativo). Ao visitar a aba exercícios, o
+ * próximo nível não resolvido abre sozinho a partir do progresso restaurado. */
+export function fecharContexto(): void {
+  setActiveId(null);
+  setSolucaoVisivel(false);
+  setCaseIndex(0);
+  setResults(null);
+  setVerifiedId(null);
+  setCelebrate(null);
+}
 
 /** Depois de todas as dicas: ver a solução avança o nível, marcado como "com ajuda". */
 export const solveWithHelp = (def: ExerciseDef): void => {
