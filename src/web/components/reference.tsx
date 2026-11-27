@@ -270,8 +270,11 @@ function OpcodeCell(props: { instr: RefInstr; mode: AddressingMode }) {
 export function ReferencePage(props: {
   examples: Array<{ name: string; source: string; note: string }>;
 }) {
-  /** Mnemônicos cujo exemplo de uso está exposto na tabela de instruções. */
-  const [abertas, setAbertas] = createSignal<Set<string>>(new Set<string>());
+  /** Mnemônicos cujo exemplo de uso está exposto na tabela de instruções. O
+   * LDA começa aberto: mostra que a linha é expansível sem ler o hint. */
+  const [abertas, setAbertas] = createSignal<Set<string>>(
+    new Set<string>([INSTRS[0].mnemonic]),
+  );
 
   /** Expande/fecha o exemplo de uso de uma instrução. */
   const alternar = (mnemonic: string) => {
