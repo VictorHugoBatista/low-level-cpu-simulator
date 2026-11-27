@@ -34,6 +34,19 @@ describe("card de melhor performance — registrarMelhor", () => {
     expect(s.marcas["ex1-soma"]?.total).toBe(62);
     expect(s.marcas["ex2-desvio"]?.total).toBe(40);
   });
+
+  it("empate de total com marca antiga sem detalhe: preenche o detalhe, não muda o total", () => {
+    const s = registrarMelhor(vazio(), "ex1-soma", { total: 62, casos: [] });
+    const depois = registrarMelhor(s, "ex1-soma", marcaDe([20, 42]));
+    expect(depois.marcas["ex1-soma"]?.total).toBe(62);
+    expect(depois.marcas["ex1-soma"]?.casos.map((c) => c.ciclos)).toEqual([20, 42]);
+  });
+
+  it("empate de total com detalhe já presente: não mexe", () => {
+    const s = registrarMelhor(vazio(), "ex1-soma", marcaDe([20, 42]));
+    const depois = registrarMelhor(s, "ex1-soma", marcaDe([42, 20]));
+    expect(depois.marcas["ex1-soma"]?.casos.map((c) => c.ciclos)).toEqual([20, 42]);
+  });
 });
 
 describe("card de melhor performance — atualizarMelhor", () => {
@@ -93,8 +106,10 @@ describe("card de melhor performance — atualizarMelhor", () => {
       vi.resetModules();
       const md = await import("../src/web/marcador.js");
       expect(md.melhor("ex1-soma")).toEqual({ total: 55, casos: [] });
-      // e a rodada nova só vence se o total for melhor
-      expect(md.atualizarMelhor("ex1-soma", casos([18, 36]))).toBe(true);
+      // empate com a marca antiga sem detalhe: a rodada nova preenche o detalhe
+      expect(md.atualizarMelhor("ex1-soma", casos([18, 37]))).toBe(true);
+      expect(md.melhor("ex1-soma")?.casos.map((c) => c.ciclos)).toEqual([18, 37]);
+      // e a rodada pior não mexe
       expect(md.atualizarMelhor("ex1-soma", casos([20, 42]))).toBe(false);
     } finally {
       vi.unstubAllGlobals();

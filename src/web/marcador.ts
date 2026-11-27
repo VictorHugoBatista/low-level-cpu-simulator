@@ -99,6 +99,16 @@ const updateMarcador = (fn: (m: MarcadorState) => MarcadorState): void => {
 export const melhor = (exercicio: string): MarcaExercicio | undefined =>
   marcador().marcas[exercicio];
 
+/** A rodada nova vence a guardada: total menor, ou primeiro registro; em empate de
+ * total, só troca quando a marca guardada está sem detalhe (migrada do schema antigo,
+ * que só tinha a soma) e a rodada nova trouxe o detalhe — preencher o card não pode
+ * nunca custar ciclos. */
+export function deveTrocar(atual: MarcaExercicio | undefined, marca: MarcaExercicio): boolean {
+  if (atual === undefined) return true;
+  if (marca.total < atual.total) return true;
+  return marca.total === atual.total && atual.casos.length === 0 && marca.casos.length > 0;
+}
+
 /** Registra (ou melhora) a marca de um exercício. Puro: devolve o estado novo sem tocar
  * no atual — a marca só recua, nunca sobe; quem compara é o total. */
 export function registrarMelhor(
@@ -106,19 +116,18 @@ export function registrarMelhor(
   exercicio: string,
   marca: MarcaExercicio,
 ): MarcadorState {
-  const atual = state.marcas[exercicio];
-  if (atual !== undefined && atual.total <= marca.total) return state;
+  if (!deveTrocar(state.marcas[exercicio], marca)) return state;
   return { ...state, marcas: { ...state.marcas, [exercicio]: marca } };
 }
 
 /** Atualiza o card a cada verificação com sucesso: recebe os ciclos de cada caso de
- * teste, soma no total e registra quando é a primeira marca do exercício ou quando a
- * rodada foi melhor; do contrário, não mexe. Devolve true quando houve registro novo
- * ou melhorado. */
+ * teste, soma no total e registra quando é a primeira marca do exercício, quando a
+ * rodada foi melhor ou quando empata com uma marca antiga que só tinha a soma. Do
+ * contrário, não mexe. Devolve true quando houve registro novo ou melhorado. */
 export function atualizarMelhor(exercicio: string, casos: readonly CasoCiclos[]): boolean {
   const total = casos.reduce((soma, c) => soma + c.ciclos, 0);
-  const atual = marcador().marcas[exercicio];
-  if (atual !== undefined && atual.total <= total) return false;
-  updateMarcador((s) => registrarMelhor(s, exercicio, { total, casos: [...casos] }));
+  const marca: MarcaExercicio = { total, casos: [...casos] };
+  if (!deveTrocar(marcador().marcas[exercicio], marca)) return false;
+  updateMarcador((s) => registrarMelhor(s, exercicio, marca));
   return true;
 }
