@@ -9,6 +9,8 @@ import type { IndicatorKind } from "./components/indicatorPanel.js";
 import { ReferencePage } from "./components/reference.js";
 import { ExercisesPage } from "./components/exercises.js";
 import { ExercisePanel } from "./components/exercisePanel.js";
+import { MarcadorPage } from "./components/marcador.js";
+import { capturarExecucao } from "./marcador.js";
 import { BootScreen } from "./components/boot.js";
 import { FundoChuva } from "./components/fundo.js";
 import { restoreLast, saveDraftActive } from "./exerciseState.js";
@@ -127,11 +129,18 @@ function applyTheme(theme: Theme) {
 }
 
 export function App() {
-  const store = createStore({ source: somaAsm, name: "soma.asm" });
+  const store = createStore({
+    source: somaAsm,
+    name: "soma.asm",
+    // Um exemplo que chega ao HLT com resultado válido vira marca no placar.
+    onHalt: () => capturarExecucao(store.machine, store.program()?.name ?? null),
+  });
   // A página carregada com um exercício: o último nível aberto volta com o rascunho no
   // editor e as entradas do caso gravadas na RAM — a pessoa continua de onde parou.
   restoreLast(store);
-  const [tab, setTab] = createSignal<"maquina" | "exercicios" | "referencia">("maquina");
+  const [tab, setTab] = createSignal<"maquina" | "exercicios" | "marcador" | "referencia">(
+    "maquina",
+  );
   const [slots, setSlots] = createSignal<IndicatorKind[]>([...INITIAL_SLOTS]);
 
   /** Escolher um painel para um espaço troca com o espaço onde ele estava. */
@@ -203,6 +212,12 @@ export function App() {
             onClick={() => setTab("exercicios")}
           >
             exercícios
+          </button>
+          <button
+            classList={{ active: tab() === "marcador" }}
+            onClick={() => setTab("marcador")}
+          >
+            marcador
           </button>
           <button
             classList={{ active: tab() === "referencia" }}
@@ -323,6 +338,10 @@ export function App() {
 
       <Show when={tab() === "exercicios"}>
         <ExercisesPage store={store} onOpenMachine={() => setTab("maquina")} />
+      </Show>
+
+      <Show when={tab() === "marcador"}>
+        <MarcadorPage store={store} />
       </Show>
 
       <Show when={tab() === "referencia"}>
