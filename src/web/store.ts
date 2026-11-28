@@ -182,7 +182,10 @@ export function createStore(initial?: { source: string; name: string }) {
   };
 
   const loadAsm = (newSource: string, name: string): void => {
-    setSourceValue(newSource); // o editor passa a mostrar o que foi carregado — sem marcar como rascunho
+    // Normaliza CRLF/CR para LF: arquivos gravados no Windows chegam com \r, o
+    // textarea normaliza na exibição (value) — mas a camada de destaque renderiza
+    // o texto bruto, onde um \r vira quebra de linha a mais e desalinha as camadas.
+    setSourceValue(newSource.replace(/\r\n?/g, "\n")); // o editor passa a mostrar o que foi carregado — sem marcar como rascunho
     setSourceDirty(false);
     try {
       const r = assemble(newSource, name);

@@ -1,13 +1,27 @@
 import { For, createEffect, createMemo, createSignal, onCleanup, onMount } from "solid-js";
 import type { Store } from "../store.js";
+import { destacar, type Trecho } from "../destaque.js";
 
 /** Editor do fonte em assembly: o que está aqui é o que o botão "Montar e carregar" usa. */
 export function Editor(props: { store: Store; onBlur?: () => void }) {
   const s = props.store;
   let ta: HTMLTextAreaElement | undefined;
   let gutter: HTMLDivElement | undefined;
+  let shade: HTMLPreElement | undefined;
 
   const lineCount = createMemo(() => s.source().split("\n").length);
+
+  /** O fonte tokenizado e classificado para a camada de destaque atrás do
+   * campo, achatado em uma lista só com as quebras de linha no meio. */
+  const trechos = createMemo(() => {
+    const linhas = destacar(s.source());
+    const saida: Trecho[] = [];
+    linhas.forEach((linha, i) => {
+      saida.push(...linha);
+      if (i < linhas.length - 1) saida.push({ texto: "\n" });
+    });
+    return saida;
+  });
 
   /** Linha do cursor e geometria da faixa destacada (top/altura em px, já
    * compensada pela rolagem do campo). */
@@ -38,6 +52,12 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
 
   const syncScroll = (): void => {
     if (gutter !== undefined && ta !== undefined) gutter.scrollTop = ta.scrollTop;
+    // A camada de destaque acompanha a rolagem do campo nos dois eixos — o
+    // overflow: hidden a mantém em posição, mas o scroll programático funciona.
+    if (shade !== undefined && ta !== undefined) {
+      shade.scrollTop = ta.scrollTop;
+      shade.scrollLeft = ta.scrollLeft;
+    }
     syncCursor();
   };
 
@@ -48,15 +68,16 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
       return;
     }
     if (e.key === "Tab") {
-      // tab insere dois espaços em vez de fugir do campo
+      // tab insere oito espaços — a coluna dos mnemônicos nos exemplos e nas
+      // soluções — em vez de fugir do campo
       e.preventDefault();
       const el = e.currentTarget as HTMLTextAreaElement;
       const start = el.selectionStart;
       const end = el.selectionEnd;
       const v = s.source();
-      s.setSource(v.slice(0, start) + "  " + v.slice(end));
+      s.setSource(v.slice(0, start) + "        " + v.slice(end));
       queueMicrotask(() => {
-        el.selectionStart = el.selectionEnd = start + 2;
+        el.selectionStart = el.selectionEnd = start + 8;
         syncCursor();
       });
     }
@@ -75,10 +96,12 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
 
   /** Fonte trocada por fora (exemplo, exercício, Novo): o cursor do campo é
    * reiniciado pelo navegador — recalcular depois do valor novo assentar. O
-   * microtask também cobre a montagem inicial, com a ref do campo já resolvida. */
+   * microtask também cobre a montagem inicial, com a ref do campo já resolvida.
+   * syncScroll e não syncCursor: o browser zera a rolagem do campo ao trocar o
+   * valor, e o gutter e a camada de destaque precisam acompanhar. */
   createEffect(() => {
     s.source(); // rastreia trocas de fonte
-    queueMicrotask(syncCursor);
+    queueMicrotask(syncScroll);
   });
 
   // Toda mudança de seleção passa por aqui — cobre os furos de click/keyup:
@@ -111,6 +134,17 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
             aria-hidden="true"
             style={{ top: `${faixa().top}px`, height: `${faixa().altura}px` }}
           />
+          <pre class="srcshade" aria-hidden="true" ref={shade}>
+            <For each={trechos()}>
+              {(t) =>
+                t.classe === undefined ? (
+                  t.texto
+                ) : (
+                  <span class={`tk-${t.classe}`}>{t.texto}</span>
+                )
+              }
+            </For>
+          </pre>
           <textarea
             ref={ta}
             class="srcedit"
@@ -120,7 +154,9 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
             placeholder={"; escreva seu programa em assembly MOS-6502 aqui\n; Ctrl+Enter monta e carrega"}
             onInput={(e) => {
               s.setSource(e.currentTarget.value);
-              syncCursor();
+              // no microtask: a camada de destaque só re-renderiza depois do
+              // flush do Solid — sincronizar antes seria contra o conteúdo velho
+              queueMicrotask(syncScroll);
             }}
             onClick={syncCursor}
             onKeyUp={syncCursor}
