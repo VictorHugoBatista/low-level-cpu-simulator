@@ -126,11 +126,11 @@ export const ajustarVolume = (volume: number): void =>
   updateRadio((r) => ({ ...r, volume: Math.min(1, Math.max(0, volume)) }));
 
 /**
- * A posição do slider vira ganho linear com teto: ganho = posição × 0.8.
+ * A posição do slider vira ganho linear com teto: ganho = posição × 0.7.
  * O rádio fica um passo abaixo do volume máximo do elemento, mesmo com o
  * slider em 100% — e a subida é proporcional do início ao fim.
  */
-export const GANHO_MAXIMO = 0.8;
+export const GANHO_MAXIMO = 0.7;
 
 export function volumeParaGanho(volume: number): number {
   const c = Math.min(1, Math.max(0, volume));

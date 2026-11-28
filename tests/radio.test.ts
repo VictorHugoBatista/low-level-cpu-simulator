@@ -59,10 +59,10 @@ describe("streams e fallback das estações", () => {
 });
 
 describe("curva de ganho do volume", () => {
-  it("o contrato: ganho linear desde 0, com teto de 0.8 em 100%", () => {
+  it("o contrato: ganho linear desde 0, com teto de 0.7 em 100%", () => {
     expect(volumeParaGanho(0)).toBe(0);
-    expect(volumeParaGanho(0.5)).toBeCloseTo(0.4, 10);
-    expect(volumeParaGanho(1)).toBeCloseTo(0.8, 10);
+    expect(volumeParaGanho(0.5)).toBeCloseTo(0.35, 10);
+    expect(volumeParaGanho(1)).toBeCloseTo(0.7, 10);
   });
 
   it("a subida é proporcional — mais slider nunca é mais baixo", () => {
@@ -73,6 +73,6 @@ describe("curva de ganho do volume", () => {
 
   it("fora de 0..1 é clampado antes da curva, e o ganho fica no intervalo válido", () => {
     expect(volumeParaGanho(-2)).toBe(0);
-    expect(volumeParaGanho(7)).toBeCloseTo(0.8, 10);
+    expect(volumeParaGanho(7)).toBeCloseTo(0.7, 10);
   });
 });
