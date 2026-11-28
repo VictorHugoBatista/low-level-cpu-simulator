@@ -96,10 +96,12 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
 
   /** Fonte trocada por fora (exemplo, exercício, Novo): o cursor do campo é
    * reiniciado pelo navegador — recalcular depois do valor novo assentar. O
-   * microtask também cobre a montagem inicial, com a ref do campo já resolvida. */
+   * microtask também cobre a montagem inicial, com a ref do campo já resolvida.
+   * syncScroll e não syncCursor: o browser zera a rolagem do campo ao trocar o
+   * valor, e o gutter e a camada de destaque precisam acompanhar. */
   createEffect(() => {
     s.source(); // rastreia trocas de fonte
-    queueMicrotask(syncCursor);
+    queueMicrotask(syncScroll);
   });
 
   // Toda mudança de seleção passa por aqui — cobre os furos de click/keyup:
@@ -152,7 +154,9 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
             placeholder={"; escreva seu programa em assembly MOS-6502 aqui\n; Ctrl+Enter monta e carrega"}
             onInput={(e) => {
               s.setSource(e.currentTarget.value);
-              syncCursor();
+              // no microtask: a camada de destaque só re-renderiza depois do
+              // flush do Solid — sincronizar antes seria contra o conteúdo velho
+              queueMicrotask(syncScroll);
             }}
             onClick={syncCursor}
             onKeyUp={syncCursor}
