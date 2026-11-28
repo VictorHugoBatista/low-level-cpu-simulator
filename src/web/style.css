@@ -1284,7 +1284,7 @@ button.run .glyph {
     position: fixed;
     inset: 0;
     z-index: 5;
-    background: rgb(0 0 0 / 40%);
+    background: rgb(0 0 0 / 55%);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
