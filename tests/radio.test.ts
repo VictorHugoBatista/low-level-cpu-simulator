@@ -4,6 +4,7 @@ import {
   RADIO_PADRAO,
   normalizarRadio,
   streamDaEstacao,
+  volumeParaGanho,
 } from "../src/web/radio.js";
 
 describe("preferência da rádio", () => {
@@ -54,5 +55,27 @@ describe("streams e fallback das estações", () => {
 
   it("estação inexistente não tem stream nenhum", () => {
     expect(streamDaEstacao("fantasma", 0)).toBeUndefined();
+  });
+});
+
+describe("curva de ganho do volume", () => {
+  it("o pedido é o contrato: 50% no slider = 80% de ganho", () => {
+    expect(Math.abs(volumeParaGanho(0.5) - 0.8)).toBeLessThan(0.001);
+  });
+
+  it("as pontas não mudam de nível: 0 → 0 e 1 → 1", () => {
+    expect(volumeParaGanho(0)).toBe(0);
+    expect(volumeParaGanho(1)).toBe(1);
+  });
+
+  it("a curva é crescente — mais slider nunca é mais baixo", () => {
+    for (let v = 0; v < 1; v += 0.05) {
+      expect(volumeParaGanho(v)).toBeLessThanOrEqual(volumeParaGanho(v + 0.05));
+    }
+  });
+
+  it("fora de 0..1 é clampado antes da curva, e o ganho fica no intervalo válido", () => {
+    expect(volumeParaGanho(-2)).toBe(0);
+    expect(volumeParaGanho(7)).toBe(1);
   });
 });

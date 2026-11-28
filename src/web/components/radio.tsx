@@ -7,6 +7,7 @@ import {
   ligarRadio,
   radioAtual,
   streamDaEstacao,
+  volumeParaGanho,
 } from "../radio.js";
 
 /**
@@ -74,7 +75,8 @@ export function RadioPlayer() {
   });
 
   createEffect(() => {
-    audio.volume = radioAtual().volume;
+    // O slider guarda a posição percebida; o ganho real segue a curva de potência.
+    audio.volume = volumeParaGanho(radioAtual().volume);
   });
 
   onMount(() => {
