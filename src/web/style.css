@@ -1368,6 +1368,13 @@ button.run .glyph {
 /* O título é h2 de painel: herda o padrão do .panel h2 (maiúsculas, cor neutra,
    régua), tanto no .ex-main quanto no ex-banner da aba máquina. */
 
+/* Na aba máquina o card é irmão da tabela de resultados, no mesmo painel — sem
+   este respiro o título cola na última linha da tabela. Na aba exercícios o card
+   mora num painel só seu, e este seletor nem casa lá. */
+.ex-cases + .mp {
+  margin-top: 16px;
+}
+
 .mp-valor {
   color: var(--hot-text);
 }
