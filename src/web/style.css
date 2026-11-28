@@ -1133,7 +1133,10 @@ button.run .glyph {
 .footer {
   position: relative;
   display: flex;
+  align-items: center;
   justify-content: center;
+  flex-wrap: wrap; /* no mobile, o rádio e o widget do github podem empilhar */
+  gap: 6px 24px;
   margin-top: auto;
   padding-top: 34px; /* 24px de vão até a régua + 10px da régua ao widget */
   padding-bottom: 10px; /* o mesmo vão de 10px — o widget não encosta na borda */
@@ -1485,3 +1488,69 @@ button.run .glyph {
 
 
 
+
+/* ===== Rádio de fundo — streams retrowave/vaporwave ao vivo, no rodapé ===== */
+
+/* Widget de ambiente, sempre no rodapé junto do botão do github. O stop solta a
+   conexão Icecast (não é pause: stream ao vivo não tem posição para retomar).
+   O LED apaga em branco-quente quando há som e os textos seguem o dim do tema. */
+.radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.radio-btn {
+  padding: 3px 10px;
+  line-height: 1;
+}
+
+.radio-estacao {
+  max-width: 190px;
+  font-size: 12px;
+  padding: 3px 6px;
+}
+
+.radio-volume {
+  width: 90px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+/* LED do "on air": quadrado de fósforo que acende quando há som; sem sinal,
+   o texto muda para o âmbar quente, que é a cor de estado chato por aqui. */
+.radio-status {
+  color: var(--dim);
+  min-width: 68px;
+  white-space: nowrap;
+}
+
+.radio-status::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border: 1px solid var(--line);
+  vertical-align: baseline;
+}
+
+.radio-status.no-ar {
+  color: var(--accent);
+}
+
+.radio-status.no-ar::before {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.radio-status.offline {
+  color: var(--hot-text);
+}
+
+.radio-status.offline::before {
+  background: var(--hot-text);
+  border-color: var(--hot-text);
+}
