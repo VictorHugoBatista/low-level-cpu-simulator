@@ -106,7 +106,7 @@ export function OpcoesPage(props: {
               <option value="light">claro</option>
             </select>
           </label>
-          <label class="opcao">
+          <label class="opcao opcao-layout">
             <span>layout</span>
             <select
               title="layout"

@@ -108,6 +108,27 @@ header {
   font-weight: bold;
 }
 
+/* Botão do menu mobile: as três barras. Some no desktop, onde as abas cabem na
+   linha do cabeçalho. */
+.menu-btn {
+  display: none;
+  align-items: center;
+  padding: 6px 8px;
+}
+
+.menu-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.menu-icon i {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: currentColor;
+}
+
 /* Contêiner da página de referência: div.ref, e não .ref — as tabelas da página
    também têm class="ref" (table.ref) e herdariam o display:flex daqui, quebrando
    o layout de tabela: thead e tbody passam a dimensionar colunas separadamente. */
@@ -1218,6 +1239,94 @@ button.run .glyph {
   /* Lateral: sem espaço para as metades lado a lado, empilha como o editor cheio. */
   .layout-side .hero {
     grid-template-columns: minmax(0, 1fr);
+  }
+  /* Tela estreita ignora o layout escolhido: lateral e editor cheio viram a
+     mesma pilha vertical — os painéis indicadores não dividem a linha. */
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Cabeçalho vira grid: título e subtítulo empilham na coluna da esquerda e o
+     botão hamburguer ocupa a coluna da direita atravessando as duas linhas,
+     centrado — à direita como no desktop. */
+  header {
+    display: grid;
+    position: relative; /* o menu aberto se ancora nele, por cima do conteúdo */
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "titulo botao"
+      "sub botao"
+      "status status";
+    gap: 4px 16px;
+    align-items: start;
+  }
+  header h1 {
+    grid-area: titulo;
+  }
+  .subtitle {
+    grid-area: sub;
+  }
+  .menu-btn {
+    display: inline-flex;
+    grid-area: botao;
+    align-self: center; /* centrado no bloco título + subtítulo */
+  }
+  /* O corpo do menu: largura cheia, flutuando por cima do conteúdo (position
+     absolute a partir do header). Vidro como os painéis — fundo levemente
+     transparente e a chuva atravessando borrada. Aparece e some com o
+     dropdown: desce de perto do botão ao abrir, sobe e esvai ao fechar. */
+  .tabs {
+    position: absolute;
+    top: calc(100% + 1px);
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    background: color-mix(in srgb, var(--panel) 86%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    box-shadow: var(--sombra);
+    opacity: 0;
+    transform: translateY(-8px);
+    transform-origin: top;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 0.28s cubic-bezier(0.22, 0.9, 0.35, 1),
+      transform 0.28s cubic-bezier(0.22, 0.9, 0.35, 1),
+      visibility 0.28s;
+  }
+  .tabs.open {
+    opacity: 1;
+    transform: none;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .tabs button {
+    text-align: left;
+    padding: 8px 10px;
+  }
+  .status {
+    grid-area: status;
+  }
+  /* No mobile o layout escolhido não muda nada (tudo vira pilha vertical):
+     a opção sai da tela de opções. O seletor emparelha a especificidade de
+     `.opcoes-prefs .opcao` (0,2,0) e vence por vir depois no arquivo. */
+  .opcoes-prefs .opcao-layout {
+    display: none;
+  }
+}
+
+/* Quem pede menos animação no sistema vê o menu aparecer e sumir na hora
+   (a regra fica depois do media query mobile para vencer a cascata). */
+@media (prefers-reduced-motion: reduce) {
+  header .tabs,
+  header .tabs.open {
+    transition: none;
   }
 }
 

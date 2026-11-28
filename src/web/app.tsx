@@ -135,6 +135,13 @@ export function App() {
   const [tab, setTab] = createSignal<"maquina" | "exercicios" | "referencia" | "opcoes">("maquina");
   const [slots, setSlots] = createSignal<IndicatorKind[]>([...INITIAL_SLOTS]);
 
+  /** No mobile, o menu hamburguer guarda as abas: escolher uma fecha o menu. */
+  const [menuAberto, setMenuAberto] = createSignal(false);
+  const irPara = (t: "maquina" | "exercicios" | "referencia" | "opcoes") => {
+    setTab(t);
+    setMenuAberto(false);
+  };
+
   /** Escolher um painel para um espaço troca com o espaço onde ele estava. */
   const pickSlot = (index: number, kind: IndicatorKind): void => {
     setSlots((prev) => {
@@ -191,29 +198,38 @@ export function App() {
       </Show>
       <header>
         <h1>MOS-6502</h1>
+        <button
+          class="menu-btn"
+          aria-expanded={menuAberto()}
+          aria-controls="menu-tabs"
+          aria-label="menu"
+          onClick={() => setMenuAberto(!menuAberto())}
+        >
+          <span class="menu-icon" aria-hidden="true"><i /><i /><i /></span>
+        </button>
         <div class="subtitle">Simulador de CPU de 8 bits</div>
-        <nav class="tabs">
+        <nav class="tabs" id="menu-tabs" classList={{ open: menuAberto() }}>
           <button
             classList={{ active: tab() === "maquina" }}
-            onClick={() => setTab("maquina")}
+            onClick={() => irPara("maquina")}
           >
             máquina
           </button>
           <button
             classList={{ active: tab() === "exercicios" }}
-            onClick={() => setTab("exercicios")}
+            onClick={() => irPara("exercicios")}
           >
             exercícios
           </button>
           <button
             classList={{ active: tab() === "referencia" }}
-            onClick={() => setTab("referencia")}
+            onClick={() => irPara("referencia")}
           >
             referência
           </button>
           <button
             classList={{ active: tab() === "opcoes" }}
-            onClick={() => setTab("opcoes")}
+            onClick={() => irPara("opcoes")}
           >
             opções
           </button>
