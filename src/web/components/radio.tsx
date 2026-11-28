@@ -39,9 +39,13 @@ export function RadioPlayer() {
       setConectando(false);
       setOffline(false);
       setTentativa(0);
-      audio.removeAttribute("data-stream");
-      audio.removeAttribute("src");
-      audio.load();
+      if (audio.dataset.stream !== undefined) {
+        // Já está parado e o efeito re-rodou por outra mudança (ex.: volume):
+        // não recarrega o elemento de novo, senão o load() dispara à toa.
+        audio.removeAttribute("data-stream");
+        audio.removeAttribute("src");
+        audio.load();
+      }
       return;
     }
     const url = streamDaEstacao(estacao, tentativa());
@@ -51,19 +55,21 @@ export function RadioPlayer() {
       setConectando(false);
       return;
     }
-    if (audio.dataset.stream === url) return; // mesmo stream (ex.: só o volume mudou)
+    if (audio.dataset.stream !== undefined) return; // mesmo stream (ex.: só o volume mudou)
     setOffline(false);
     setConectando(true);
     audio.dataset.stream = url;
     audio.src = url;
     audio.load();
     void audio.play().catch((e: unknown) => {
-      // NotAllowedError: o navegador exige gesto do usuário — quem retoma é o
-      // listener de gesto do onMount. AbortError: o src trocou no meio do play.
+      // Nada aqui avança a tentativa: falha de rede/codec rejeita o play() e
+      // TAMBÉM dispara o evento "error" no elemento — e o evento (audioErro) é
+      // quem avança, senão o fallback pula dois espelhos de uma vez.
+      // NotAllowedError: o navegador exige gesto — quem retoma é o listener do
+      // onMount. AbortError: o src trocou no meio do play.
       if (e instanceof DOMException && (e.name === "NotAllowedError" || e.name === "AbortError")) {
         return;
       }
-      setTentativa((t) => t + 1); // re-roda o efeito com o espelho seguinte
     });
   });
 
@@ -72,6 +78,23 @@ export function RadioPlayer() {
   });
 
   onMount(() => {
+    // O efeito marca conectando ao abrir o stream, mas quem confirma que há som
+    // é o próprio elemento: "playing" quando o áudio corre de verdade e
+    // "waiting" quando ele engasga no buffering — o LED segue a transmissão.
+    const aoTocar = (): void => {
+      setConectando(false);
+      setOffline(false);
+    };
+    const aoEngasgar = (): void => {
+      if (radioAtual().ligado) setConectando(true);
+    };
+    audio.addEventListener("playing", aoTocar);
+    audio.addEventListener("waiting", aoEngasgar);
+    onCleanup(() => {
+      audio.removeEventListener("playing", aoTocar);
+      audio.removeEventListener("waiting", aoEngasgar);
+    });
+
     // Preferência salva diz ligado? O autoplay sem gesto é bloqueado, então o
     // player fica armado: o primeiro clique/tecla (o boot é clicável) retoma.
     if (!radioAtual().ligado) return;

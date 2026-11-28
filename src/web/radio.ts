@@ -111,8 +111,7 @@ const updateRadio = (fn: (r: PreferenciaRadio) => PreferenciaRadio): void => {
 
 export const radioAtual = (): PreferenciaRadio => radio();
 
-export const estacaoPorId = (id: string): EstacaoRadio | undefined =>
-  ESTACOES.find((e) => e.id === id);
+const estacaoPorId = (id: string): EstacaoRadio | undefined => ESTACOES.find((e) => e.id === id);
 
 /** URL da tentativa n da estação (0 = primária); undefined quando acabaram os espelhos. */
 export function streamDaEstacao(id: string, tentativa: number): string | undefined {
