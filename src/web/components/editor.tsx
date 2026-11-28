@@ -48,7 +48,8 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
       return;
     }
     if (e.key === "Tab") {
-      // tab insere dois espaços em vez de fugir do campo
+      // tab insere oito espaços — a coluna dos mnemônicos nos exemplos e nas
+      // soluções — em vez de fugir do campo
       e.preventDefault();
       const el = e.currentTarget as HTMLTextAreaElement;
       const start = el.selectionStart;
