@@ -1,4 +1,4 @@
-import { For, createEffect, createSignal, onCleanup, onMount } from "solid-js";
+import { For, Show, createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import {
   ESTACOES,
   ajustarVolume,
@@ -162,9 +162,13 @@ export function RadioPlayer() {
         style={{ "--volume": `${radioAtual().volume * 100}%` }}
         onInput={(e) => ajustarVolume(Number(e.currentTarget.value))}
       />
-      <span class="radio-status" classList={{ offline: offline(), "no-ar": noAr() }}>
-        {offline() ? "sem sinal" : conectando() ? "conectando…" : noAr() ? "no ar" : ""}
-      </span>
+      {/* O LED só existe com o rádio ligado — quadrado vazio de rádio parada
+          fica órfão no rodapé, pior ainda no mobile. */}
+      <Show when={radioAtual().ligado}>
+        <span class="radio-status" classList={{ offline: offline(), "no-ar": noAr() }}>
+          {offline() ? "sem sinal" : conectando() ? "conectando…" : "no ar"}
+        </span>
+      </Show>
       <audio ref={audio} preload="none" onError={audioErro} />
     </div>
   );

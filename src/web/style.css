@@ -1507,7 +1507,6 @@ button.run .glyph {
 }
 
 .radio-estacao {
-  max-width: 190px;
   font-size: 12px;
   padding: 3px 6px;
 }
@@ -1602,4 +1601,19 @@ button.run .glyph {
 .radio-status.offline::before {
   background: var(--hot-text);
   border-color: var(--hot-text);
+}
+
+/* No mobile o rodapé empilha: rádio numa linha centrada, widget do github na
+   de baixo (flex-direction muda o eixo, e justify-content passa a centrar no
+   horizontal). O seletor de estação sem teto de largura espremido. */
+@media (max-width: 900px) {
+  .footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .radio {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }
