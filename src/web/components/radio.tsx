@@ -55,7 +55,7 @@ export function RadioPlayer() {
       setConectando(false);
       return;
     }
-    if (audio.dataset.stream !== undefined) return; // mesmo stream (ex.: só o volume mudou)
+    if (audio.dataset.stream === url) return; // mesmo stream (ex.: só o volume mudou)
     setOffline(false);
     setConectando(true);
     audio.dataset.stream = url;
