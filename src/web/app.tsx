@@ -221,6 +221,9 @@ export function App() {
       <Show when={crt() === "on"}>
         <FundoChuva />
       </Show>
+      {/* Véu do menu mobile: cobre o site quando o menu está aberto, entre o
+          conteúdo e o menu/botão (só existe de verdade no mobile, via CSS). */}
+      <div class="menu-overlay" classList={{ on: menuAberto() }} aria-hidden="true" />
       <Show when={booting()}>
         <BootScreen onDone={encerrarBoot} />
       </Show>

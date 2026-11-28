@@ -129,6 +129,11 @@ header {
   background: currentColor;
 }
 
+/* O véu do menu: só existe no mobile — no desktop ele fica display:none. */
+.menu-overlay {
+  display: none;
+}
+
 /* Contêiner da página de referência: div.ref, e não .ref — as tabelas da página
    também têm class="ref" (table.ref) e herdariam o display:flex daqui, quebrando
    o layout de tabela: thead e tbody passam a dimensionar colunas separadamente. */
@@ -1251,6 +1256,7 @@ button.run .glyph {
   header {
     display: grid;
     position: relative; /* o menu aberto se ancora nele, por cima do conteúdo */
+    z-index: 6; /* o header inteiro (menu e botão inclusive) fica acima do véu (5) */
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       "titulo botao"
@@ -1269,6 +1275,27 @@ button.run .glyph {
     display: inline-flex;
     grid-area: botao;
     align-self: center; /* centrado no bloco título + subtítulo */
+  }
+  /* O véu: cobre a viewport com o menu aberto, escurecendo o conteúdo e
+     bloqueando os cliques para ele (um toque no véu fecha, via o listener de
+     clique fora). Abaixo do header (5 < 6) e abaixo dos overlays do CRT. */
+  .menu-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    background: rgb(0 0 0 / 40%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 0.28s cubic-bezier(0.22, 0.9, 0.35, 1),
+      visibility 0.28s;
+  }
+  .menu-overlay.on {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
   /* O corpo do menu: largura cheia, flutuando por cima do conteúdo (position
      absolute a partir do header). Vidro como os painéis — fundo levemente
@@ -1321,11 +1348,15 @@ button.run .glyph {
   }
 }
 
-/* Quem pede menos animação no sistema vê o menu aparecer e sumir na hora
-   (a regra fica depois do media query mobile para vencer a cascata). */
+/* Quem pede menos animação no sistema vê o menu e o véu aparecerem e sumirem
+   na hora (a regra fica depois do media query mobile para vencer a cascata). */
 @media (prefers-reduced-motion: reduce) {
   header .tabs,
   header .tabs.open {
+    transition: none;
+  }
+  .menu-overlay,
+  .menu-overlay.on {
     transition: none;
   }
 }
