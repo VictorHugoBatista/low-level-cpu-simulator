@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Sem Referer em requisição nenhuma: a SomaFM aplica proteção contra hotlink
+         por Referer e devolve 403 para origens externas — inclusive este site no
+         github.io. Sem Referer, os espelhos respondem 200/206. (O widget do github
+         e os links externos não dependem dele.) -->
+    <meta name="referrer" content="no-referrer" />
     <title>MOS-6502 — Simulador de CPU de 8 bits</title>
     <script>
       // As chaves de tema e CRT também são definidas em src/web/app.tsx (THEME_KEY e CRT_KEY).

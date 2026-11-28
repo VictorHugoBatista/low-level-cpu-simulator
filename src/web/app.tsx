@@ -12,6 +12,7 @@ import { ExercisePanel } from "./components/exercisePanel.js";
 import { OpcoesPage } from "./components/opcoes.js";
 import { BootScreen } from "./components/boot.js";
 import { FundoChuva } from "./components/fundo.js";
+import { RadioPlayer } from "./components/radio.js";
 import { restoreLast, saveDraftActive } from "./exerciseState.js";
 import somaAsm from "../../examples/soma.asm?raw";
 import desvioAsm from "../../examples/desvio.asm?raw";
@@ -381,6 +382,7 @@ export function App() {
       </Show>
 
       <footer class="footer">
+        <RadioPlayer />
         <iframe
           class="gh-btn"
           src="https://ghbtns.com/github-btn.html?user=VictorHugoBatista&type=follow&count=true"
