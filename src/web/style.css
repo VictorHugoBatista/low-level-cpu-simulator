@@ -30,6 +30,16 @@
   --r-term: #63e68a;
   --r-disk: #ff9e4d;
   --r-vec: #ff6b6b;
+  /* Destaque de sintaxe do editor: família fósforo — comentário verde-acinzentado
+     que recede, mnemônico em âmbar quente, números no verde de acento. */
+  --tk-com: #7d9a83;
+  --tk-num: #4aff7f;
+  --tk-dir: #39d7d7;
+  --tk-mne: #ffb000;
+  --tk-lab: #c39bff;
+  --tk-sim: #c9dac7;
+  --tk-str: #ff9e4d;
+  --tk-op: #8ba890;
   font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
 }
 
@@ -62,6 +72,16 @@
   --r-term: #177f3c;
   --r-disk: #a85a08;
   --r-vec: #bf3039;
+  /* Destaque de sintaxe no modo dia: as mesmas famílias de cor escurecidas para
+     o contraste sobre o fundo claro. */
+  --tk-com: #66766a;
+  --tk-num: #087a35;
+  --tk-dir: #0d7d8c;
+  --tk-mne: #8a6a00;
+  --tk-lab: #6b3fd6;
+  --tk-sim: #233021;
+  --tk-str: #a85a08;
+  --tk-op: #5c6e5c;
 }
 
 * {
@@ -762,6 +782,25 @@ button.run .glyph {
   font-weight: bold;
 }
 
+/* A camada de destaque de sintaxe: o mesmo fonte, colorido, atrás do campo. O
+   textarea fica por cima com o texto transparente e o caret aceso — as métricas
+   (fonte, altura de linha, padding, white-space, tab-size) têm de ser idênticas
+   às do .srcedit, ou um pixel de diferença desalinha o colorido. */
+.editor .srcshade {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.45;
+  padding: 8px;
+  white-space: pre;
+  tab-size: 8;
+  color: var(--tk-sim);
+}
+
 .editor .srcedit {
   position: relative;
   z-index: 1;
@@ -769,7 +808,9 @@ button.run .glyph {
   border: none;
   resize: none;
   background: transparent;
-  color: var(--text);
+  /* O texto que se vê é o da camada de baixo; o campo só mantém o caret. */
+  color: transparent;
+  caret-color: var(--accent);
   font: inherit;
   font-size: 12px;
   line-height: 1.45;
@@ -782,6 +823,47 @@ button.run .glyph {
 
 .editor .srcedit::placeholder {
   color: var(--dim);
+}
+
+/* Seleção nativa sobre texto transparente: fundo translúcido para o colorido
+   de baixo continuar aparecendo através dela. */
+.editor .srcedit::selection {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+/* Cores por classe de token do destaque (definidas nos dois temas no topo). */
+.tk-com {
+  color: var(--tk-com);
+  font-style: italic;
+}
+
+.tk-num {
+  color: var(--tk-num);
+}
+
+.tk-dir {
+  color: var(--tk-dir);
+}
+
+.tk-mne {
+  color: var(--tk-mne);
+  font-weight: bold;
+}
+
+.tk-lab {
+  color: var(--tk-lab);
+}
+
+.tk-sim {
+  color: var(--tk-sim);
+}
+
+.tk-str {
+  color: var(--tk-str);
+}
+
+.tk-op {
+  color: var(--tk-op);
 }
 
 /* No destaque, o editor ganha altura para ser a superfície principal de trabalho. */

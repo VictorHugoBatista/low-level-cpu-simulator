@@ -46,7 +46,7 @@ export function tokenize(source: string, file: string, problems: AsmProblem[]): 
   return source.split(/\r?\n/).map((raw, i) => tokenizeLine(raw, i + 1, file, problems));
 }
 
-function tokenizeLine(text: string, line: number, file: string, problems: AsmProblem[]): Token[] {
+export function tokenizeLine(text: string, line: number, file: string, problems: AsmProblem[]): Token[] {
   const tokens: Token[] = [];
   const fail = (col: number, message: string): void => {
     problems.push({ file, line, col, message });

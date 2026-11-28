@@ -1,13 +1,27 @@
 import { For, createEffect, createMemo, createSignal, onCleanup, onMount } from "solid-js";
 import type { Store } from "../store.js";
+import { destacar, type Trecho } from "../destaque.js";
 
 /** Editor do fonte em assembly: o que está aqui é o que o botão "Montar e carregar" usa. */
 export function Editor(props: { store: Store; onBlur?: () => void }) {
   const s = props.store;
   let ta: HTMLTextAreaElement | undefined;
   let gutter: HTMLDivElement | undefined;
+  let shade: HTMLPreElement | undefined;
 
   const lineCount = createMemo(() => s.source().split("\n").length);
+
+  /** O fonte tokenizado e classificado para a camada de destaque atrás do
+   * campo, achatado em uma lista só com as quebras de linha no meio. */
+  const trechos = createMemo(() => {
+    const linhas = destacar(s.source());
+    const saida: Trecho[] = [];
+    linhas.forEach((linha, i) => {
+      saida.push(...linha);
+      if (i < linhas.length - 1) saida.push({ texto: "\n" });
+    });
+    return saida;
+  });
 
   /** Linha do cursor e geometria da faixa destacada (top/altura em px, já
    * compensada pela rolagem do campo). */
@@ -38,6 +52,12 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
 
   const syncScroll = (): void => {
     if (gutter !== undefined && ta !== undefined) gutter.scrollTop = ta.scrollTop;
+    // A camada de destaque acompanha a rolagem do campo nos dois eixos — o
+    // overflow: hidden a mantém em posição, mas o scroll programático funciona.
+    if (shade !== undefined && ta !== undefined) {
+      shade.scrollTop = ta.scrollTop;
+      shade.scrollLeft = ta.scrollLeft;
+    }
     syncCursor();
   };
 
@@ -55,9 +75,9 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
       const start = el.selectionStart;
       const end = el.selectionEnd;
       const v = s.source();
-      s.setSource(v.slice(0, start) + "  " + v.slice(end));
+      s.setSource(v.slice(0, start) + "        " + v.slice(end));
       queueMicrotask(() => {
-        el.selectionStart = el.selectionEnd = start + 2;
+        el.selectionStart = el.selectionEnd = start + 8;
         syncCursor();
       });
     }
@@ -112,6 +132,17 @@ export function Editor(props: { store: Store; onBlur?: () => void }) {
             aria-hidden="true"
             style={{ top: `${faixa().top}px`, height: `${faixa().altura}px` }}
           />
+          <pre class="srcshade" aria-hidden="true" ref={shade}>
+            <For each={trechos()}>
+              {(t) =>
+                t.classe === undefined ? (
+                  t.texto
+                ) : (
+                  <span class={`tk-${t.classe}`}>{t.texto}</span>
+                )
+              }
+            </For>
+          </pre>
           <textarea
             ref={ta}
             class="srcedit"
