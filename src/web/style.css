@@ -1297,15 +1297,17 @@ button.run .glyph {
     visibility: visible;
     pointer-events: auto;
   }
-  /* O corpo do menu: largura cheia, flutuando por cima do conteúdo (position
-     absolute a partir do header). Vidro como os painéis — fundo levemente
+  /* O corpo do menu: flutua por cima do conteúdo (position fixed), centrado
+     verticalmente na tela e alinhado horizontalmente com a coluna de conteúdo
+     (os 16px de padding do main). Vidro como os painéis — fundo levemente
      transparente e a chuva atravessando borrada. Aparece e some com o
-     dropdown: desce de perto do botão ao abrir, sobe e esvai ao fechar. */
+     dropdown: desce ao abrir, sobe e esvai ao fechar (o transform fechado
+     soma os -50% de centrar com o -8px do deslize). */
   .tabs {
-    position: absolute;
-    top: calc(100% + 1px);
-    left: 0;
-    right: 0;
+    position: fixed;
+    top: 50%;
+    left: 16px;
+    right: 16px;
     z-index: 10;
     display: flex;
     flex-direction: column;
@@ -1318,8 +1320,7 @@ button.run .glyph {
     border-radius: 2px;
     box-shadow: var(--sombra);
     opacity: 0;
-    transform: translateY(-8px);
-    transform-origin: top;
+    transform: translateY(calc(-50% - 8px));
     visibility: hidden;
     pointer-events: none;
     transition:
@@ -1329,7 +1330,7 @@ button.run .glyph {
   }
   .tabs.open {
     opacity: 1;
-    transform: none;
+    transform: translateY(-50%);
     visibility: visible;
     pointer-events: auto;
   }
