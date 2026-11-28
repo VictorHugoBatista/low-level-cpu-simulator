@@ -126,18 +126,15 @@ export const ajustarVolume = (volume: number): void =>
   updateRadio((r) => ({ ...r, volume: Math.min(1, Math.max(0, volume)) }));
 
 /**
- * A posição do slider vira ganho por curva de potência, não linear: percepção
- * de sonoridade é comprimida no logaritmo do ouvido, e ganho linear faz a
- * metade de baixo da barra parecer fraca. O expoente é escolhido para
- * atender ao desejado: 50% no slider = 80% de ganho (0.5^k = 0.8, com
- * k = ln(0.8)/ln(0.5) ≈ 0.322 — perto do expoente da Lei de Stevens para
- * sonoridade, ~0.3). As pontas ficam intactas: 0 → 0, 1 → 1.
+ * A posição do slider vira ganho linear com teto: ganho = posição × 0.8.
+ * O rádio fica um passo abaixo do volume máximo do elemento, mesmo com o
+ * slider em 100% — e a subida é proporcional do início ao fim.
  */
-export const GANHO_EXPOENTE = Math.log(0.8) / Math.log(0.5);
+export const GANHO_MAXIMO = 0.8;
 
 export function volumeParaGanho(volume: number): number {
   const c = Math.min(1, Math.max(0, volume));
-  return Math.pow(c, GANHO_EXPOENTE);
+  return c * GANHO_MAXIMO;
 }
 
 export const escolherEstacao = (estacao: string): void =>
