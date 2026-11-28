@@ -108,6 +108,32 @@ header {
   font-weight: bold;
 }
 
+/* Botão do menu mobile: as três barras. Some no desktop, onde as abas cabem na
+   linha do cabeçalho. */
+.menu-btn {
+  display: none;
+  align-items: center;
+  padding: 6px 8px;
+}
+
+.menu-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.menu-icon i {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: currentColor;
+}
+
+/* O véu do menu: só existe no mobile — no desktop ele fica display:none. */
+.menu-overlay {
+  display: none;
+}
+
 /* Contêiner da página de referência: div.ref, e não .ref — as tabelas da página
    também têm class="ref" (table.ref) e herdariam o display:flex daqui, quebrando
    o layout de tabela: thead e tbody passam a dimensionar colunas separadamente. */
@@ -1218,6 +1244,121 @@ button.run .glyph {
   /* Lateral: sem espaço para as metades lado a lado, empilha como o editor cheio. */
   .layout-side .hero {
     grid-template-columns: minmax(0, 1fr);
+  }
+  /* Tela estreita ignora o layout escolhido: lateral e editor cheio viram a
+     mesma pilha vertical — os painéis indicadores não dividem a linha. */
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Cabeçalho vira grid: título e subtítulo empilham na coluna da esquerda e o
+     botão hamburguer ocupa a coluna da direita atravessando as duas linhas,
+     centrado — à direita como no desktop. */
+  header {
+    display: grid;
+    position: relative; /* o menu aberto se ancora nele, por cima do conteúdo */
+    z-index: 6; /* o header inteiro (menu e botão inclusive) fica acima do véu (5) */
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "titulo botao"
+      "sub botao"
+      "status status";
+    gap: 4px 16px;
+    align-items: start;
+  }
+  header h1 {
+    grid-area: titulo;
+  }
+  .subtitle {
+    grid-area: sub;
+  }
+  .menu-btn {
+    display: inline-flex;
+    grid-area: botao;
+    align-self: center; /* centrado no bloco título + subtítulo */
+  }
+  /* O véu: cobre a viewport com o menu aberto, escurecendo o conteúdo e
+     bloqueando os cliques para ele (um toque no véu fecha, via o listener de
+     clique fora). Abaixo do header (5 < 6) e abaixo dos overlays do CRT. */
+  .menu-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    background: rgb(0 0 0 / 55%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 0.28s cubic-bezier(0.22, 0.9, 0.35, 1),
+      visibility 0.28s;
+  }
+  .menu-overlay.on {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  /* O corpo do menu: flutua por cima do conteúdo (position fixed), centrado
+     verticalmente na tela e alinhado horizontalmente com a coluna de conteúdo
+     (os 16px de padding do main). Vidro como os painéis — fundo levemente
+     transparente e a chuva atravessando borrada. Aparece e some com o
+     dropdown: desce ao abrir, sobe e esvai ao fechar (o transform fechado
+     soma os -50% de centrar com o -8px do deslize). */
+  .tabs {
+    position: fixed;
+    top: 50%;
+    left: 16px;
+    right: 16px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    background: color-mix(in srgb, var(--panel) 86%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    box-shadow: var(--sombra);
+    opacity: 0;
+    transform: translateY(calc(-50% - 8px));
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 0.28s cubic-bezier(0.22, 0.9, 0.35, 1),
+      transform 0.28s cubic-bezier(0.22, 0.9, 0.35, 1),
+      visibility 0.28s;
+  }
+  .tabs.open {
+    opacity: 1;
+    transform: translateY(-50%);
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .tabs button {
+    text-align: left;
+    padding: 8px 10px;
+  }
+  .status {
+    grid-area: status;
+  }
+  /* No mobile o layout escolhido não muda nada (tudo vira pilha vertical):
+     a opção sai da tela de opções. O seletor emparelha a especificidade de
+     `.opcoes-prefs .opcao` (0,2,0) e vence por vir depois no arquivo. */
+  .opcoes-prefs .opcao-layout {
+    display: none;
+  }
+}
+
+/* Quem pede menos animação no sistema vê o menu e o véu aparecerem e sumirem
+   na hora (a regra fica depois do media query mobile para vencer a cascata). */
+@media (prefers-reduced-motion: reduce) {
+  header .tabs,
+  header .tabs.open {
+    transition: none;
+  }
+  .menu-overlay,
+  .menu-overlay.on {
+    transition: none;
   }
 }
 

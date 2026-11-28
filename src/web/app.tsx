@@ -1,4 +1,4 @@
-import { For, Show, createSignal } from "solid-js";
+import { For, Show, createEffect, createSignal, onCleanup } from "solid-js";
 import { createStore } from "./store.js";
 import type { Store } from "./store.js";
 import { Controls } from "./components/controls.js";
@@ -135,6 +135,41 @@ export function App() {
   const [tab, setTab] = createSignal<"maquina" | "exercicios" | "referencia" | "opcoes">("maquina");
   const [slots, setSlots] = createSignal<IndicatorKind[]>([...INITIAL_SLOTS]);
 
+  /** No mobile, o menu hamburguer guarda as abas: escolher uma fecha o menu. */
+  const [menuAberto, setMenuAberto] = createSignal(false);
+  let btnMenu!: HTMLButtonElement;
+  let navTabs!: HTMLElement;
+  const irPara = (t: "maquina" | "exercicios" | "referencia" | "opcoes") => {
+    setTab(t);
+    setMenuAberto(false);
+    // A aba escolhida some com o menu: o foco volta para o botão que o abre
+    // (no desktop o botão está display:none e o focus() não faz nada).
+    btnMenu.focus();
+  };
+
+  // Padrão disclosure: com o menu aberto, Escape fecha (devolvendo o foco ao
+  // botão) e clique fora dele fecha. Os listeners existem só enquanto aberto.
+  createEffect(() => {
+    if (!menuAberto()) return;
+    const fecharFora = (e: PointerEvent): void => {
+      if (e.target instanceof Node && !navTabs.contains(e.target) && !btnMenu.contains(e.target)) {
+        setMenuAberto(false);
+      }
+    };
+    const fecharEsc = (e: KeyboardEvent): void => {
+      if (e.key === "Escape") {
+        setMenuAberto(false);
+        btnMenu.focus();
+      }
+    };
+    document.addEventListener("pointerdown", fecharFora);
+    document.addEventListener("keydown", fecharEsc);
+    onCleanup(() => {
+      document.removeEventListener("pointerdown", fecharFora);
+      document.removeEventListener("keydown", fecharEsc);
+    });
+  });
+
   /** Escolher um painel para um espaço troca com o espaço onde ele estava. */
   const pickSlot = (index: number, kind: IndicatorKind): void => {
     setSlots((prev) => {
@@ -186,34 +221,47 @@ export function App() {
       <Show when={crt() === "on"}>
         <FundoChuva />
       </Show>
+      {/* Véu do menu mobile: cobre o site quando o menu está aberto, entre o
+          conteúdo e o menu/botão (só existe de verdade no mobile, via CSS). */}
+      <div class="menu-overlay" classList={{ on: menuAberto() }} aria-hidden="true" />
       <Show when={booting()}>
         <BootScreen onDone={encerrarBoot} />
       </Show>
       <header>
         <h1>MOS-6502</h1>
+        <button
+          class="menu-btn"
+          ref={btnMenu}
+          aria-expanded={menuAberto()}
+          aria-controls="menu-tabs"
+          aria-label="menu"
+          onClick={() => setMenuAberto(!menuAberto())}
+        >
+          <span class="menu-icon" aria-hidden="true"><i /><i /><i /></span>
+        </button>
         <div class="subtitle">Simulador de CPU de 8 bits</div>
-        <nav class="tabs">
+        <nav class="tabs" id="menu-tabs" ref={navTabs} classList={{ open: menuAberto() }}>
           <button
             classList={{ active: tab() === "maquina" }}
-            onClick={() => setTab("maquina")}
+            onClick={() => irPara("maquina")}
           >
             máquina
           </button>
           <button
             classList={{ active: tab() === "exercicios" }}
-            onClick={() => setTab("exercicios")}
+            onClick={() => irPara("exercicios")}
           >
             exercícios
           </button>
           <button
             classList={{ active: tab() === "referencia" }}
-            onClick={() => setTab("referencia")}
+            onClick={() => irPara("referencia")}
           >
             referência
           </button>
           <button
             classList={{ active: tab() === "opcoes" }}
-            onClick={() => setTab("opcoes")}
+            onClick={() => irPara("opcoes")}
           >
             opções
           </button>
