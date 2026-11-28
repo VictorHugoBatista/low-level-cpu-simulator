@@ -1512,10 +1512,59 @@ button.run .glyph {
   padding: 3px 6px;
 }
 
+/* O range nativo com accent-color deixa a trilha com recuo nas pontas (0 e 100%
+   não encostam nos extremos). Com appearance: none, desenhamos trilha e thumb à
+   mão: o preenchido vai de ponta a ponta. O WebKit não pinta a parte preenchida
+   sozinha — o componente passa o percentual na variável --volume. */
 .radio-volume {
   width: 90px;
   cursor: pointer;
-  accent-color: var(--accent);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 14px;
+}
+
+.radio-volume::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--accent) 0 var(--volume, 50%),
+    var(--line) var(--volume, 50%)
+  );
+}
+
+.radio-volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4px; /* centra o thumb de 12px na trilha de 4px */
+  border-radius: 50%;
+  background: var(--accent);
+  border: 1px solid var(--bg);
+}
+
+.radio-volume::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.radio-volume::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.radio-volume::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 1px solid var(--bg);
 }
 
 /* LED do "on air": quadrado de fósforo que acende quando há som; sem sinal,

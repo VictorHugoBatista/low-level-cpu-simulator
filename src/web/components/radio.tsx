@@ -157,6 +157,7 @@ export function RadioPlayer() {
         aria-label="volume da rádio"
         title="volume"
         value={radioAtual().volume}
+        style={{ "--volume": `${radioAtual().volume * 100}%` }}
         onInput={(e) => ajustarVolume(Number(e.currentTarget.value))}
       />
       <span class="radio-status" classList={{ offline: offline(), "no-ar": noAr() }}>
